@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { CATS } from '@/lib/config';
+import CatPicker from '../CatPicker';
 export default function AddForm() {
-  const [f, setF] = useState({ fb_url: '', name: '', category: 'full' });
+  const [f, setF] = useState({ fb_url: '', name: '', categories: [] });
   const [msg, setMsg] = useState(null); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
   const set = k => e => setF({ ...f, [k]: e.target.value });
   async function submit(e) {
@@ -22,9 +22,9 @@ export default function AddForm() {
     <form onSubmit={submit} className="panel" style={{ marginTop: 18, display: 'grid', gap: 18 }}>
       <div><label htmlFor="fb" className="lab">Facebook хуудасны линк</label><input id="fb" required className="field" placeholder="facebook.com/..." value={f.fb_url} onChange={set('fb_url')} /></div>
       <div><label htmlFor="nm" className="lab">Агентлагийн нэр</label><input id="nm" required className="field" value={f.name} onChange={set('name')} /></div>
-      <div><span className="lab">Ангилал</span><div className="row" style={{ marginTop: 9 }}>{Object.entries(CATS).map(([k, c]) => <button type="button" key={k} className={'chip' + (f.category === k ? ' on' : '')} onClick={() => setF({ ...f, category: k })}>{c.label}</button>)}</div></div>
+      <CatPicker value={f.categories} onChange={v => setF({ ...f, categories: v })} />
       {msg && <div className="err">{msg}</div>}
-      <button className="btn dark" disabled={busy} style={{ padding: 16 }}>{busy ? 'Түр хүлээ…' : 'Санал болгох →'}</button>
+      <button className="btn dark" disabled={busy || !f.categories.length} style={{ padding: 16 }}>{busy ? 'Түр хүлээ…' : 'Санал болгох →'}</button>
     </form>}
   </section>;
 }

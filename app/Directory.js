@@ -2,13 +2,13 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Card from './Card';
-import { CATS, isActive } from '@/lib/config';
+import { CATS, isActive, catsOf } from '@/lib/config';
 export default function Directory({ list }) {
   const [q, setQ] = useState(''); const [cat, setCat] = useState('all'); const [sort, setSort] = useState('followers'); const [n, setN] = useState(24);
-  const counts = useMemo(() => list.reduce((m, a) => (m[a.category] = (m[a.category] || 0) + 1, m), {}), [list]);
+  const counts = useMemo(() => list.reduce((m, a) => (catsOf(a).forEach(k => m[k] = (m[k] || 0) + 1), m), {}), [list]);
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
-    let r = list.filter(a => (cat === 'all' || a.category === cat) && (!s || a.name.toLowerCase().includes(s) || (a.description || '').toLowerCase().includes(s)));
+    let r = list.filter(a => (cat === 'all' || catsOf(a).includes(cat)) && (!s || a.name.toLowerCase().includes(s) || (a.description || '').toLowerCase().includes(s)));
     if (sort === 'name') r = [...r].sort((x, y) => x.name.localeCompare(y.name));
     return r;
   }, [list, q, cat, sort]);

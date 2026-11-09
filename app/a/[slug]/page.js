@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAgency, listAgencies } from '@/lib/db';
-import { CATS, fmtNum } from '@/lib/config';
+import { CATS, fmtNum, catsOf } from '@/lib/config';
 import Card, { Logo, Badges } from '../../Card';
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }) {
@@ -13,7 +13,7 @@ export default async function Profile({ params }) {
   const a = await getAgency(slug);
   if (!a) notFound();
   const c = CATS[a.category] || { label: a.category, tone: 'v' };
-  const similar = (await listAgencies()).filter(x => x.category === a.category && x.slug !== a.slug).slice(0, 3);
+  const similar = (await listAgencies()).filter(x => x.slug !== a.slug && catsOf(x).some(k => catsOf(a).includes(k))).slice(0, 3);
   return <section className="wrap" style={{ marginTop: 10 }}>
     <Link href="/" style={{ color: 'var(--mute)', fontWeight: 600, fontSize: 14.5 }}>← Агентлагууд / {c.label}</Link>
     <div className="panel" style={{ padding: 0, overflow: 'hidden', marginTop: 18 }}>
@@ -22,7 +22,7 @@ export default async function Profile({ params }) {
         <div>
           <div style={{ marginTop: -56, display: 'inline-block', border: '6px solid #fff', borderRadius: 34, background: '#fff' }}><Logo a={a} size={112} radius={28} /></div>
           <h1 className="h" style={{ fontSize: 'clamp(30px,4vw,44px)', fontWeight: 800, marginTop: 12 }}>{a.name}</h1>
-          <div className="row" style={{ marginTop: 12 }}><span className={`cat ${c.tone}`}>{c.label}</span><Badges a={a} /></div>
+          <div className="row" style={{ marginTop: 12 }}>{catsOf(a).map(k => <span key={k} className={`cat ${CATS[k].tone}`}>{CATS[k].label}</span>)}<Badges a={a} /></div>
           <p style={{ fontSize: 18, color: 'var(--mute)', marginTop: 20, maxWidth: 640 }}>{a.description || 'Тайлбар хараахан нэмэгдээгүй. Агентлагийн эзэн баталгаажаад өөрөө бөглөнө.'}</p>
           {a.services?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Үйлчилгээ</h2><div className="row" style={{ marginTop: 12 }}>{a.services.map(s => <span key={s} className="chip">{s}</span>)}</div></>}
         </div>

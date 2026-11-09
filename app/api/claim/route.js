@@ -1,4 +1,4 @@
-import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn } from '@/lib/server';
+import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin, pickCats } from '@/lib/server';
 import { normFb, slugify } from '@/lib/fb';
 import { CATS } from '@/lib/config';
 export async function POST(req) {
@@ -22,16 +22,16 @@ export async function POST(req) {
     ({ data: ag } = await d.from('agencies').select('id,name,slug,fb_url,verified').eq('fb_url', fb).maybeSingle());
     if (!ag) {
       const name = (b.name || '').trim().slice(0, 80); if (name.length < 2) return fail('Агентлагийн нэрээ оруул');
-      if (!CATS[b.category]) return fail('Ангилал сонго');
+      const cats = pickCats(b.categories); if (!cats || !cats.every(k => CATS[k])) return fail('1-3 ангилал сонго');
       let slug = slugify(fb.split('/').pop().replace('profile.php?id=', ''));
       const { data: dup } = await d.from('agencies').select('id').eq('slug', slug).maybeSingle(); if (dup) slug += '-' + Date.now().toString(36).slice(-4);
-      ({ data: ag } = await d.from('agencies').insert({ slug, name, category: b.category, fb_url: fb, status: 'pending', added_by: 'owner' }).select('id,name,slug,fb_url,verified').single());
+      ({ data: ag } = await d.from('agencies').insert({ slug, name, category: cats[0], categories: cats, fb_url: fb, status: 'pending', added_by: 'owner' }).select('id,name,slug,fb_url,verified').single());
     }
   }
   const { data: owners } = await d.from('agency_members').select('user_id').eq('agency_id', ag.id);
   if (owners?.length) return fail('Энэ агентлагийг өөр хүн удирдаж байна. Тэднээс урилга ав эсвэл бидэнтэй холбогд.');
   const { data: c, error } = await d.from('claims').insert({ agency_id: ag.id, user_id: u.id, phone: p.phone, note, status: 'pending' }).select('id').single();
   if (error) return fail('Хадгалж чадсангүй', 500);
-  await mail(ADMIN_EMAIL(), `Эзэмших хүсэлт: ${ag.name}`, `<p><b>${esc(p.full_name || '')}</b> (${esc(u.email)}, утас ${esc(p.phone)})<br>«<b>${esc(ag.name)}</b>» агентлагийг эзэмших хүсэлт илгээлээ.</p><p>Албан тушаал / тайлбар: ${esc(note)}</p><p><a href="${ag.fb_url || ''}">${esc(ag.fb_url || '')}</a></p><p>${btn(await decideLink('claim', c.id, 'approve'), 'Батлах', '#2FB344')}${btn(await decideLink('claim', c.id, 'reject'), 'Татгалзах', '#E8452A')}</p>`);
+  await mail(ADMIN_EMAIL(), `Эзэмших хүсэлт: ${ag.name}`, `<p><b>${esc(p.full_name || '')}</b> (${esc(u.email)}, утас ${esc(p.phone)})<br>«<b>${esc(ag.name)}</b>» агентлагийг эзэмших хүсэлт илгээлээ.</p><p>Албан тушаал / тайлбар: ${esc(note)}</p><p><a href="${ag.fb_url || ''}">${esc(ag.fb_url || '')}</a></p><p>${btn(await decideLink(origin(req), 'claim', c.id, 'approve'), 'Батлах', '#2FB344')}${btn(await decideLink(origin(req), 'claim', c.id, 'reject'), 'Татгалзах', '#E8452A')}</p>`);
   return json({ ok: true });
 }

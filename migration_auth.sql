@@ -19,3 +19,6 @@ create table if not exists agency_members (
 create unique index if not exists one_agency_per_user on agency_members(user_id);
 alter table profiles enable row level security;
 alter table agency_members enable row level security;
+
+alter table agencies add column if not exists categories text[];
+update agencies set categories = array[category] where categories is null or cardinality(categories) = 0;

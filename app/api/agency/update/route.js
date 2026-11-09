@@ -1,4 +1,4 @@
-import { db, fail, json, authUser } from '@/lib/server';
+import { db, fail, json, authUser, pickCats } from '@/lib/server';
 import { CATS } from '@/lib/config';
 export async function POST(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна', 503);
@@ -11,7 +11,7 @@ export async function POST(req) {
   if (typeof b.website === 'string') { const w = b.website.trim(); up.website = !w ? null : /^https?:\/\//.test(w) ? w.slice(0, 200) : 'https://' + w.slice(0, 200); }
   if (typeof b.phone_public === 'string') up.phone_public = b.phone_public.replace(/[^\d+ ]/g, '').slice(0, 20) || null;
   if (Array.isArray(b.services)) up.services = b.services.map(s => String(s).trim().slice(0, 40)).filter(Boolean).slice(0, 12);
-  if (b.category && CATS[b.category]) up.category = b.category;
+  if (b.categories) { const c = pickCats(b.categories); if (!c || !c.every(k => CATS[k])) return fail('1-3 ангилал сонго'); up.categories = c; up.category = c[0]; }
   const { error } = await d.from('agencies').update(up).eq('id', m.agency_id);
   if (error) return fail('Хадгалж чадсангүй', 500);
   return json({ ok: true });

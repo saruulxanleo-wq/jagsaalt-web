@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { sb, api } from '@/lib/sbclient';
-import { CATS } from '@/lib/config';
+import { catsOf } from '@/lib/config';
+import CatPicker from '../CatPicker';
 const Step = ({ n, title, done, active, children }) => (
   <div className="panel" style={{ marginTop: 18, opacity: active || done ? 1 : .55 }}>
     <div className="row" style={{ gap: 12 }}>
@@ -18,14 +19,14 @@ export default function Account() {
   const [me, setMe] = useState(null);
   const [err, setErr] = useState(null); const [busy, setBusy] = useState(false);
   const [phone, setPhone] = useState(''); const [sent, setSent] = useState(false); const [code, setCode] = useState('');
-  const [cl, setCl] = useState({ fb_url: '', name: '', category: 'full', note: '' });
+  const [cl, setCl] = useState({ fb_url: '', name: '', categories: [], note: '' });
   const [ed, setEd] = useState(null); const [saved, setSaved] = useState(false);
   useEffect(() => {
     sb().auth.getSession().then(({ data }) => setSession(data.session));
     const { data: s } = sb().auth.onAuthStateChange((_e, s) => setSession(s));
     return () => s.subscription.unsubscribe();
   }, []);
-  async function load() { const r = await api('/api/me'); if (r.ok) { setMe(r); if (r.agency) setEd({ description: r.agency.description || '', website: r.agency.website || '', phone_public: r.agency.phone_public || '', services: (r.agency.services || []).join(', '), category: r.agency.category }); } else setErr(r.error); }
+  async function load() { const r = await api('/api/me'); if (r.ok) { setMe(r); if (r.agency) setEd({ description: r.agency.description || '', website: r.agency.website || '', phone_public: r.agency.phone_public || '', services: (r.agency.services || []).join(', '), categories: catsOf(r.agency) }); } else setErr(r.error); }
   useEffect(() => { if (session) load(); }, [session]);
   const run = async (fn) => { setBusy(true); setErr(null); try { await fn(); } finally { setBusy(false); } };
   const login = () => sb().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/minii' + (claimSlug ? '?claim=' + claimSlug : '') } });
@@ -64,7 +65,7 @@ export default function Account() {
           <div><label htmlFor="fb" className="lab">Агентлагийн Facebook хуудасны линк</label><input id="fb" className="field" placeholder="facebook.com/..." value={cl.fb_url} onChange={e => setCl({ ...cl, fb_url: e.target.value })} required />
             <p style={{ fontSize: 13.5, color: 'var(--mute)', marginTop: 6 }}>Жагсаалтад байгаа бол линкээр нь таниад холбоно. Байхгүй бол доорх мэдээллээр шинээр нэмнэ.</p></div>
           <div><label htmlFor="nm" className="lab">Агентлагийн нэр</label><input id="nm" className="field" value={cl.name} onChange={e => setCl({ ...cl, name: e.target.value })} /></div>
-          <div><span className="lab">Ангилал</span><div className="row" style={{ marginTop: 9 }}>{Object.entries(CATS).map(([k, c]) => <button type="button" key={k} className={'chip' + (cl.category === k ? ' on' : '')} onClick={() => setCl({ ...cl, category: k })}>{c.label}</button>)}</div></div>
+          <CatPicker value={cl.categories} onChange={v => setCl({ ...cl, categories: v })} />
         </>}
         <div><label htmlFor="nt" className="lab">Агентлагт ямар албан тушаалтай вэ?</label><input id="nt" className="field" placeholder="Жишээ нь: Үүсгэн байгуулагч, гүйцэтгэх захирал" value={cl.note} onChange={e => setCl({ ...cl, note: e.target.value })} required /></div>
         <button className="btn dark" disabled={busy} style={{ padding: 15 }}>{busy ? 'Илгээж байна…' : 'Хүсэлт илгээх →'}</button>
@@ -77,7 +78,7 @@ export default function Account() {
         <div className="row" style={{ gap: 14 }}>
           <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="wb" className="lab">Вэбсайт</label><input id="wb" className="field" value={ed.website} onChange={e => setEd({ ...ed, website: e.target.value })} /></div>
           <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="pp" className="lab">Холбоо барих утас</label><input id="pp" className="field" value={ed.phone_public} onChange={e => setEd({ ...ed, phone_public: e.target.value })} /></div></div>
-        <div><span className="lab">Ангилал</span><div className="row" style={{ marginTop: 9 }}>{Object.entries(CATS).map(([k, c]) => <button type="button" key={k} className={'chip' + (ed.category === k ? ' on' : '')} onClick={() => setEd({ ...ed, category: k })}>{c.label}</button>)}</div></div>
+        <CatPicker value={ed.categories} onChange={v => setEd({ ...ed, categories: v })} />
         {saved && <div className="ok">Хадгаллаа ✓ <Link href={`/a/${me.agency.slug}`} style={{ textDecoration: 'underline' }}>Профайлаа харах</Link></div>}
         <button className="btn v" disabled={busy} style={{ padding: 15 }}>{busy ? 'Хадгалж байна…' : 'Хадгалах'}</button>
       </form>}
