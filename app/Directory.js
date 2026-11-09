@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Card from './Card';
-import { CATS, isActive, catsOf } from '@/lib/config';
+import { CATS, isActive, catsOf, catLabel } from '@/lib/config';
 export default function Directory({ list }) {
   const [q, setQ] = useState(''); const [cat, setCat] = useState('all'); const [sort, setSort] = useState('followers'); const [n, setN] = useState(24);
   const counts = useMemo(() => list.reduce((m, a) => (catsOf(a).forEach(k => m[k] = (m[k] || 0) + 1), m), {}), [list]);
@@ -36,10 +36,10 @@ export default function Directory({ list }) {
     <section className="wrap">
       <div className="row chips" style={{ gap: 10 }}>
         <button className={'chip' + (cat === 'all' ? ' on' : '')} onClick={() => setCat('all')}>Бүгд<span>{list.length}</span></button>
-        {Object.entries(CATS).filter(([k]) => counts[k]).map(([k, c]) => <button key={k} className={'chip' + (cat === k ? ' on' : '')} onClick={() => { setCat(k); setN(24); }}>{c.label}<span>{counts[k]}</span></button>)}
+        {[...Object.keys(CATS).filter(k => counts[k]), ...Object.keys(counts).filter(k => !CATS[k]).sort((x, y) => counts[y] - counts[x])].map(k => <button key={k} className={'chip' + (cat === k ? ' on' : '')} onClick={() => { setCat(k); setN(24); }}>{catLabel(k)}<span>{counts[k]}</span></button>)}
       </div>
       <div className="row" style={{ justifyContent: 'space-between', margin: '22px 0 16px' }}>
-        <h2 className="h" style={{ fontSize: 24, fontWeight: 700 }}>{cat === 'all' ? 'Бүх агентлаг' : CATS[cat].label} <span style={{ color: 'var(--mute)', fontSize: 18 }}>{shown.length}</span></h2>
+        <h2 className="h" style={{ fontSize: 24, fontWeight: 700 }}>{cat === 'all' ? 'Бүх агентлаг' : catLabel(cat)} <span style={{ color: 'var(--mute)', fontSize: 18 }}>{shown.length}</span></h2>
         <label className="row" style={{ background: '#fff', padding: '9px 14px', borderRadius: 12, boxShadow: 'inset 0 0 0 1.5px var(--line)', fontWeight: 600, fontSize: 14.5 }}>Эрэмбэ:
           <select value={sort} onChange={e => setSort(e.target.value)} style={{ border: 0, background: 'transparent', fontWeight: 600 }}><option value="followers">Дагагчаар</option><option value="name">Нэрээр</option></select></label>
       </div>

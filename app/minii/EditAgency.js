@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { sb, api } from '@/lib/sbclient';
-import { catsOf, completeness, TEAM_SIZES, SOCIALS } from '@/lib/config';
+import { catsOf, completeness, TEAM_SIZES, SOCIALS, SERVICES, cap } from '@/lib/config';
+import TagInput from '../TagInput';
 import CatPicker from '../CatPicker';
 import { Logo } from '../Card';
 async function resize(file) {
@@ -18,7 +19,7 @@ export default function EditAgency({ agency, adminSlug }) {
   const [a, setA] = useState(agency);
   const [ed, setEd] = useState({
     description: agency.description || '', website: agency.website || '', phone_public: agency.phone_public || '',
-    services: (agency.services || []).join(', '), categories: catsOf(agency),
+    services: (agency.services || []).map(cap), categories: catsOf(agency),
     founded: agency.founded || '', team_size: agency.team_size || '', min_budget: agency.min_budget || '',
     socials: { instagram: '', linkedin: '', tiktok: '', youtube: '', email: '', ...(agency.socials || {}) },
     clients: (agency.clients || []).join(', '), cases: agency.cases || [], team: agency.team || [],
@@ -28,9 +29,9 @@ export default function EditAgency({ agency, adminSlug }) {
   const list = (k, i, f) => e => setEd({ ...ed, [k]: ed[k].map((x, j) => j === i ? { ...x, [f]: e.target.value } : x) });
   async function save(e) {
     e.preventDefault(); setBusy(true); setMsg(null);
-    const body = { ...ed, slug: adminSlug, services: ed.services.split(','), clients: ed.clients.split(',') };
+    const body = { ...ed, slug: adminSlug, clients: ed.clients.split(',') };
     const r = await api('/api/agency/update', body); setBusy(false);
-    if (r.ok) { setMsg({ ok: 'Хадгаллаа ✓' }); setA({ ...a, ...body, services: body.services.map(s => s.trim()).filter(Boolean), clients: body.clients.map(s => s.trim()).filter(Boolean) }); } else setMsg({ err: r.error });
+    if (r.ok) { setMsg({ ok: 'Хадгаллаа ✓' }); setA({ ...a, ...body, clients: body.clients.map(s => s.trim()).filter(Boolean) }); } else setMsg({ err: r.error });
   }
   async function logo(e) {
     const file = e.target.files?.[0]; if (!file) return; setUp(true); setMsg(null);
@@ -41,7 +42,7 @@ export default function EditAgency({ agency, adminSlug }) {
       r.ok ? setA({ ...a, logo_url: j.logo_url }) : setMsg({ err: j.error });
     } catch { setMsg({ err: 'Зураг уншиж чадсангүй' }); } finally { setUp(false); e.target.value = ''; }
   }
-  const pct = completeness({ ...a, ...ed, services: ed.services.split(',').filter(s => s.trim()), clients: ed.clients.split(',').filter(s => s.trim()), socials: Object.fromEntries(Object.entries(ed.socials).filter(([, v]) => v)) });
+  const pct = completeness({ ...a, ...ed, clients: ed.clients.split(',').filter(s => s.trim()), socials: Object.fromEntries(Object.entries(ed.socials).filter(([, v]) => v)) });
   return <form onSubmit={save} style={{ display: 'grid', gap: 16 }}>
     <div className="row" style={{ gap: 16, alignItems: 'center' }}>
       <Logo a={a} size={84} radius={22} />
@@ -55,7 +56,7 @@ export default function EditAgency({ agency, adminSlug }) {
       </div>
     </div>
     <div><label htmlFor="ds" className="lab">Товч тайлбар</label><textarea id="ds" rows={3} maxLength={400} className="field" style={{ resize: 'vertical' }} value={ed.description} onChange={set('description')} /></div>
-    <F id="sv" label="Үйлчилгээ (таслалаар тусгаарла)" placeholder="Брэнд стратеги, Сошиал менежмент, Видео продакшн" value={ed.services} onChange={set('services')} />
+    <TagInput id="sv" label="Үйлчилгээ" value={ed.services} onChange={v => setEd({ ...ed, services: v })} suggestions={SERVICES} placeholder="Жагсаалтаас сонго эсвэл өөрөө бичээд Enter дар" />
     <CatPicker value={ed.categories} onChange={v => setEd({ ...ed, categories: v })} />
     <div className="row" style={{ gap: 14 }}><F id="wb" label="Вэбсайт" value={ed.website} onChange={set('website')} /><F id="pp" label="Утас" value={ed.phone_public} onChange={set('phone_public')} /></div>
     <Sec title="Товч баримт" hint="он, баг, төсөв" open={!!(ed.founded || ed.team_size || ed.min_budget)}>

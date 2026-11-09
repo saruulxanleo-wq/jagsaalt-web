@@ -22,7 +22,7 @@ export async function POST(req) {
     ({ data: ag } = await d.from('agencies').select('id,name,slug,fb_url,verified').eq('fb_url', fb).maybeSingle());
     if (!ag) {
       const name = (b.name || '').trim().slice(0, 80); if (name.length < 2) return fail('Агентлагийн нэрээ оруул');
-      const cats = pickCats(b.categories); if (!cats || !cats.every(k => CATS[k])) return fail('1-3 ангилал сонго');
+      const cats = pickCats(b.categories); if (!cats) return fail('1-3 ангилал сонго');
       let slug = slugify(fb.split('/').pop().replace('profile.php?id=', ''));
       const { data: dup } = await d.from('agencies').select('id').eq('slug', slug).maybeSingle(); if (dup) slug += '-' + Date.now().toString(36).slice(-4);
       ({ data: ag } = await d.from('agencies').insert({ slug, name, category: cats[0], categories: cats, fb_url: fb, status: 'pending', added_by: 'owner' }).select('id,name,slug,fb_url,verified').single());
