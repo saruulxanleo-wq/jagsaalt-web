@@ -70,3 +70,11 @@ update agencies set name = v.n, updated_at = now() from (values
 ) as v(s, n) where agencies.slug = v.s;
 select count(*) as fixed from agencies where updated_at > now() - interval '1 minute';
 alter table agencies add column if not exists packages jsonb not null default '[]'::jsonb;
+create table if not exists events (
+  id bigserial primary key,
+  agency_id uuid references agencies on delete cascade,
+  kind text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists events_agency_time on events(agency_id, created_at);
+alter table events enable row level security;

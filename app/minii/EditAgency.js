@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { sb, api } from '@/lib/sbclient';
 import { catsOf, completeness, TEAM_SIZES, SOCIALS, SERVICES, cap, PERIODS, fmtPrice } from '@/lib/config';
@@ -26,6 +26,22 @@ const Sec = ({ title, hint, children, open }) => <details open={open} style={{ b
   <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>{title} <span style={{ color: 'var(--mute)', fontWeight: 500, fontSize: 14 }}>· {hint}</span></summary>
   <div style={{ display: 'grid', gap: 14, marginTop: 14 }}>{children}</div></details>;
 const F = ({ id, label, ...p }) => <div style={{ flex: 1, minWidth: 200 }}><label htmlFor={id} className="lab">{label}</label><input id={id} className="field" {...p} /></div>;
+function Stats({ slug }) {
+  const [s, setS] = useState(null);
+  useEffect(() => { api('/api/agency/stats' + (slug ? '?slug=' + encodeURIComponent(slug) : '')).then(r => r.ok && setS(r)); }, [slug]);
+  if (!s) return null;
+  const t = s.totals, max = Math.max(1, ...s.daily.map(d => d[1]));
+  const N = ({ n, l }) => <div><div className="h" style={{ fontSize: 26, fontWeight: 800 }}>{n || 0}</div><div style={{ color: 'var(--mute)', fontSize: 13.5, fontWeight: 600 }}>{l}</div></div>;
+  return <div style={{ background: 'var(--bg)', borderRadius: 20, padding: 18 }}>
+    <div className="row" style={{ justifyContent: 'space-between' }}><b>Сүүлийн 30 хоног</b><span style={{ color: 'var(--mute)', fontSize: 13 }}>Профайл үзэлт, товч дарсан тоо</span></div>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(110px,1fr))', gap: 12, marginTop: 12 }}>
+      <N n={t.view} l="Профайл үзэлт" /><N n={t.phone} l="Утас дарсан" /><N n={t.fb} l="Facebook дарсан" /><N n={(t.website || 0) + (t.social || 0) + (t.email || 0)} l="Вэб, сошиал, и-мэйл" />
+    </div>
+    <div role="img" aria-label="Өдөр тутмын үзэлт" style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 54, marginTop: 14 }}>
+      {s.daily.map(([d, n]) => <div key={d} title={`${d}: ${n}`} style={{ flex: 1, height: Math.max(3, n / max * 54), borderRadius: 3, background: n ? 'var(--v)' : 'var(--line)' }} />)}
+    </div>
+  </div>;
+}
 export default function EditAgency({ agency, adminSlug }) {
   const [a, setA] = useState(agency);
   const [ed, setEd] = useState({
@@ -59,6 +75,7 @@ export default function EditAgency({ agency, adminSlug }) {
   const setItem = (k, i, f, v) => setEd(ed => ({ ...ed, [k]: ed[k].map((x, j) => j === i ? { ...x, [f]: v } : x) }));
   const pct = completeness({ ...a, ...ed, clients: ed.clients.split(',').filter(s => s.trim()), socials: Object.fromEntries(Object.entries(ed.socials).filter(([, v]) => v)) });
   return <form onSubmit={save} style={{ display: 'grid', gap: 16 }}>
+    <Stats slug={adminSlug} />
     <div className="row" style={{ gap: 16, alignItems: 'center' }}>
       <Logo a={a} size={84} radius={22} />
       <div style={{ flex: 1 }}>

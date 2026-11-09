@@ -32,6 +32,9 @@ export default function Admin() {
       <span style={{ color: 'var(--mute)', fontWeight: 600 }}>Жагсаалтад {data.total} агентлаг</span>
     </div>
     {err && <div className="err" style={{ marginTop: 12 }}>{err}</div>}
+    <Box title={`Хамгийн их үзэлттэй (30 хоног · нийт ${data.totalViews} үзэлт, ${data.totalClicks} дарсан)`} n={data.top.length}>
+      {data.top.map((a, i) => <Row key={a.slug} actions={<Link className="btn ghost" href={`/minii?edit=${a.slug}`}>Статистик</Link>}><b>{i + 1}. {a.name}</b> <span style={{ color: 'var(--mute)' }}>· {a.views} үзэлт · {a.clicks} дарсан</span></Row>)}
+    </Box>
     <Box title="Эзэмших хүсэлт" n={data.claims.length}>{data.claims.map(c => <Row key={c.id}
       actions={<><button className="btn v" onClick={() => act('claim', c.id, 'approve')}>Батлах</button><button className="btn ghost" onClick={() => act('claim', c.id, 'reject', 'Татгалзах уу?')}>Татгалзах</button></>}>
       <b>{c.agencies?.name}</b> ← {c.user?.full_name || c.user?.email} <span style={{ color: 'var(--mute)' }}>· {c.user?.email} · {c.phone}</span>

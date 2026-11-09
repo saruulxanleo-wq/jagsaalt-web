@@ -4,6 +4,7 @@ import { getAgency, listAgencies } from '@/lib/db';
 import { fmtNum, catsOf, catLabel, catTone, cap, SOCIALS, host, fmtPrice } from '@/lib/config';
 import OwnerTools from './OwnerTools';
 import ReportButton from './ReportButton';
+import Track from './Track';
 import { MemberPhoto } from '../../Avatar';
 import Card, { Logo, Badges } from '../../Card';
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default async function Profile({ params }) {
   const c = { label: catLabel(catsOf(a)[0]) };
   const similar = (await listAgencies()).filter(x => x.slug !== a.slug && catsOf(x).some(k => catsOf(a).includes(k))).slice(0, 3);
   return <section className="wrap" style={{ marginTop: 10 }}>
+    <Track slug={a.slug} />
     <Link href="/" style={{ color: 'var(--mute)', fontWeight: 600, fontSize: 14.5 }}>← Агентлагууд / {c.label}</Link>
     <div className="panel" style={{ padding: 0, overflow: 'hidden', marginTop: 18 }}>
       <div style={{ height: 160, background: 'radial-gradient(circle at 15% 30%,var(--l) 0 100px,transparent 101px),radial-gradient(circle at 80% 120%,var(--c) 0 160px,transparent 161px),var(--v)' }} />
@@ -39,12 +41,12 @@ export default async function Profile({ params }) {
             {[[a.founded, 'Байгуулагдсан'], [a.team_size && a.team_size + ' хүн', 'Баг'], [a.followers != null && fmtNum(a.followers), 'FB дагагч'], [a.min_budget, 'Доод төсөв']].filter(([v]) => v).slice(0, 4).map(([v, l]) =>
               <div key={l}><div className="h" style={{ fontSize: String(v).length > 8 ? 18 : 26, fontWeight: 800 }}>{v}</div><div style={{ color: 'var(--mute)', fontSize: 14, fontWeight: 600 }}>{l}</div></div>)}
           </div>
-          {a.fb_url && <a href={a.fb_url} target="_blank" rel="noopener" className="btn v">Facebook хуудас</a>}
-          {a.phone_public && <a href={`tel:${a.phone_public}`} className="btn ghost">☎ {a.phone_public}</a>}
-          {a.website && <a href={a.website} target="_blank" rel="noopener" className="btn ghost">🌐 {host(a.website)}</a>}
+          {a.fb_url && <a href={a.fb_url} target="_blank" rel="noopener" className="btn v" data-track="fb">Facebook хуудас</a>}
+          {a.phone_public && <a href={`tel:${a.phone_public}`} className="btn ghost" data-track="phone">☎ {a.phone_public}</a>}
+          {a.website && <a href={a.website} target="_blank" rel="noopener" className="btn ghost" data-track="website">🌐 {host(a.website)}</a>}
           {a.socials && Object.keys(a.socials).length > 0 && <div className="row" style={{ gap: 8 }}>
-            {Object.entries(SOCIALS).filter(([k]) => a.socials[k]).map(([k, l]) => <a key={k} href={a.socials[k]} target="_blank" rel="noopener" className="chip">{l}</a>)}
-            {a.socials.email && <a href={`mailto:${a.socials.email}`} className="chip">✉ {a.socials.email}</a>}</div>}
+            {Object.entries(SOCIALS).filter(([k]) => a.socials[k]).map(([k, l]) => <a key={k} href={a.socials[k]} target="_blank" rel="noopener" className="chip" data-track="social">{l}</a>)}
+            {a.socials.email && <a href={`mailto:${a.socials.email}`} className="chip" data-track="email">✉ {a.socials.email}</a>}</div>}
           <ReportButton slug={a.slug} />
           {!a.verified && <div className="ok">Энэ агентлагийг удирддаг уу? <Link href={`/minii?claim=${a.slug}`} style={{ textDecoration: 'underline' }}>Эзэмших хүсэлт илгээ</Link></div>}
         </aside>
