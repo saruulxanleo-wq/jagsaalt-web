@@ -1,6 +1,7 @@
 import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin, pickCats } from '@/lib/server';
 import { normFb, slugify } from '@/lib/fb';
-import { CATS } from '@/lib/config';
+import { CATS, SUPABASE_URL } from '@/lib/config';
+import { enrichAgency } from '@/lib/fbpage';
 export async function POST(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна', 503);
   const u = await authUser(req, d); if (!u) return fail('Нэвтрээгүй байна', 401);
@@ -25,7 +26,8 @@ export async function POST(req) {
       const cats = pickCats(b.categories); if (!cats) return fail('1-3 ангилал сонго');
       let slug = slugify(fb.split('/').pop().replace('profile.php?id=', ''));
       const { data: dup } = await d.from('agencies').select('id').eq('slug', slug).maybeSingle(); if (dup) slug += '-' + Date.now().toString(36).slice(-4);
-      ({ data: ag } = await d.from('agencies').insert({ slug, name, category: cats[0], categories: cats, fb_url: fb, status: 'pending', added_by: 'owner' }).select('id,name,slug,fb_url,verified').single());
+      ({ data: ag } = await d.from('agencies').insert({ slug, name, category: cats[0], categories: cats, fb_url: fb, status: 'pending', added_by: 'owner' }).select('id,name,slug,fb_url,verified,logo_url,phone_public').single());
+      await enrichAgency(d, ag, SUPABASE_URL).catch(() => null);
     }
   }
   const { data: owners } = await d.from('agency_members').select('user_id').eq('agency_id', ag.id);

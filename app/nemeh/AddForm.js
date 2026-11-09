@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import CatPicker from '../CatPicker';
+import FbPreview from '../FbPreview';
 export default function AddForm() {
   const [f, setF] = useState({ fb_url: '', name: '', categories: [] });
   const [msg, setMsg] = useState(null); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
@@ -20,7 +21,7 @@ export default function AddForm() {
       <span className="btn v">Нэвтрэх →</span></Link>
     {done ? <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>Баярлалаа! Админ шалгаад жагсаалтад нэмнэ.</div> :
     <form onSubmit={submit} className="panel" style={{ marginTop: 18, display: 'grid', gap: 18 }}>
-      <div><label htmlFor="fb" className="lab">Facebook хуудасны линк</label><input id="fb" required className="field" placeholder="facebook.com/..." value={f.fb_url} onChange={set('fb_url')} /></div>
+      <div><label htmlFor="fb" className="lab">Facebook хуудасны линк</label><input id="fb" required className="field" placeholder="facebook.com/..." value={f.fb_url} onChange={set('fb_url')} /><FbPreview url={f.fb_url} onName={n => setF(f => f.name ? f : { ...f, name: n })} /></div>
       <div><label htmlFor="nm" className="lab">Агентлагийн нэр</label><input id="nm" required className="field" value={f.name} onChange={set('name')} /></div>
       <CatPicker value={f.categories} onChange={v => setF({ ...f, categories: v })} />
       {msg && <div className="err">{msg}</div>}

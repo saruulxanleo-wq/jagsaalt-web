@@ -6,6 +6,7 @@ import { sb, api } from '@/lib/sbclient';
 import { catsOf } from '@/lib/config';
 import CatPicker from '../CatPicker';
 import EditAgency from './EditAgency';
+import FbPreview from '../FbPreview';
 const Step = ({ n, title, done, active, children }) => (
   <div className="panel" style={{ marginTop: 18, opacity: active || done ? 1 : .55 }}>
     <div className="row" style={{ gap: 12 }}>
@@ -67,6 +68,7 @@ export default function Account() {
         {me.claim?.status === 'rejected' && <div className="err">Өмнөх хүсэлт батлагдаагүй. Дахин илгээж болно.</div>}
         {claimSlug ? <div className="ok">Эзэмших агентлаг: <b>{claimSlug}</b> · <Link href="/minii" style={{ textDecoration: 'underline' }}>өөр агентлаг</Link></div> : <>
           <div><label htmlFor="fb" className="lab">Агентлагийн Facebook хуудасны линк</label><input id="fb" className="field" placeholder="facebook.com/..." value={cl.fb_url} onChange={e => setCl({ ...cl, fb_url: e.target.value })} required />
+            <FbPreview url={cl.fb_url} onName={n => setCl(c => c.name ? c : { ...c, name: n })} />
             <p style={{ fontSize: 13.5, color: 'var(--mute)', marginTop: 6 }}>Жагсаалтад байгаа бол линкээр нь таниад холбоно. Байхгүй бол доорх мэдээллээр шинээр нэмнэ.</p></div>
           <div><label htmlFor="nm" className="lab">Агентлагийн нэр</label><input id="nm" className="field" value={cl.name} onChange={e => setCl({ ...cl, name: e.target.value })} /></div>
           <CatPicker value={cl.categories} onChange={v => setCl({ ...cl, categories: v })} />

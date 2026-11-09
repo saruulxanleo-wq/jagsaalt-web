@@ -7,6 +7,13 @@ const ago = t => { const h = Math.round((Date.now() - new Date(t)) / 36e5); retu
 const Box = ({ title, n, children }) => <div className="panel" style={{ marginTop: 18 }}><h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>{title} <span style={{ color: 'var(--mute)' }}>{n}</span></h2><div style={{ display: 'grid', gap: 12, marginTop: 14 }}>{n ? children : <p style={{ color: 'var(--mute)' }}>Хоосон.</p>}</div></div>;
 const Row = ({ children, actions }) => <div className="row" style={{ background: 'var(--bg)', borderRadius: 16, padding: '12px 14px', justifyContent: 'space-between', gap: 12 }}><div style={{ flex: 1, minWidth: 240 }}>{children}</div><div className="row" style={{ gap: 6 }}>{actions}</div></div>;
 export default function Admin() {
+  const [rf, setRf] = useState(null);
+  async function refresh() {
+    let off = 0, ok = 0, tot = 0; setRf('Эхэлж байна…');
+    while (true) { const r = await api('/api/admin/refresh', { offset: off }); if (!r.ok) { setRf('Алдаа: ' + r.error); return; }
+      ok += r.res.filter(x => x.ok).length; tot = r.total; off = r.next; setRf(`${off}/${tot} шалгасан · ${ok} амжилттай`); if (r.done) break; }
+    setRf(`Дууслаа: ${tot}-аас ${ok} агентлагийн мэдээлэл шинэчлэгдлээ`);
+  }
   const [s, setS] = useState(undefined); const [data, setData] = useState(null); const [err, setErr] = useState(null); const [q, setQ] = useState('');
   useEffect(() => { sb().auth.getSession().then(({ data }) => setS(data.session)); }, []);
   const load = async () => { const r = await api('/api/admin/list'); r.ok ? setData(r) : setErr(r.error); };
@@ -36,6 +43,11 @@ export default function Admin() {
     <Box title="Мэдээлэл буруу гэсэн гомдол" n={data.reports.length}>{data.reports.map(r => <Row key={r.id}
       actions={<><Link className="btn ghost" href={`/minii?edit=${r.agencies?.slug}`}>Засах</Link><button className="btn ghost" onClick={() => act('report', r.id, 'resolve')}>Шийдсэн</button></>}>
       <b>{r.agencies?.name}</b> <span style={{ color: 'var(--mute)' }}>· {ago(r.created_at)}</span><div style={{ fontSize: 14, whiteSpace: 'pre-wrap' }}>{r.message}</div></Row>)}</Box>
+    <div className="panel" style={{ marginTop: 18 }}>
+      <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>Facebook мэдээлэл шинэчлэх</h2>
+      <p style={{ color: 'var(--mute)', marginTop: 6 }}>Бүх агентлагийн дагагч, сүүлийн пост (идэвхтэй эсэх), логогүй бол логог FB-ээс татна. 3–5 минут болно, хуудсаа бүү хаа.</p>
+      <div className="row" style={{ marginTop: 10 }}><button className="btn v" disabled={rf && !rf.startsWith('Дууслаа') && !rf.startsWith('Алдаа')} onClick={refresh}>Шинэчлэх</button>{rf && <span style={{ fontWeight: 600 }}>{rf}</span>}</div>
+    </div>
     <div className="panel" style={{ marginTop: 18 }}>
       <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>Агентлаг засах / нуух</h2>
       <p style={{ color: 'var(--mute)', marginTop: 6 }}>Аль ч агентлагийн профайл руу ороод «✎ Профайл засах» дар. Эсвэл slug-аар нь шууд:</p>
