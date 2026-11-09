@@ -3,12 +3,15 @@ import { notFound } from 'next/navigation';
 import { getAgency, listAgencies } from '@/lib/db';
 import { fmtNum, catsOf, catLabel, catTone, cap, SOCIALS, host } from '@/lib/config';
 import OwnerTools from './OwnerTools';
+import ReportButton from './ReportButton';
 import { MemberPhoto } from '../../Avatar';
 import Card, { Logo, Badges } from '../../Card';
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }) {
   const a = await getAgency((await params).slug);
-  return a ? { title: a.name, description: `${a.name} — ${catsOf(a).map(catLabel).join(', ')}. Монголын маркетингийн агентлагуудын жагсаалт.` } : {};
+  if (!a) return {};
+  const description = a.description || `${a.name} — ${catsOf(a).map(catLabel).join(', ')}. Монголын маркетингийн агентлагуудын жагсаалт.`;
+  return { title: a.name, description, alternates: { canonical: `/a/${a.slug}` }, openGraph: { title: `${a.name} | jagsaalt.mn`, description, images: a.logo_url ? [{ url: a.logo_url, width: 400, height: 400 }] : undefined }, twitter: { card: a.logo_url ? 'summary' : 'summary_large_image' } };
 }
 export default async function Profile({ params }) {
   const { slug } = await params;
@@ -42,6 +45,7 @@ export default async function Profile({ params }) {
           {a.socials && Object.keys(a.socials).length > 0 && <div className="row" style={{ gap: 8 }}>
             {Object.entries(SOCIALS).filter(([k]) => a.socials[k]).map(([k, l]) => <a key={k} href={a.socials[k]} target="_blank" rel="noopener" className="chip">{l}</a>)}
             {a.socials.email && <a href={`mailto:${a.socials.email}`} className="chip">✉ {a.socials.email}</a>}</div>}
+          <ReportButton slug={a.slug} />
           {!a.verified && <div className="ok">Энэ агентлагийг удирддаг уу? <Link href={`/minii?claim=${a.slug}`} style={{ textDecoration: 'underline' }}>Эзэмших хүсэлт илгээ</Link></div>}
         </aside>
       </div>

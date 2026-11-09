@@ -31,3 +31,41 @@ alter table agencies add column if not exists cases jsonb not null default '[]':
 alter table agencies add column if not exists team jsonb not null default '[]'::jsonb;
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('logos', 'logos', true, 1500000, array['image/webp','image/jpeg','image/png']) on conflict (id) do nothing;
+alter table profiles add column if not exists sms_day date;
+alter table profiles add column if not exists sms_count int not null default 0;
+alter table reports add column if not exists resolved boolean not null default false;
+update agencies set name = v.n, updated_at = now() from (values
+ ('mongoliannationalmarketingagency','National Marketing Agency'),
+ ('healthmarketingservice','Health Marketing Services'),
+ ('marshallmongolia','Marshall Mongolia'),
+ ('arimunmedia','All in One Place'),
+ ('todoragency','Todor Agency'),
+ ('hashtagchatbotboostservice','ХашТаг'),
+ ('www-fameagency-mn','Fame Agency'),
+ ('achitmarketing','Achit Marketing Agency'),
+ ('socialzarzurag','Сошиал пост зураг бэлтгэл'),
+ ('amgalanamjiltllc','Амгалан Амжилт'),
+ ('digital-social-online-marketing','Digital Social Online Marketing Agency'),
+ ('brandpromo-mn','Brand Promo'),
+ ('brandlymarketing','Brandly'),
+ ('mnmarketingconsultingllc','MN Agency'),
+ ('adstationmarketingagency','Adstation'),
+ ('imarketingagency','I Marketing Agency'),
+ ('medymarketingagency','Medy Marketing Agency'),
+ ('lumeagencymongolia','LUME Agency'),
+ ('rawagency123','RAW Agency'),
+ ('kreate10','Kreate Agency'),
+ ('the-vision-agency-ofc','Vision.'),
+ ('ufe-marketing-agency','UFE Marketing Agency'),
+ ('bee2creative','Pick Agency'),
+ ('5thseasonagency','5th Season Agency'),
+ ('contentlabofficial','Content Lab Agency'),
+ ('storylinecreativity','StoryLine Creative Agency'),
+ ('thinker-ca','Thinker Creative Agency'),
+ ('socialsmartmarketing','Social Marketing Mongolia'),
+ ('marketingteampr','Creative Ideas'),
+ ('creativemotion-mongolia','Creative Motion Agency'),
+ ('businessdevelopermarketingagency','BD Marketing Agency'),
+ ('agency-carpediem','Carpe Diem')
+) as v(s, n) where agencies.slug = v.s;
+select count(*) as fixed from agencies where updated_at > now() - interval '1 minute';

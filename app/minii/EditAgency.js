@@ -120,6 +120,12 @@ export default function EditAgency({ agency, adminSlug }) {
     </Sec>
     {msg?.err && <div className="err">{msg.err}</div>}
     {msg?.ok && <div className="ok">{msg.ok} <Link href={`/a/${agency.slug}`} style={{ textDecoration: 'underline' }}>Профайлаа харах</Link></div>}
-    <button className="btn v" disabled={busy || !ed.categories.length} style={{ padding: 15, position: 'sticky', bottom: 12 }}>{busy ? 'Хадгалж байна…' : 'Хадгалах'}</button>
+    <button className="btn v" disabled={busy || !ed.categories.length} style={{ padding: 15, position: 'sticky', bottom: 12, boxShadow: '0 10px 30px -10px #6a3df0aa' }}>{busy ? 'Хадгалж байна…' : 'Хадгалах'}</button>
+    {adminSlug && <div className="row" style={{ borderTop: '1.5px dashed var(--line)', paddingTop: 14, gap: 8 }}>
+      <span style={{ color: 'var(--mute)', fontWeight: 600, fontSize: 14 }}>Админ:</span>
+      <button type="button" className="btn ghost" onClick={async () => { const r = await api('/api/admin/action', { kind: 'agency', id: agency.id, action: 'hide' }); setMsg(r.ok ? { ok: 'Жагсаалтаас нуулаа' } : { err: r.error }); }}>Жагсаалтаас нуух</button>
+      <button type="button" className="btn ghost" onClick={async () => { const r = await api('/api/admin/action', { kind: 'agency', id: agency.id, action: 'approve' }); setMsg(r.ok ? { ok: 'Жагсаалтад харагдаж байна' } : { err: r.error }); }}>Жагсаалтад харуулах</button>
+      <button type="button" className="btn ghost" style={{ color: '#A3260F' }} onClick={async () => { if (!window.confirm(`«${agency.name}»-ийг бүр мөсөн устгах уу? Буцаах боломжгүй.`)) return; const r = await api('/api/admin/action', { kind: 'agency', id: agency.id, action: 'delete' }); r.ok ? (location.href = '/admin') : setMsg({ err: r.error }); }}>Бүр устгах</button>
+    </div>}
   </form>;
 }

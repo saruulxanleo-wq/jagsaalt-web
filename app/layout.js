@@ -1,11 +1,13 @@
 import './globals.css';
 import Link from 'next/link';
-import { SITE_URL, SITE_NAME } from '@/lib/config';
-export const metadata = {
-  metadataBase: new URL(SITE_URL),
+import { siteUrl, SITE_NAME } from '@/lib/config';
+export const generateMetadata = async () => ({
+  metadataBase: new URL(siteUrl()),
+  openGraph: { type: 'website', locale: 'mn_MN', siteName: 'jagsaalt.mn', images: [{ url: '/og.png', width: 1200, height: 630 }] },
+  twitter: { card: 'summary_large_image' },
   title: { default: 'Монголын маркетингийн агентлагууд | ' + SITE_NAME, template: '%s | ' + SITE_NAME },
   description: 'Монголын маркетингийн агентлагуудын нээлттэй жагсаалт. Ангиллаар шүүж, идэвхтэй эсэхийг хараад өөрт тохирохоо ол.',
-};
+});
 const [n1, n2] = SITE_NAME.split('.');
 export default function Root({ children }) {
   return (
@@ -19,7 +21,7 @@ export default function Root({ children }) {
         {children}
         <footer><div className="wrap row" style={{ justifyContent: 'space-between', paddingTop: 32, paddingBottom: 32 }}>
           <div className="logo" style={{ color: '#fff' }}><i /><span>{n1}<b style={{ color: 'var(--l)' }}>.{n2}</b></span></div>
-          <p style={{ fontSize: 14 }}>Идэвхтэй эсэхийг Saruul RADAR шалгана · Үнэгүй жагсаалт</p>
+          <p style={{ fontSize: 14 }}>Идэвхтэй эсэхийг Saruul RADAR шалгана · Үнэгүй жагсаалт · <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал ба нөхцөл</Link></p>
         </div></footer>
       </body>
     </html>

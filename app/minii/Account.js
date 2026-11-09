@@ -49,7 +49,7 @@ export default function Account() {
   return <section className="wrap" style={{ marginTop: 20, maxWidth: 860 }}>
     <div className="row" style={{ justifyContent: 'space-between' }}>
       <div><h1 className="h" style={{ fontSize: 'clamp(30px,5vw,42px)', fontWeight: 800 }}>Миний агентлаг</h1><p style={{ color: 'var(--mute)', marginTop: 6 }}>{me.name || me.email}</p></div>
-      <button className="btn ghost" onClick={() => sb().auth.signOut()}>Гарах</button>
+      <div className="row">{me.is_admin && <Link href="/admin" className="btn v">Админ</Link>}<button className="btn ghost" onClick={() => sb().auth.signOut()}>Гарах</button></div>
     </div>
     {err && <div className="err" style={{ marginTop: 16 }}>{err}</div>}
     <Step n={1} title={me.phone_verified ? `Утас баталгаажсан · ${me.phone}` : 'Утсаа баталгаажуул'} done={me.phone_verified} active={step === 1}>
