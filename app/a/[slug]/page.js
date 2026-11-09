@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAgency, listAgencies } from '@/lib/db';
-import { CATS, fmtNum, catsOf } from '@/lib/config';
+import { CATS, fmtNum, catsOf, SOCIALS, host } from '@/lib/config';
+import OwnerTools from './OwnerTools';
 import Card, { Logo, Badges } from '../../Card';
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }) {
@@ -25,19 +26,28 @@ export default async function Profile({ params }) {
           <div className="row" style={{ marginTop: 12 }}>{catsOf(a).map(k => <span key={k} className={`cat ${CATS[k].tone}`}>{CATS[k].label}</span>)}<Badges a={a} /></div>
           <p style={{ fontSize: 18, color: 'var(--mute)', marginTop: 20, maxWidth: 640 }}>{a.description || 'Тайлбар хараахан нэмэгдээгүй. Агентлагийн эзэн баталгаажаад өөрөө бөглөнө.'}</p>
           {a.services?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Үйлчилгээ</h2><div className="row" style={{ marginTop: 12 }}>{a.services.map(s => <span key={s} className="chip">{s}</span>)}</div></>}
+          {a.clients?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Харилцагч брэндүүд</h2><div className="row" style={{ marginTop: 12 }}>{a.clients.map(s => <span key={s} style={{ padding: '10px 16px', borderRadius: 14, background: 'var(--bg)', fontWeight: 700 }}>{s}</span>)}</div></>}
+          {a.team?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Баг</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 10, marginTop: 12 }}>{a.team.map((m, i) => <div key={i} style={{ background: 'var(--bg)', borderRadius: 16, padding: '12px 14px' }}><b>{m.name}</b><div style={{ color: 'var(--mute)', fontSize: 14 }}>{m.role}</div></div>)}</div></>}
         </div>
         <aside style={{ marginTop: 24, display: 'grid', gap: 14, alignContent: 'start' }}>
+          <OwnerTools slug={a.slug} />
           <div style={{ background: 'var(--bg)', borderRadius: 24, padding: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <div><div className="h" style={{ fontSize: 28, fontWeight: 800 }}>{fmtNum(a.followers)}</div><div style={{ color: 'var(--mute)', fontSize: 14, fontWeight: 600 }}>FB дагагч</div></div>
-            <div><div className="h" style={{ fontSize: 28, fontWeight: 800 }}>{a.last_post_at ? a.last_post_at.slice(5).replace('-', '/') : '—'}</div><div style={{ color: 'var(--mute)', fontSize: 14, fontWeight: 600 }}>Сүүлийн пост</div></div>
+            {[[a.founded, 'Байгуулагдсан'], [a.team_size && a.team_size + ' хүн', 'Баг'], [a.followers != null && fmtNum(a.followers), 'FB дагагч'], [a.min_budget, 'Доод төсөв']].filter(([v]) => v).slice(0, 4).map(([v, l]) =>
+              <div key={l}><div className="h" style={{ fontSize: String(v).length > 8 ? 18 : 26, fontWeight: 800 }}>{v}</div><div style={{ color: 'var(--mute)', fontSize: 14, fontWeight: 600 }}>{l}</div></div>)}
           </div>
           {a.fb_url && <a href={a.fb_url} target="_blank" rel="noopener" className="btn v">Facebook хуудас</a>}
           {a.phone_public && <a href={`tel:${a.phone_public}`} className="btn ghost">☎ {a.phone_public}</a>}
-          {a.website && <a href={a.website} target="_blank" rel="noopener" className="btn ghost">Вэбсайт</a>}
+          {a.website && <a href={a.website} target="_blank" rel="noopener" className="btn ghost">🌐 {host(a.website)}</a>}
+          {a.socials && Object.keys(a.socials).length > 0 && <div className="row" style={{ gap: 8 }}>
+            {Object.entries(SOCIALS).filter(([k]) => a.socials[k]).map(([k, l]) => <a key={k} href={a.socials[k]} target="_blank" rel="noopener" className="chip">{l}</a>)}
+            {a.socials.email && <a href={`mailto:${a.socials.email}`} className="chip">✉ {a.socials.email}</a>}</div>}
           {!a.verified && <div className="ok">Энэ агентлагийг удирддаг уу? <Link href={`/minii?claim=${a.slug}`} style={{ textDecoration: 'underline' }}>Эзэмших хүсэлт илгээ</Link></div>}
         </aside>
       </div>
     </div>
+    {a.cases?.length > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 18px' }}>Кейсүүд</h2>
+      <div className="grid">{a.cases.map((c, i) => { const In = <><span className="cat v" style={{ alignSelf: 'flex-start' }}>{c.client || 'Кейс'}</span><h3>{c.title}</h3>{c.result && <p style={{ fontSize: 16, fontWeight: 600 }}>{c.result}</p>}{c.link && <span style={{ color: 'var(--v)', fontWeight: 600, fontSize: 14, marginTop: 'auto' }}>Дэлгэрэнгүй →</span>}</>;
+        return c.link ? <a key={i} href={c.link} target="_blank" rel="noopener" className="card">{In}</a> : <div key={i} className="card">{In}</div>; })}</div></>}
     {similar.length > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 18px' }}>Төстэй агентлагууд</h2><div className="grid">{similar.map(x => <Card key={x.slug} a={x} />)}</div></>}
   </section>;
 }

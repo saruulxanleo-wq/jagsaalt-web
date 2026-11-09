@@ -22,3 +22,12 @@ alter table agency_members enable row level security;
 
 alter table agencies add column if not exists categories text[];
 update agencies set categories = array[category] where categories is null or cardinality(categories) = 0;
+alter table agencies add column if not exists founded int;
+alter table agencies add column if not exists team_size text;
+alter table agencies add column if not exists min_budget text;
+alter table agencies add column if not exists socials jsonb not null default '{}'::jsonb;
+alter table agencies add column if not exists clients text[] not null default '{}';
+alter table agencies add column if not exists cases jsonb not null default '[]'::jsonb;
+alter table agencies add column if not exists team jsonb not null default '[]'::jsonb;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('logos', 'logos', true, 1500000, array['image/webp','image/jpeg','image/png']) on conflict (id) do nothing;

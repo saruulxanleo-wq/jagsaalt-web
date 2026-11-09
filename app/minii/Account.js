@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { sb, api } from '@/lib/sbclient';
 import { catsOf } from '@/lib/config';
 import CatPicker from '../CatPicker';
+import EditAgency from './EditAgency';
 const Step = ({ n, title, done, active, children }) => (
   <div className="panel" style={{ marginTop: 18, opacity: active || done ? 1 : .55 }}>
     <div className="row" style={{ gap: 12 }}>
@@ -14,7 +15,7 @@ const Step = ({ n, title, done, active, children }) => (
     {active && <div style={{ marginTop: 18 }}>{children}</div>}
   </div>);
 export default function Account() {
-  const claimSlug = useSearchParams().get('claim');
+  const q = useSearchParams(); const claimSlug = q.get('claim'); const editSlug = q.get('edit');
   const [session, setSession] = useState(undefined);
   const [me, setMe] = useState(null);
   const [err, setErr] = useState(null); const [busy, setBusy] = useState(false);
@@ -26,7 +27,7 @@ export default function Account() {
     const { data: s } = sb().auth.onAuthStateChange((_e, s) => setSession(s));
     return () => s.subscription.unsubscribe();
   }, []);
-  async function load() { const r = await api('/api/me'); if (r.ok) { setMe(r); if (r.agency) setEd({ description: r.agency.description || '', website: r.agency.website || '', phone_public: r.agency.phone_public || '', services: (r.agency.services || []).join(', '), categories: catsOf(r.agency) }); } else setErr(r.error); }
+  async function load() { const r = await api('/api/me' + (editSlug ? '?edit=' + encodeURIComponent(editSlug) : '')); if (r.ok) { setMe(r); if (r.agency) setEd({ description: r.agency.description || '', website: r.agency.website || '', phone_public: r.agency.phone_public || '', services: (r.agency.services || []).join(', '), categories: catsOf(r.agency) }); } else setErr(r.error); }
   useEffect(() => { if (session) load(); }, [session]);
   const run = async (fn) => { setBusy(true); setErr(null); try { await fn(); } finally { setBusy(false); } };
   const login = () => sb().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/minii' + (claimSlug ? '?claim=' + claimSlug : '') } });
@@ -40,6 +41,9 @@ export default function Account() {
         Google-ээр нэвтрэх</button>
     </div></section>;
   if (!me) return <section className="wrap" style={{ padding: 60 }}>{err ? <div className="err">{err}</div> : 'Ачаалж байна…'}</section>;
+  if (me.edit_agency) return <section className="wrap" style={{ marginTop: 20, maxWidth: 860 }}>
+    <h1 className="h" style={{ fontSize: 34, fontWeight: 800 }}>Админ: {me.edit_agency.name}</h1>
+    <div className="panel" style={{ marginTop: 18 }}><EditAgency agency={me.edit_agency} adminSlug={me.edit_agency.slug} /></div></section>;
   const step = !me.phone_verified ? 1 : !me.agency ? 2 : 3;
   const pending = me.claim?.status === 'pending';
   return <section className="wrap" style={{ marginTop: 20, maxWidth: 860 }}>
@@ -72,16 +76,7 @@ export default function Account() {
       </form>}
     </Step>
     <Step n={3} title="Профайлаа засах" done={false} active={step === 3}>
-      {ed && <form onSubmit={e => { e.preventDefault(); setSaved(false); run(async () => { const r = await api('/api/agency/update', { ...ed, services: ed.services.split(',') }); r.ok ? setSaved(true) : setErr(r.error); }); }} style={{ display: 'grid', gap: 16 }}>
-        <div><label htmlFor="ds" className="lab">Товч тайлбар</label><textarea id="ds" rows={3} maxLength={400} className="field" style={{ resize: 'vertical' }} value={ed.description} onChange={e => setEd({ ...ed, description: e.target.value })} /></div>
-        <div><label htmlFor="sv" className="lab">Үйлчилгээ (таслалаар тусгаарла)</label><input id="sv" className="field" placeholder="Брэнд стратеги, Сошиал менежмент, Видео продакшн" value={ed.services} onChange={e => setEd({ ...ed, services: e.target.value })} /></div>
-        <div className="row" style={{ gap: 14 }}>
-          <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="wb" className="lab">Вэбсайт</label><input id="wb" className="field" value={ed.website} onChange={e => setEd({ ...ed, website: e.target.value })} /></div>
-          <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="pp" className="lab">Холбоо барих утас</label><input id="pp" className="field" value={ed.phone_public} onChange={e => setEd({ ...ed, phone_public: e.target.value })} /></div></div>
-        <CatPicker value={ed.categories} onChange={v => setEd({ ...ed, categories: v })} />
-        {saved && <div className="ok">Хадгаллаа ✓ <Link href={`/a/${me.agency.slug}`} style={{ textDecoration: 'underline' }}>Профайлаа харах</Link></div>}
-        <button className="btn v" disabled={busy} style={{ padding: 15 }}>{busy ? 'Хадгалж байна…' : 'Хадгалах'}</button>
-      </form>}
+      {me.agency && <EditAgency agency={me.agency} />}
     </Step>
   </section>;
 }
