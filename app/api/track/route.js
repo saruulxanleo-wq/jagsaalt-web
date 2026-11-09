@@ -6,6 +6,7 @@ export async function POST(req) {
   if (BOT.test(req.headers.get('user-agent') || '')) return json({ ok: true });
   const d = db(); if (!d) return json({ ok: false });
   const b = await req.json().catch(() => null) || await req.text().then(t => { try { return JSON.parse(t); } catch { return {}; } }).catch(() => ({}));
+  if (b.kind === 'click' && typeof b.lid === 'string' && /^[0-9a-f-]{36}$/.test(b.lid)) { await d.from('events').insert({ listing_id: b.lid, kind: 'click' }); return json({ ok: true }); }
   if (!KINDS.includes(b.kind) || typeof b.slug !== 'string') return json({ ok: false });
   const { data: ag } = await d.from('agencies').select('id').eq('slug', b.slug.slice(0, 80)).maybeSingle();
   if (ag) await d.from('events').insert({ agency_id: ag.id, kind: b.kind });

@@ -8,15 +8,18 @@ export async function GET(req) {
     d.from('reports').select('id,message,created_at,agencies(name,slug)').eq('resolved', false).order('created_at', { ascending: false }).limit(50),
     d.from('agencies').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
   ]);
-  const { data: ev } = await d.from('events').select('kind,agency_id').gte('created_at', new Date(Date.now() - 30 * 864e5).toISOString()).limit(50000);
+  const { data: ev } = await d.from('events').select('kind,agency_id').not('agency_id', 'is', null).gte('created_at', new Date(Date.now() - 30 * 864e5).toISOString()).limit(50000);
   const agg = {}; for (const e of ev || []) { const a = agg[e.agency_id] ||= { views: 0, clicks: 0 }; e.kind === 'view' ? a.views++ : a.clicks++; }
   const topIds = Object.entries(agg).sort((x, y) => y[1].views - x[1].views).slice(0, 15).map(([id]) => id);
   const { data: topAg } = topIds.length ? await d.from('agencies').select('id,name,slug').in('id', topIds) : { data: [] };
   const top = topIds.map(id => ({ ...(topAg || []).find(a => a.id === id), ...agg[id] })).filter(a => a.slug);
   const totalViews = Object.values(agg).reduce((s, a) => s + a.views, 0), totalClicks = Object.values(agg).reduce((s, a) => s + a.clicks, 0);
+  const { data: listings } = await d.from('listings').select('id,type,name,maker,description,price,url,topics,status,sponsored,contact,created_at').neq('status', 'rejected').order('created_at', { ascending: false });
+  const { data: lev } = await d.from('events').select('listing_id').not('listing_id', 'is', null).gte('created_at', new Date(Date.now() - 30 * 864e5).toISOString()).limit(50000);
+  const lc = {}; for (const e of lev || []) lc[e.listing_id] = (lc[e.listing_id] || 0) + 1;
   const { data: leads } = await d.from('leads').select('*').order('created_at', { ascending: false }).limit(50);
   const ids = [...new Set((claims || []).map(c => c.user_id))];
   const { data: profs } = ids.length ? await d.from('profiles').select('id,email,full_name').in('id', ids) : { data: [] };
   const pm = Object.fromEntries((profs || []).map(p => [p.id, p]));
-  return json({ leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
+  return json({ listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
 }

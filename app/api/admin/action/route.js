@@ -9,6 +9,11 @@ export async function POST(req) {
     else if (action === 'reject' || action === 'hide') await d.from('agencies').update({ status: 'rejected', updated_at: now }).eq('id', id);
     else if (action === 'delete') await d.from('agencies').delete().eq('id', id);
     else return fail('Буруу үйлдэл');
+  } else if (kind === 'listing') {
+    const set = { approve: { status: 'approved' }, reject: { status: 'rejected' }, hide: { status: 'rejected' }, sponsor: { sponsored: true }, unsponsor: { sponsored: false } }[action];
+    if (action === 'delete') await d.from('listings').delete().eq('id', id);
+    else if (set) await d.from('listings').update({ ...set, updated_at: now }).eq('id', id);
+    else return fail('Буруу үйлдэл');
   } else if (kind === 'report') {
     await d.from('reports').update({ resolved: true }).eq('id', id);
   } else if (kind === 'claim') {

@@ -1,9 +1,12 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import ToolStrip from './ToolStrip';
 import Link from 'next/link';
 import Card from './Card';
-import { CATS, isActive, catsOf, catLabel } from '@/lib/config';
-export default function Directory({ list }) {
+import { CATS, CAT_TOPIC, isActive, catsOf, catLabel } from '@/lib/config';
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+export default function Directory({ list, tools = [] }) {
+  const [seed, setSeed] = useState(null); useEffect(() => setSeed(shuffle(tools)), [tools]);
   const [q, setQ] = useState(''); const [cat, setCat] = useState('all'); const [sort, setSort] = useState('followers'); const [n, setN] = useState(24);
   const counts = useMemo(() => list.reduce((m, a) => (catsOf(a).forEach(k => m[k] = (m[k] || 0) + 1), m), {}), [list]);
   const shown = useMemo(() => {
@@ -12,6 +15,12 @@ export default function Directory({ list }) {
     if (sort === 'name') r = [...r].sort((x, y) => x.name.localeCompare(y.name));
     return r;
   }, [list, q, cat, sort]);
+  // Хэрэгслийн мөр: эхний 6 картын дараа, дараа нь 12 карт тутамд. Ивээн тэтгэсэн → ангилалд таарах → бусад
+  const pool = useMemo(() => { const base = seed || tools, tp = CAT_TOPIC[cat];
+    const rank = l => (l.sponsored ? 0 : 2) + (tp && (l.topics || []).includes(tp) ? 0 : 1);
+    return [...base].sort((x, y) => rank(x) - rank(y)); }, [seed, tools, cat]);
+  const stripAt = i => pool.length >= 3 && !q.trim() && (i === 5 || (i > 5 && (i - 5) % 12 === 0));
+  const stripItems = i => { const k = i === 5 ? 0 : (i - 5) / 12; return [0, 1, 2].map(j => pool[(k * 3 + j) % pool.length]).filter((l, j, a) => a.indexOf(l) === j); };
   const active = list.filter(a => isActive(a)).length, verified = list.filter(a => a.verified).length;
   return <>
     <header className="wrap hero" style={{ paddingTop: 20, paddingBottom: 28, position: 'relative' }}>
@@ -43,7 +52,7 @@ export default function Directory({ list }) {
         <label className="row" style={{ background: '#fff', padding: '9px 14px', borderRadius: 12, boxShadow: 'inset 0 0 0 1.5px var(--line)', fontWeight: 600, fontSize: 14.5 }}>Эрэмбэ:
           <select value={sort} onChange={e => setSort(e.target.value)} style={{ border: 0, background: 'transparent', fontWeight: 600 }}><option value="followers">Дагагчаар</option><option value="name">Нэрээр</option></select></label>
       </div>
-      <div className="grid">{shown.slice(0, n).map(a => <Card key={a.slug} a={a} />)}</div>
+      <div className="grid">{shown.slice(0, n).map((a, i) => <Fragment key={a.slug}><Card a={a} />{stripAt(i) && i < shown.slice(0, n).length - 1 && <ToolStrip items={stripItems(i)} />}</Fragment>)}</div>
       {shown.length === 0 && <p style={{ textAlign: 'center', color: 'var(--mute)', padding: 40 }}>Олдсонгүй. <Link href="/nemeh" style={{ color: 'var(--v)', fontWeight: 700 }}>Нэмэх үү?</Link></p>}
       {shown.length > n && <div style={{ textAlign: 'center', marginTop: 28 }}><button className="btn ghost" onClick={() => setN(n + 24)}>Цааш үзэх · {shown.length - n} үлдсэн</button></div>}
       <div style={{ marginTop: 64, borderRadius: 36, background: 'var(--v)', color: '#fff', padding: '48px 40px', position: 'relative', overflow: 'hidden' }}>

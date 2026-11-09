@@ -1,0 +1,174 @@
+[
+ {
+  "id": "m0",
+  "type": "tool",
+  "name": "Meta Ad Library",
+  "maker": "Meta",
+  "description": "Аль ч хуудас ямар зар явуулж байгааг үнэгүй харна. Өрсөлдөгчөө судлах хамгийн энгийн арга.",
+  "price": "Үнэгүй",
+  "url": "https://www.facebook.com/ads/library/",
+  "logo_url": null,
+  "topics": [
+   "ads",
+   "data"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m1",
+  "type": "tool",
+  "name": "Google Trends",
+  "maker": "Google",
+  "description": "Хүмүүс юуг хэр их хайж байгааг цаг хугацаа, бүсээр харуулна.",
+  "price": "Үнэгүй",
+  "url": "https://trends.google.com/",
+  "logo_url": null,
+  "topics": [
+   "data"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m2",
+  "type": "tool",
+  "name": "Canva",
+  "maker": "Canva",
+  "description": "Пост, сторис, зарын зураг, танилцуулгыг загвараас хурдан бүтээнэ.",
+  "price": "Үнэгүй · Pro төлбөртэй",
+  "url": "https://www.canva.com/",
+  "logo_url": null,
+  "topics": [
+   "design",
+   "content"
+  ],
+  "sponsored": true,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m3",
+  "type": "tool",
+  "name": "CapCut",
+  "maker": "ByteDance",
+  "description": "Reels, TikTok видеог утсан дээрээ эвлүүлэх, хадмал автоматаар нэмэх.",
+  "price": "Үнэгүй · Pro төлбөртэй",
+  "url": "https://www.capcut.com/",
+  "logo_url": null,
+  "topics": [
+   "content"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m4",
+  "type": "tool",
+  "name": "SARUUL Score",
+  "maker": "saruul.work",
+  "description": "Facebook хуудсаа 100 онооны системээр үнэлүүлж, юуг засахаа мэд.",
+  "price": "9 000₮",
+  "url": "https://score.saruul.work/",
+  "logo_url": null,
+  "topics": [
+   "social",
+   "ads"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m5",
+  "type": "tool",
+  "name": "SARUUL Framework",
+  "maker": "saruul.work",
+  "description": "Facebook зарын мөнгө хаашаа урсаж байгааг шалгах алхам алхмын аргачлал.",
+  "price": "98 000₮",
+  "url": "https://saruul.work/framework",
+  "logo_url": null,
+  "topics": [
+   "ads"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m6",
+  "type": "tool",
+  "name": "PlanAI",
+  "maker": "planai.mn",
+  "description": "Бизнесийнхээ мэдээллийг оруулаад маркетингийн төлөвлөгөө AI-аар гаргана.",
+  "price": null,
+  "url": "https://planai.mn",
+  "logo_url": null,
+  "topics": [
+   "ai",
+   "brand"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m7",
+  "type": "course",
+  "name": "Meta Blueprint",
+  "maker": "Meta",
+  "description": "Facebook, Instagram зарын албан ёсны үнэгүй сургалт, гэрчилгээтэй.",
+  "price": "Үнэгүй",
+  "url": "https://www.facebook.com/business/learn",
+  "logo_url": null,
+  "topics": [
+   "ads",
+   "social"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m8",
+  "type": "course",
+  "name": "Google Skillshop",
+  "maker": "Google",
+  "description": "Google Ads, Analytics, YouTube зарын үнэгүй сургалт, гэрчилгээ.",
+  "price": "Үнэгүй",
+  "url": "https://skillshop.withgoogle.com/",
+  "logo_url": null,
+  "topics": [
+   "ads",
+   "data"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m9",
+  "type": "course",
+  "name": "HubSpot Academy",
+  "maker": "HubSpot",
+  "description": "Контент, имэйл, борлуулалтын маркетингийн үнэгүй курсууд.",
+  "price": "Үнэгүй",
+  "url": "https://academy.hubspot.com/",
+  "logo_url": null,
+  "topics": [
+   "content",
+   "brand"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ },
+ {
+  "id": "m99",
+  "type": "community",
+  "name": "Тест маркетерийн групп",
+  "maker": "Facebook групп",
+  "description": "Туршилтын коммюнити",
+  "price": "Үнэгүй",
+  "url": "https://www.facebook.com/groups/test",
+  "logo_url": null,
+  "topics": [
+   "social"
+  ],
+  "sponsored": false,
+  "created_at": "2026-11-10T00:00:00Z"
+ }
+]

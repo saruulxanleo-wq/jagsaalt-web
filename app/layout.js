@@ -1,5 +1,6 @@
 import './globals.css';
 import Link from 'next/link';
+import Nav from './Nav';
 import { siteUrl, SITE_NAME } from '@/lib/config';
 export const generateMetadata = async () => ({
   metadataBase: new URL(siteUrl()),
@@ -19,7 +20,7 @@ export default function Root({ children }) {
         {pid && <script dangerouslySetInnerHTML={{ __html: pixel(pid) }} />}
         <div className="wrap"><nav className="top">
           <Link href="/" className="logo"><i /><span>{n1}<b>.{n2}</b></span></Link>
-          <div className="links"><Link href="/" className="on">Агентлаг</Link></div>
+          <Nav />
           <div className="row"><Link href="/minii" className="btn ghost">Миний агентлаг</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
         </nav></div>
         {children}

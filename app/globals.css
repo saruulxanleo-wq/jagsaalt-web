@@ -63,5 +63,12 @@ footer{background:var(--ink);color:#CFCAE6;margin-top:80px}
 .deco i,.deco img{position:absolute;display:block}
 .deco img{border-radius:24px;object-fit:cover;box-shadow:0 18px 40px -12px #14121f66}
 @media(min-width:1180px){.deco{display:block}}
-@media(max-width:640px){.links{display:none}}
+@media(max-width:640px){.links{order:3;width:100%;overflow-x:auto;gap:20px;white-space:nowrap;scrollbar-width:none;font-size:15px;gap:16px}.hubtabs{display:none}.links::-webkit-scrollbar{display:none}}
 @media(max-width:640px){.chips{flex-wrap:nowrap;overflow-x:auto;margin:0 -24px;padding:2px 24px 6px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}.chips .chip{flex:none}}
+
+.strip{grid-column:1/-1;background:var(--l2);border-radius:28px;padding:18px;margin:4px 0}
+.strip-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.strip .card{box-shadow:none}
+.lcard .licon{background:var(--ink);color:var(--l);font-size:20px}
+.lcard.t-course .licon{background:var(--v);color:#fff}.lcard.t-community .licon{background:var(--c);color:#fff}
+@media(max-width:640px){.strip{margin:4px -24px;border-radius:0;padding:16px 24px}.strip-row{display:flex;overflow-x:auto;scrollbar-width:none;margin:0 -24px;padding:0 24px}.strip-row::-webkit-scrollbar{display:none}.strip-row .card{flex:0 0 78%}}
