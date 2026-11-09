@@ -30,7 +30,7 @@ export default function Directory({ list }) {
       <div className="row" style={{ marginTop: 12, gap: 18, color: 'var(--mute)', fontWeight: 600, fontSize: 14.5 }}>
         <span><b style={{ color: 'var(--ink)' }}>{list.length}</b> агентлаг</span>
         {active > 0 && <span><span className="dot" />&nbsp;<b style={{ color: 'var(--ink)' }}>{active}</b> идэвхтэй</span>}{verified > 0 && <span><b style={{ color: 'var(--ink)' }}>{verified}</b> баталгаажсан</span>}
-        <Link href="/nemeh" style={{ color: 'var(--v)' }}>Жагсаалтад алга уу? Нэмэх →</Link>
+        <Link href="/songoh" className="btn lime" style={{ padding: '8px 16px', fontSize: 14 }}>Аль агентлаг тохирохыг 1 минутад ол →</Link>
       </div>
     </header>
     <section className="wrap">

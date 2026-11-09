@@ -78,3 +78,10 @@ create table if not exists events (
 );
 create index if not exists events_agency_time on events(agency_id, created_at);
 alter table events enable row level security;
+create table if not exists leads (
+  id uuid primary key default gen_random_uuid(),
+  name text not null, phone text, email text, company text, note text,
+  answers jsonb not null default '{}', agencies text[] not null default '{}', utm jsonb not null default '{}',
+  status text not null default 'new', created_at timestamptz not null default now()
+);
+alter table leads enable row level security;

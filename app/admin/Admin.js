@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { sb, api } from '@/lib/sbclient';
 import { catsOf, catLabel } from '@/lib/config';
+import { NEEDS, BUDGETS, SIZES, PRIORITIES } from '@/lib/match';
 const ago = t => { const h = Math.round((Date.now() - new Date(t)) / 36e5); return h < 1 ? 'дөнгөж сая' : h < 24 ? `${h} цагийн өмнө` : `${Math.round(h / 24)} өдрийн өмнө`; };
 const Box = ({ title, n, children }) => <div className="panel" style={{ marginTop: 18 }}><h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>{title} <span style={{ color: 'var(--mute)' }}>{n}</span></h2><div style={{ display: 'grid', gap: 12, marginTop: 14 }}>{n ? children : <p style={{ color: 'var(--mute)' }}>Хоосон.</p>}</div></div>;
 const Row = ({ children, actions }) => <div className="row" style={{ background: 'var(--bg)', borderRadius: 16, padding: '12px 14px', justifyContent: 'space-between', gap: 12 }}><div style={{ flex: 1, minWidth: 240 }}>{children}</div><div className="row" style={{ gap: 6 }}>{actions}</div></div>;
@@ -32,6 +33,11 @@ export default function Admin() {
       <span style={{ color: 'var(--mute)', fontWeight: 600 }}>Жагсаалтад {data.total} агентлаг</span>
     </div>
     {err && <div className="err" style={{ marginTop: 12 }}>{err}</div>}
+    <Box title="Клиентийн хүсэлт (үнийн санал)" n={data.leads.length}>{data.leads.map(l => <Row key={l.id} actions={<a className="btn v" href={`tel:${l.phone || ''}`}>Залгах</a>}>
+      <b>{l.name}</b>{l.company && ` · ${l.company}`} <span style={{ color: 'var(--mute)' }}>· {l.phone} {l.email} · {ago(l.created_at)}</span>
+      <div style={{ fontSize: 14 }}>{(l.answers?.needs || []).map(k => NEEDS[k]?.label).join(', ')} · {BUDGETS[l.answers?.budget]?.[0]} · {SIZES[l.answers?.size]} · {PRIORITIES[l.answers?.priority]}{l.answers?.industry && ` · ${l.answers.industry}`}</div>
+      <div style={{ fontSize: 14 }}>Агентлаг: {l.agencies.map(s => <Link key={s} href={`/a/${s}`} style={{ color: 'var(--v)', marginRight: 8 }}>{s}</Link>)}{l.utm?.utm_campaign && <span style={{ color: 'var(--mute)' }}> · кампанит: {l.utm.utm_campaign}</span>}</div>
+      {l.note && <div style={{ fontSize: 14, color: 'var(--mute)' }}>«{l.note}»</div>}</Row>)}</Box>
     <Box title={`Хамгийн их үзэлттэй (30 хоног · нийт ${data.totalViews} үзэлт, ${data.totalClicks} дарсан)`} n={data.top.length}>
       {data.top.map((a, i) => <Row key={a.slug} actions={<Link className="btn ghost" href={`/minii?edit=${a.slug}`}>Статистик</Link>}><b>{i + 1}. {a.name}</b> <span style={{ color: 'var(--mute)' }}>· {a.views} үзэлт · {a.clicks} дарсан</span></Row>)}
     </Box>

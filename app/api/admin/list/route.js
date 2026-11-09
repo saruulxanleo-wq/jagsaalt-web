@@ -14,8 +14,9 @@ export async function GET(req) {
   const { data: topAg } = topIds.length ? await d.from('agencies').select('id,name,slug').in('id', topIds) : { data: [] };
   const top = topIds.map(id => ({ ...(topAg || []).find(a => a.id === id), ...agg[id] })).filter(a => a.slug);
   const totalViews = Object.values(agg).reduce((s, a) => s + a.views, 0), totalClicks = Object.values(agg).reduce((s, a) => s + a.clicks, 0);
+  const { data: leads } = await d.from('leads').select('*').order('created_at', { ascending: false }).limit(50);
   const ids = [...new Set((claims || []).map(c => c.user_id))];
   const { data: profs } = ids.length ? await d.from('profiles').select('id,email,full_name').in('id', ids) : { data: [] };
   const pm = Object.fromEntries((profs || []).map(p => [p.id, p]));
-  return json({ top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
+  return json({ leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
 }
