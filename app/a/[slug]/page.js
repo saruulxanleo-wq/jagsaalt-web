@@ -32,8 +32,9 @@ export default async function Profile({ params }) {
             <div><div className="h" style={{ fontSize: 28, fontWeight: 800 }}>{a.last_post_at ? a.last_post_at.slice(5).replace('-', '/') : '—'}</div><div style={{ color: 'var(--mute)', fontSize: 14, fontWeight: 600 }}>Сүүлийн пост</div></div>
           </div>
           {a.fb_url && <a href={a.fb_url} target="_blank" rel="noopener" className="btn v">Facebook хуудас</a>}
+          {a.phone_public && <a href={`tel:${a.phone_public}`} className="btn ghost">☎ {a.phone_public}</a>}
           {a.website && <a href={a.website} target="_blank" rel="noopener" className="btn ghost">Вэбсайт</a>}
-          {!a.verified && <div className="ok">Энэ агентлагийг удирддаг уу? <Link href={`/nemeh?claim=${a.slug}`} style={{ textDecoration: 'underline' }}>SMS-ээр баталгаажуул</Link></div>}
+          {!a.verified && <div className="ok">Энэ агентлагийг удирддаг уу? <Link href={`/minii?claim=${a.slug}`} style={{ textDecoration: 'underline' }}>Эзэмших хүсэлт илгээ</Link></div>}
         </aside>
       </div>
     </div>

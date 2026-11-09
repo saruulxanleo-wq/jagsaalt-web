@@ -16,5 +16,8 @@
 Локал: `npm run preview`
 
 Supabase: төсөл `jagsaalt` (feclitszuweodpnyejnj). Бүтэц: `schema.sql`.
-Шинэ агентлаг `status='pending'` орж ирнэ; Supabase Table Editor дээр `approved` болгоход сайтад гарна.
-SMS-ээр баталгаажсан хүсэлт `claims.status='phone_verified'` болно; дугаарыг FB хуудастай тулгаад `agencies.verified=true` болгоно.
+## Урсгал
+- Хэрэглэгч `/nemeh`-ээр агентлаг санал болгоно → `pending`, админд и-мэйл (Батлах / Татгалзах линк).
+- Эзэн `/minii`: Google-ээр нэвтэрнэ → утсаа SMS-ээр баталгаажуулна (wesend) → эзэмших хүсэлт → админд и-мэйл → батлахад `agency_members`-д орж, агентлаг `verified=true`, эзэнд и-мэйл очно → профайлаа засна.
+- Админ и-мэйл: `ADMIN_EMAIL` (анхдагч saruulxanleo@gmail.com). Линкүүд HMAC-аар гарын үсэгтэй.
+- Нэг бүртгэл = нэг агентлаг, нэг утас = нэг бүртгэл.
