@@ -11,6 +11,8 @@ export function Badges({ a }) {
     {a.verified && <span className="badge b-ver">✓ Баталгаажсан</span>}
     {act === true && <span className="badge b-act"><span className="dot" />Идэвхтэй</span>}
     {act === false && <span className="badge b-off">Сүүлд идэвхгүй</span>}
+    {a.team_size && <span className="badge b-off">👥 {a.team_size} хүн</span>}
+    {a.cases?.length > 0 && <span className="badge b-off">📁 {a.cases.length} кейс</span>}
   </div>;
 }
 export default function Card({ a }) {
@@ -18,6 +20,6 @@ export default function Card({ a }) {
     <div className="top"><Logo a={a} /><div><h3>{a.name}</h3><div className="row" style={{ marginTop: 6, gap: 6 }}>{catsOf(a).map(k => <span key={k} className={`cat ${catTone(k)}`}>{catLabel(k)}</span>)}</div></div></div>
     {a.description && <p style={{ color: 'var(--mute)', fontSize: 14.5 }}>{a.description}</p>}
     <Badges a={a} />
-    <div className="meta"><span><b>{fmtNum(a.followers)}</b> дагагч</span><span style={{ color: 'var(--v)' }}>Профайл →</span></div>
+    <div className="meta"><span>{a.followers != null ? <><b>{fmtNum(a.followers)}</b> дагагч</> : a.founded ? <><b>{a.founded}</b> оноос</> : ''}</span><span style={{ color: 'var(--v)' }}>Профайл →</span></div>
   </Link>;
 }
