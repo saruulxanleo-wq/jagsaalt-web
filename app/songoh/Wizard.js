@@ -10,7 +10,7 @@ const Opt = ({ on, onClick, children, disabled }) => <button type="button" onCli
   style={{ textAlign: 'left', padding: '16px 18px', borderRadius: 18, fontSize: 16.5, fontWeight: 600, background: on ? 'var(--ink)' : '#fff', color: on ? '#fff' : 'var(--ink)', boxShadow: on ? 'none' : 'inset 0 0 0 1.5px var(--line)', opacity: disabled ? .45 : 1, display: 'flex', alignItems: 'center', gap: 10 }}>
   <span style={{ width: 22, height: 22, borderRadius: 7, flex: 'none', display: 'grid', placeItems: 'center', background: on ? 'var(--l)' : 'var(--bg)', color: 'var(--ink)', fontSize: 14 }}>{on ? '✓' : ''}</span>{children}</button>;
 const U = (base, extra = '') => `${base}${base.includes('?') ? '&' : '?'}utm_source=jagsaalt&utm_medium=songoh${extra}`;
-// Агентлаг сонгохоос өмнөх алхам: SARUUL Score (үнэгүй) ба SARUUL Framework (98 000₮). Үүсгэгчийн арга зүй гэдгийг ил тод бичнэ.
+// Агентлаг сонгохоос өмнөх алхам: SARUUL Score (9 000₮) ба SARUUL Framework (98 000₮)
 function Before({ q }) {
   const runsAds = q.ads === 'yes' || q.ads === 'some';
   const fb = /facebook\.com\/./i.test(q.fb || '') ? q.fb.trim() : '';
@@ -18,10 +18,10 @@ function Before({ q }) {
     <span className="cat p" style={{ alignSelf: 'flex-start' }}>{tag}</span><h3>{title}</h3><p style={{ color: 'var(--mute)', fontSize: 14.5 }}>{text}</p>
     <span style={{ color: 'var(--v)', fontWeight: 700, marginTop: 'auto' }}>{cta} →</span></a>;
   return <div style={{ marginTop: 18 }}>
-    <div className="row" style={{ justifyContent: 'space-between' }}><b style={{ fontSize: 16 }}>Агентлагт мөнгө зарахаасаа өмнө</b><span style={{ color: 'var(--mute)', fontSize: 13 }}>jagsaalt-ийг үүсгэгч Б.Саруулбаярын арга зүй</span></div>
+    <b style={{ fontSize: 16 }}>Агентлагт мөнгө зарахаасаа өмнө</b>
     <div className="grid" style={{ marginTop: 10, gridTemplateColumns: 'repeat(auto-fit,minmax(250px,1fr))' }}>
-      <Card tag="Үнэгүй" title="SARUUL Score — хуудсаа үнэлүүл" text={fb ? 'Таны оруулсан хуудсыг 0–100 оноогоор үнэлж, юуг нь сайжруулахыг хэлнэ.' : 'Facebook хуудсаа 0–100 оноогоор үнэлүүлээд, агентлагт юу даалгахаа тодорхой мэд.'}
-        href={U('https://score.saruul.work/' + (fb ? '?url=' + encodeURIComponent(fb) : ''))} cta="Оноогоо авах" hot={!runsAds} />
+      <Card tag="9 000₮ · 5 минутад" title="SARUUL Score — хуудсаа үнэлүүл" text={(fb ? 'Таны хуудсыг' : 'Facebook хуудсаа') + ' 0–100 оноогоор үнэлүүлж, юуг нь засахыг мэд. QPay-ээр төлөөд хариугаа 5 минутад авна.'}
+        href={U('https://score.saruul.work/' + (fb ? '?url=' + encodeURIComponent(fb) : ''))} cta="QPay-ээр төлөөд оноогоо авах" hot={!runsAds} />
       <Card tag="98 000₮" title="SARUUL Framework — зарын мөнгөө шалга" text={runsAds ? 'Зар явуулдаг юм байна. Нэг шинэ хэрэглэгчид хэдээс илүү зарцуулж болохгүйг, мөнгө хаана үрэгдэж байгааг тоогоор гаргана.' : 'Зар эхлүүлэхээсээ өмнө нэг хэрэглэгчид зарцуулах дээд дүн, эхний 30 хоногийн төлөвлөгөөгөө тоогоор гарга.'}
         href={U('https://saruul.work/framework')} cta="Дэлгэрэнгүй" hot={runsAds} />
     </div></div>;

@@ -49,9 +49,9 @@ export default function Admin() {
       actions={<><button className="btn v" onClick={() => act('agency', a.id, 'approve')}>Нэмэх</button><button className="btn ghost" onClick={() => act('agency', a.id, 'reject')}>Татгалзах</button></>}>
       <b>{a.name}</b> <span style={{ color: 'var(--mute)' }}>· {catsOf(a).map(catLabel).join(', ')} · {a.added_by === 'owner' ? 'эзэн нэмсэн' : 'хэрэглэгч санал болгосон'}</span>
       <div style={{ fontSize: 14 }}>{a.fb_url ? <a href={a.fb_url} target="_blank" rel="noopener" style={{ color: 'var(--v)' }}>{a.fb_url.replace('https://www.', '')}</a> : 'линкгүй'} · <span style={{ color: 'var(--mute)' }}>{ago(a.created_at)}</span></div></Row>)}</Box>
-    <Box title="Мэдээлэл буруу гэсэн гомдол" n={data.reports.length}>{data.reports.map(r => <Row key={r.id}
-      actions={<><Link className="btn ghost" href={`/minii?edit=${r.agencies?.slug}`}>Засах</Link><button className="btn ghost" onClick={() => act('report', r.id, 'resolve')}>Шийдсэн</button></>}>
-      <b>{r.agencies?.name}</b> <span style={{ color: 'var(--mute)' }}>· {ago(r.created_at)}</span><div style={{ fontSize: 14, whiteSpace: 'pre-wrap' }}>{r.message}</div></Row>)}</Box>
+    <Box title="Алдаа, буруу мэдээллийн гомдол" n={data.reports.length}>{data.reports.map(r => <Row key={r.id}
+      actions={<>{r.agencies && <Link className="btn ghost" href={`/minii?edit=${r.agencies.slug}`}>Засах</Link>}<button className="btn ghost" onClick={() => act('report', r.id, 'resolve')}>Шийдсэн</button></>}>
+      <b>{r.agencies?.name || 'Сайтын алдаа'}</b> <span style={{ color: 'var(--mute)' }}>· {ago(r.created_at)}</span><div style={{ fontSize: 14, whiteSpace: 'pre-wrap' }}>{r.message}</div></Row>)}</Box>
     <div className="panel" style={{ marginTop: 18 }}>
       <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>Facebook мэдээлэл шинэчлэх</h2>
       <p style={{ color: 'var(--mute)', marginTop: 6 }}>Бүх агентлагийн дагагч, сүүлийн пост (идэвхтэй эсэх), логогүй бол логог FB-ээс татна. 3–5 минут болно, хуудсаа бүү хаа.</p>
