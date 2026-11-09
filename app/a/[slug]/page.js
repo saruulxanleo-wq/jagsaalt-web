@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getAgency, listAgencies } from '@/lib/db';
 import { fmtNum, catsOf, catLabel, catTone, cap, SOCIALS, host } from '@/lib/config';
 import OwnerTools from './OwnerTools';
+import { MemberPhoto } from '../../Avatar';
 import Card, { Logo, Badges } from '../../Card';
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }) {
@@ -27,7 +28,7 @@ export default async function Profile({ params }) {
           <p style={{ fontSize: 18, color: 'var(--mute)', marginTop: 20, maxWidth: 640 }}>{a.description || 'Тайлбар хараахан нэмэгдээгүй. Агентлагийн эзэн баталгаажаад өөрөө бөглөнө.'}</p>
           {a.services?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Үйлчилгээ</h2><div className="row" style={{ marginTop: 12 }}>{a.services.map(s => <span key={s} className="chip">{cap(s)}</span>)}</div></>}
           {a.clients?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Харилцагч брэндүүд</h2><div className="row" style={{ marginTop: 12 }}>{a.clients.map(s => <span key={s} style={{ padding: '10px 16px', borderRadius: 14, background: 'var(--bg)', fontWeight: 700 }}>{s}</span>)}</div></>}
-          {a.team?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Баг</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 10, marginTop: 12 }}>{a.team.map((m, i) => <div key={i} style={{ background: 'var(--bg)', borderRadius: 16, padding: '12px 14px' }}><b>{m.name}</b><div style={{ color: 'var(--mute)', fontSize: 14 }}>{m.role}</div></div>)}</div></>}
+          {a.team?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Баг</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(210px,1fr))', gap: 10, marginTop: 12 }}>{a.team.map((m, i) => <div key={i} className="row" style={{ background: 'var(--bg)', borderRadius: 16, padding: '10px 12px', gap: 12, flexWrap: 'nowrap' }}><MemberPhoto m={m} size={48} /><div><b>{m.name}</b><div style={{ color: 'var(--mute)', fontSize: 14 }}>{m.role}</div></div></div>)}</div></>}
         </div>
         <aside style={{ marginTop: 24, display: 'grid', gap: 14, alignContent: 'start' }}>
           <OwnerTools slug={a.slug} />
@@ -46,7 +47,7 @@ export default async function Profile({ params }) {
       </div>
     </div>
     {a.cases?.length > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 18px' }}>Кейсүүд</h2>
-      <div className="grid">{a.cases.map((c, i) => { const In = <><span className="cat v" style={{ alignSelf: 'flex-start' }}>{c.client || 'Кейс'}</span><h3>{c.title}</h3>{c.result && <p style={{ fontSize: 16, fontWeight: 600 }}>{c.result}</p>}{c.link && <span style={{ color: 'var(--v)', fontWeight: 600, fontSize: 14, marginTop: 'auto' }}>Дэлгэрэнгүй →</span>}</>;
+      <div className="grid">{a.cases.map((c, i) => { const In = <>{c.image && <img src={c.image} alt={c.title} loading="lazy" style={{ width: 'calc(100% + 44px)', margin: '-22px -22px 4px', aspectRatio: '16/10', objectFit: 'cover', borderRadius: '24px 24px 0 0' }} />}<span className="cat v" style={{ alignSelf: 'flex-start' }}>{c.client || 'Кейс'}</span><h3>{c.title}</h3>{c.result && <p style={{ fontSize: 16, fontWeight: 600 }}>{c.result}</p>}{c.link && <span style={{ color: 'var(--v)', fontWeight: 600, fontSize: 14, marginTop: 'auto' }}>Дэлгэрэнгүй →</span>}</>;
         return c.link ? <a key={i} href={c.link} target="_blank" rel="noopener" className="card">{In}</a> : <div key={i} className="card">{In}</div>; })}</div></>}
     {similar.length > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 18px' }}>Төстэй агентлагууд</h2><div className="grid">{similar.map(x => <Card key={x.slug} a={x} />)}</div></>}
   </section>;

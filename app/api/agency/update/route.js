@@ -1,5 +1,7 @@
 import { db, fail, json, authUser, pickCats, editableAgency } from '@/lib/server';
-import { TEAM_SIZES, cap } from '@/lib/config';
+import { TEAM_SIZES, cap, SUPABASE_URL } from '@/lib/config';
+const ownImg = v => typeof v === 'string' && v.startsWith(SUPABASE_URL + '/storage/v1/object/public/logos/') ? v.slice(0, 300) : '';
+const photo = v => /^avatar:[mf][1-3]$/.test(v || '') ? v : ownImg(v);
 const str = (v, n) => typeof v === 'string' ? v.trim().slice(0, n) : '';
 const url = v => { const w = str(v, 200); return !w ? '' : /^https?:\/\//.test(w) ? w : 'https://' + w; };
 export async function POST(req) {
@@ -22,8 +24,8 @@ export async function POST(req) {
     up.socials = s;
   }
   if (Array.isArray(b.clients)) up.clients = b.clients.map(s => cap(str(String(s), 40))).filter(Boolean).slice(0, 30);
-  if (Array.isArray(b.cases)) up.cases = b.cases.slice(0, 6).map(c => ({ title: str(c.title, 80), client: str(c.client, 60), result: str(c.result, 200), link: url(c.link) })).filter(c => c.title);
-  if (Array.isArray(b.team)) up.team = b.team.slice(0, 12).map(m => ({ name: str(m.name, 60), role: str(m.role, 60) })).filter(m => m.name);
+  if (Array.isArray(b.cases)) up.cases = b.cases.slice(0, 6).map(c => ({ title: str(c.title, 80), client: str(c.client, 60), result: str(c.result, 200), link: url(c.link), image: ownImg(c.image) })).filter(c => c.title);
+  if (Array.isArray(b.team)) up.team = b.team.slice(0, 12).map(m => ({ name: str(m.name, 60), role: str(m.role, 60), photo: photo(m.photo) })).filter(m => m.name);
   const { error } = await d.from('agencies').update(up).eq('id', ag.id);
   if (error) return fail('Хадгалж чадсангүй: ' + error.message, 500);
   return json({ ok: true, slug: ag.slug });
