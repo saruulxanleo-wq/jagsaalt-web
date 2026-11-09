@@ -25,6 +25,15 @@ export async function POST(req) {
   }
   if (Array.isArray(b.clients)) up.clients = b.clients.map(s => cap(str(String(s), 40))).filter(Boolean).slice(0, 30);
   if (Array.isArray(b.cases)) up.cases = b.cases.slice(0, 6).map(c => ({ title: str(c.title, 80), client: str(c.client, 60), result: str(c.result, 200), link: url(c.link), image: ownImg(c.image) })).filter(c => c.title);
+  if (Array.isArray(b.packages)) {
+    const num = v => { const n = Math.round(Number(String(v ?? '').replace(/[^\d.]/g, ''))); return n > 0 && n < 1e11 ? n : null; };
+    up.packages = b.packages.slice(0, 10).map(p => {
+      const type = ['fixed', 'range', 'negotiable'].includes(p.type) ? p.type : 'negotiable';
+      const min = type === 'negotiable' ? null : num(p.min), max = type === 'range' ? num(p.max) : null;
+      return { title: cap(str(p.title, 80)), items: (Array.isArray(p.items) ? p.items : []).map(x => cap(str(String(x), 60))).filter(Boolean).slice(0, 15),
+        type: (type === 'fixed' && !min) || (type === 'range' && !(min && max)) ? 'negotiable' : type, min, max: max && min && max < min ? null : max, period: ['month', 'project'].includes(p.period) ? p.period : '' };
+    }).filter(p => p.title);
+  }
   if (Array.isArray(b.team)) up.team = b.team.slice(0, 12).map(m => ({ name: str(m.name, 60), role: str(m.role, 60), photo: photo(m.photo) })).filter(m => m.name);
   const { error } = await d.from('agencies').update(up).eq('id', ag.id);
   if (error) return fail('Хадгалж чадсангүй: ' + error.message, 500);

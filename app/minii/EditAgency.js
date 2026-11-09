@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { sb, api } from '@/lib/sbclient';
-import { catsOf, completeness, TEAM_SIZES, SOCIALS, SERVICES, cap } from '@/lib/config';
+import { catsOf, completeness, TEAM_SIZES, SOCIALS, SERVICES, cap, PERIODS, fmtPrice } from '@/lib/config';
 import TagInput from '../TagInput';
 import Avatar, { AVATARS, MemberPhoto } from '../Avatar';
 import CatPicker from '../CatPicker';
@@ -33,7 +33,7 @@ export default function EditAgency({ agency, adminSlug }) {
     services: (agency.services || []).map(cap), categories: catsOf(agency),
     founded: agency.founded || '', team_size: agency.team_size || '', min_budget: agency.min_budget || '',
     socials: { instagram: '', linkedin: '', tiktok: '', youtube: '', email: '', ...(agency.socials || {}) },
-    clients: (agency.clients || []).join(', '), cases: agency.cases || [], team: agency.team || [],
+    clients: (agency.clients || []).join(', '), cases: agency.cases || [], packages: agency.packages || [], team: agency.team || [],
   });
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(null); const [up, setUp] = useState(false);
   const set = k => e => setEd({ ...ed, [k]: e.target.value });
@@ -86,6 +86,26 @@ export default function EditAgency({ agency, adminSlug }) {
         {Object.entries(SOCIALS).map(([k, l]) => <F key={k} id={'s' + k} label={l} placeholder={`${k}.com/...`} value={ed.socials[k]} onChange={e => setEd({ ...ed, socials: { ...ed.socials, [k]: e.target.value } })} />)}
         <F id="sem" label="И-мэйл" type="email" value={ed.socials.email} onChange={e => setEd({ ...ed, socials: { ...ed.socials, email: e.target.value } })} />
       </div>
+    </Sec>
+    <Sec title="Үйлчилгээ, үнийн санал" hint={`${ed.packages.length}/10`} open={!!agency.packages?.length}>
+      {ed.packages.map((pk, i) => <div key={i} style={{ background: 'var(--bg)', borderRadius: 18, padding: 16, display: 'grid', gap: 12 }}>
+        <div className="row" style={{ gap: 12, alignItems: 'flex-end' }}>
+          <F id={'pt' + i} label="Багцын нэр" placeholder="Сошиал менежмент — Стандарт" value={pk.title} onChange={list('packages', i, 'title')} required />
+          <button type="button" className="btn ghost" onClick={() => setEd({ ...ed, packages: ed.packages.filter((_, j) => j !== i) })}>Хасах</button></div>
+        <TagInput id={'pi' + i} label="Багтсан үйлчилгээ" value={pk.items || []} max={15} placeholder="Жишээ нь: Сард 12 пост — бичээд Enter" onChange={v => setItem('packages', i, 'items', v)} />
+        <div>
+          <span className="lab">Үнэ</span>
+          <div className="row" style={{ marginTop: 8, gap: 6 }}>{[['fixed', 'Тогтмол үнэ'], ['range', 'Үнийн хүрээ'], ['negotiable', 'Тохиролцоно']].map(([k, l]) =>
+            <button type="button" key={k} className={'chip' + ((pk.type || 'negotiable') === k ? ' on' : '')} onClick={() => setItem('packages', i, 'type', k)}>{l}</button>)}</div>
+          {pk.type && pk.type !== 'negotiable' && <div className="row" style={{ gap: 12, marginTop: 10, alignItems: 'flex-end' }}>
+            <F id={'pmin' + i} label={pk.type === 'range' ? 'Доод (₮)' : 'Үнэ (₮)'} inputMode="numeric" placeholder="1500000" value={pk.min || ''} onChange={e => setItem('packages', i, 'min', e.target.value.replace(/\D/g, ''))} />
+            {pk.type === 'range' && <F id={'pmax' + i} label="Дээд (₮)" inputMode="numeric" placeholder="3000000" value={pk.max || ''} onChange={e => setItem('packages', i, 'max', e.target.value.replace(/\D/g, ''))} />}
+            <div style={{ flex: 1, minWidth: 160 }}><label htmlFor={'pp' + i} className="lab">Хугацаа</label><select id={'pp' + i} className="field" value={pk.period || ''} onChange={e => setItem('packages', i, 'period', e.target.value)}>{Object.entries(PERIODS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+          </div>}
+          <p style={{ fontSize: 13.5, color: 'var(--mute)', marginTop: 8 }}>Харагдах байдал: <b style={{ color: 'var(--ink)' }}>{fmtPrice({ ...pk, min: +pk.min || null, max: +pk.max || null })}</b></p>
+        </div>
+      </div>)}
+      {ed.packages.length < 10 && <button type="button" className="btn ghost" style={{ justifySelf: 'start' }} onClick={() => setEd({ ...ed, packages: [...ed.packages, { title: '', items: [], type: 'negotiable', min: '', max: '', period: 'month' }] })}>+ Багц нэмэх</button>}
     </Sec>
     <Sec title="Харилцагч брэндүүд" hint="таслалаар" open={!!agency.clients?.length}>
       <F id="cl" label="Ажилласан брэндүүд" placeholder="Unitel, Khan Bank, Gobi" value={ed.clients} onChange={set('clients')} />

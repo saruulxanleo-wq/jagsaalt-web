@@ -69,3 +69,4 @@ update agencies set name = v.n, updated_at = now() from (values
  ('agency-carpediem','Carpe Diem')
 ) as v(s, n) where agencies.slug = v.s;
 select count(*) as fixed from agencies where updated_at > now() - interval '1 minute';
+alter table agencies add column if not exists packages jsonb not null default '[]'::jsonb;

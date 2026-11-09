@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAgency, listAgencies } from '@/lib/db';
-import { fmtNum, catsOf, catLabel, catTone, cap, SOCIALS, host } from '@/lib/config';
+import { fmtNum, catsOf, catLabel, catTone, cap, SOCIALS, host, fmtPrice } from '@/lib/config';
 import OwnerTools from './OwnerTools';
 import ReportButton from './ReportButton';
 import { MemberPhoto } from '../../Avatar';
@@ -50,6 +50,12 @@ export default async function Profile({ params }) {
         </aside>
       </div>
     </div>
+    {a.packages?.length > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 18px' }}>Үйлчилгээ, үнийн санал</h2>
+      <div className="grid">{a.packages.map((p, i) => <div key={i} className="card" style={{ gap: 12 }}>
+        <h3>{p.title}</h3>
+        {p.items?.length > 0 && <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 7 }}>{p.items.map((x, j) => <li key={j} className="row" style={{ gap: 8, flexWrap: 'nowrap', alignItems: 'flex-start', fontSize: 15 }}><span style={{ color: '#2FB344', fontWeight: 800 }}>✓</span>{x}</li>)}</ul>}
+        <div className="meta" style={{ fontSize: 17 }}><b className="h" style={{ fontSize: p.type === 'negotiable' ? 16 : 19, color: p.type === 'negotiable' ? 'var(--mute)' : 'var(--ink)' }}>{fmtPrice(p)}</b></div>
+      </div>)}</div></>}
     {a.cases?.length > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 18px' }}>Кейсүүд</h2>
       <div className="grid">{a.cases.map((c, i) => { const In = <>{c.image && <img src={c.image} alt={c.title} loading="lazy" style={{ width: 'calc(100% + 44px)', margin: '-22px -22px 4px', aspectRatio: '16/10', objectFit: 'cover', borderRadius: '24px 24px 0 0' }} />}<span className="cat v" style={{ alignSelf: 'flex-start' }}>{c.client || 'Кейс'}</span><h3>{c.title}</h3>{c.result && <p style={{ fontSize: 16, fontWeight: 600 }}>{c.result}</p>}{c.link && <span style={{ color: 'var(--v)', fontWeight: 600, fontSize: 14, marginTop: 'auto' }}>Дэлгэрэнгүй →</span>}</>;
         return c.link ? <a key={i} href={c.link} target="_blank" rel="noopener" className="card">{In}</a> : <div key={i} className="card">{In}</div>; })}</div></>}
