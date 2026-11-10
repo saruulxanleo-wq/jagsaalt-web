@@ -4,7 +4,7 @@ import { api } from '@/lib/sbclient';
 import Mine from './Mine';
 import Link from 'next/link';
 import { TYPES, TOPICS } from '@/lib/config';
-const PH = { freelancer: ['Овог нэр', 'Сард 800 000₮-с, пост бүр 50 000₮'], tool: ['SARUUL Score, Canva…', 'Үнэгүй, 9 000₮, сард 29 000₮'], course: ['Курсын нэр', 'Үнэгүй, 350 000₮'], community: ['Группын нэр', 'Үнэгүй, гишүүнчлэл сард 20 000₮'] };
+const PH = { media: ['Хэвлэл, сайт, суваг, самбарын нэр', 'Баннер 300 000₮-с, 30 сек 500 000₮'], freelancer: ['Овог нэр', 'Сард 800 000₮-с, пост бүр 50 000₮'], tool: ['SARUUL Score, Canva…', 'Үнэгүй, 9 000₮, сард 29 000₮'], course: ['Курсын нэр', 'Үнэгүй, 350 000₮'], community: ['Группын нэр', 'Үнэгүй, гишүүнчлэл сард 20 000₮'] };
 export default function ListingForm({ type }) {
   const t = TYPES[type];
   const [f, setF] = useState({ name: '', url: '', maker: '', description: '', price: '', topics: [], contact: '' });
@@ -25,7 +25,7 @@ export default function ListingForm({ type }) {
     <div><span className="lab">Сэдэв <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· 1–3 ({f.topics.length}/3)</span></span>
       <div className="row" style={{ marginTop: 9 }}>{Object.entries(TOPICS).map(([k, v]) => { const on = f.topics.includes(k); return <button type="button" key={k} aria-pressed={on} className={'chip' + (on ? ' on' : '')} onClick={() => tog(k)}>{on && '✓ '}{v}</button>; })}</div></div>
     <div className="row" style={{ gap: 14, alignItems: 'flex-start' }}>
-      <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="lm" className="lab">{type === 'freelancer' ? 'Мэргэжил' : 'Бүтээгч'} <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input id="lm" className="field" maxLength={60} placeholder={type === 'freelancer' ? 'SMM мэргэжилтэн, график дизайнер…' : 'Компани, хүн'} value={f.maker} onChange={set('maker')} /></div>
+      <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="lm" className="lab">{type === 'freelancer' ? 'Мэргэжил' : type === 'media' ? 'Төрөл' : 'Бүтээгч'} <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input id="lm" className="field" maxLength={60} placeholder={type === 'freelancer' ? 'SMM мэргэжилтэн, график дизайнер…' : type === 'media' ? 'Мэдээллийн сайт, ТВ, радио, гадна самбар, подкаст…' : 'Компани, хүн'} value={f.maker} onChange={set('maker')} /></div>
       <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="lp" className="lab">Үнэ <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input id="lp" className="field" maxLength={40} placeholder={PH[type][1]} value={f.price} onChange={set('price')} /></div>
     </div>
     <div><label htmlFor="lc" className="lab">Холбоо барих утас эсвэл и-мэйл <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· зөвхөн админ харна</span></label><input id="lc" className="field" maxLength={80} value={f.contact} onChange={set('contact')} /></div>

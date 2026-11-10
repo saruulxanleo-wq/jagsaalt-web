@@ -5,9 +5,9 @@ import Link from 'next/link';
 import Card from './Card';
 import { CATS, CAT_TOPIC, isActive, catsOf, catLabel, isFeatured } from '@/lib/config';
 const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-export default function Directory({ list, tools = [] }) {
+export default function Directory({ list, tools = [], initialCat = 'all', title }) {
   const [seed, setSeed] = useState(null); useEffect(() => setSeed(shuffle(tools)), [tools]);
-  const [q, setQ] = useState(''); const [cat, setCat] = useState('all'); const [sort, setSort] = useState('followers'); const [n, setN] = useState(24);
+  const [q, setQ] = useState(''); const [cat, setCat] = useState(initialCat); const [sort, setSort] = useState('followers'); const [n, setN] = useState(24);
   const counts = useMemo(() => list.reduce((m, a) => (catsOf(a).forEach(k => m[k] = (m[k] || 0) + 1), m), {}), [list]);
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -32,7 +32,7 @@ export default function Directory({ list, tools = [] }) {
         <i style={{ right: 0, top: 100, width: 86, height: 86, borderRadius: '50%', background: 'var(--v)' }} />
         {list.filter(a => a.logo_url).slice(0, 3).map((a, i) => <img key={a.slug} src={a.logo_url} alt="" style={[{ right: 70, top: 30, width: 58, height: 58, transform: 'rotate(-8deg)', borderRadius: 16 }, { right: 160, top: 100, width: 52, height: 52, transform: 'rotate(6deg)', borderRadius: 14 }, { right: 18, top: 118, width: 48, height: 48, borderRadius: 14 }][i]} />)}
       </div>
-      <h1 className="h" style={{ fontSize: 'clamp(28px,3.6vw,46px)', fontWeight: 800, maxWidth: 760 }}>Монголын маркетингийн агентлагууд <span style={{ color: 'var(--v)' }}>нэг дор</span></h1>
+      <h1 className="h" style={{ fontSize: 'clamp(28px,3.6vw,46px)', fontWeight: 800, maxWidth: 760 }}>{title || <>Монголын маркетингийн агентлагууд <span style={{ color: 'var(--v)' }}>нэг дор</span></>}</h1>
       <div style={{ marginTop: 18, display: 'flex', gap: 10, background: '#fff', borderRadius: 999, padding: '6px 6px 6px 22px', maxWidth: 640, boxShadow: '0 16px 40px -24px #0b8a3e66, inset 0 0 0 2px var(--ink)' }}>
         <label htmlFor="q" style={{ position: 'absolute', left: -9999 }}>Хайх</label>
         <input id="q" value={q} onChange={e => { setQ(e.target.value); setN(24); }} placeholder="Агентлагийн нэрээр хайх…" style={{ flex: 1, border: 0, outline: 0, fontSize: 17, background: 'transparent', minWidth: 0 }} />

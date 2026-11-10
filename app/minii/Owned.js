@@ -9,6 +9,7 @@ const PROOF = {
   community: 'Группийнхээ тайлбар (About) эсвэл админ постонд доорх кодыг түр тавиад, тэр постын линкийг оруул.',
   freelancer: 'Facebook профайл эсвэл портфолиогийнхоо bio-д доорх кодыг түр тавиад линкийг оруул.',
   course: 'Сургалтын FB пэйж эсвэл вэбсайтын хуудсанд кодыг түр тавина уу. Эсвэл тухайн домэйны и-мэйлээр (жишээ нь info@сургалт.mn) бидэнд код илгээ.',
+  media: 'Байгууллагынхаа вэбсайт эсвэл FB пэйжид кодыг түр тавина уу. Эсвэл тухайн домэйны и-мэйлээр бидэнд код илгээ.',
   tool: 'Хэрэгслийн вэбсайт эсвэл FB пэйжид кодыг түр тавина уу. Эсвэл тухайн домэйны и-мэйлээр бидэнд код илгээ.',
   influencer: 'Instagram/TikTok bio эсвэл Facebook пост дээрээ кодыг түр тавиад линкийг оруул.',
 };
@@ -42,7 +43,7 @@ function EditListing({ l, onSaved }) {
   return <form style={{ display: 'grid', gap: 12, marginTop: 14 }} onSubmit={async e => { e.preventDefault(); setBusy(true); setMsg(null); const r = await api('/api/own/update', { own: 'listing:' + l.id, data: f }); setBusy(false); setMsg(r.ok ? ['ok', 'Хадгалагдлаа'] : ['err', r.error]); if (r.ok) onSaved?.(); }}>
     <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
       <div style={{ flex: 2, minWidth: 220 }}><label className="lab">Нэр</label><input className="field" value={f.name} onChange={set('name')} maxLength={80} /></div>
-      <div style={{ flex: 1, minWidth: 180 }}><label className="lab">{fl ? 'Мэргэжил' : 'Бүтээгч'}</label><input className="field" value={f.maker} onChange={set('maker')} maxLength={60} /></div></div>
+      <div style={{ flex: 1, minWidth: 180 }}><label className="lab">{fl ? 'Мэргэжил' : l.type === 'media' ? 'Төрөл' : 'Бүтээгч'}</label><input className="field" value={f.maker} onChange={set('maker')} maxLength={60} /></div></div>
     <div><label className="lab">Тайлбар · {f.description.length}/200</label><textarea className="field" rows={3} maxLength={200} value={f.description} onChange={set('description')} /></div>
     <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
       <div style={{ flex: 2, minWidth: 220 }}><label className="lab">Линк</label><input className="field" value={f.url} onChange={set('url')} /></div>
