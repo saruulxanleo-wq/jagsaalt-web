@@ -5,7 +5,7 @@ import Subscribe from './Subscribe';
 import { siteUrl, SITE_NAME } from '@/lib/config';
 export const generateMetadata = async () => ({
   metadataBase: new URL(siteUrl()),
-  openGraph: { type: 'website', locale: 'mn_MN', siteName: SITE_NAME, images: [{ url: '/og.png', width: 1200, height: 630 }] },
+  openGraph: { type: 'website', locale: 'mn_MN', siteName: SITE_NAME, images: [{ url: '/og-brief.jpg', width: 1200, height: 630 }] },
   twitter: { card: 'summary_large_image' },
   title: { default: 'Монголын маркетингийн хаб: агентлаг, фрилансер, инфлүэнсер | ' + SITE_NAME, template: '%s | ' + SITE_NAME },
   description: 'Монголын маркетингийн агентлаг, фрилансер, инфлүэнсер, хэрэгсэл, сургалт, коммюнити — бүгд нэг дор. Шүүж харьцуулаад өөрт тохирохоо ол.',
