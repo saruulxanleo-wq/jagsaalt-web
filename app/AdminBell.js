@@ -34,11 +34,11 @@ export default function AdminBell() {
   const ask = () => Notification.requestPermission().then(() => setF({ ...f }));
   return <div style={{ position: 'relative' }}>
     <button className="btn ghost" aria-label={'Админ мэдэгдэл ' + n} onClick={() => setOpen(!open)} style={{ position: 'relative', padding: '9px 12px' }}>🔔{n > 0 && <b style={{ position: 'absolute', top: -6, right: -6, background: '#E5383B', color: '#fff', borderRadius: 99, fontSize: 12, minWidth: 20, height: 20, display: 'grid', placeItems: 'center', padding: '0 5px' }}>{n > 99 ? '99+' : n}</b>}</button>
-    {open && <div className="panel" style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 320, maxWidth: '86vw', zIndex: 50, padding: 16, boxShadow: '0 20px 50px -20px #0004', display: 'grid', gap: 10 }}>
+    {open && <div className="panel bellpop">
       <b>{n ? n + ' шинэ зүйл' : 'Шинэ зүйл алга'}</b>
-      {f?.groups?.map(g => <div key={g.t} style={{ fontSize: 14 }}><div style={{ fontWeight: 700 }}>{g.label} <span style={{ color: 'var(--v)' }}>+{g.n}</span></div>
+      {f?.groups?.map(g => <div key={g.t} style={{ fontSize: 14, minWidth: 0 }}><div style={{ fontWeight: 700 }}>{g.label} <span style={{ color: 'var(--v)' }}>+{g.n}</span></div>
         {g.items.map((it, i) => <div key={i} style={{ color: 'var(--mute)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.text || '—'} · {ago(it.at)}</div>)}</div>)}
-      <div className="row" style={{ gap: 8 }}><a href="/admin" className="btn dark" onClick={seen} style={{ flex: 1, justifyContent: 'center' }}>Админ руу</a>{n > 0 && <button className="btn ghost" onClick={seen}>Уншсан</button>}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: n > 0 ? '1fr auto' : '1fr', gap: 8 }}><a href="/admin" className="btn dark" onClick={seen} style={{ justifyContent: 'center' }}>Админ руу</a>{n > 0 && <button className="btn ghost" onClick={seen}>Уншсан</button>}</div>
       {typeof Notification !== 'undefined' && Notification.permission === 'default' && <button className="btn ghost" onClick={ask} style={{ fontSize: 14 }}>Браузерын мэдэгдэл асаах</button>}
     </div>}
   </div>;
