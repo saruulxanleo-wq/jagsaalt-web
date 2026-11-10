@@ -25,8 +25,9 @@ export async function POST(req) {
   } else {
     if (!u) return fail('Нэвтэрнэ үү', 401);
     const ag = await editableAgency(d, u); if (!ag) return fail('Агентлагаа эзэмшсэн байх шаардлагатай');
-    const { data: lead } = await d.from('leads').select('id,answers,created_at').eq('id', String(b.target || '')).maybeSingle();
-    if (!lead || !score(ag, lead.answers || {})) return fail('Энэ хүсэлт танд тохирохгүй байна');
+    const { data: lead } = await d.from('leads').select('id,answers,agencies,created_at').eq('id', String(b.target || '')).maybeSingle();
+    const la = lead?.answers || {};
+    if (!lead || !(la.source === 'profile' ? (lead.agencies || []).includes(ag.slug) : score(ag, la))) return fail('Энэ хүсэлт танд тохирохгүй байна');
     const { data: acc } = await d.from('lead_access').select('agency_id').eq('lead_id', lead.id);
     if ((acc || []).some(x => x.agency_id === ag.id)) return fail('Та энэ хүсэлтийг аль хэдийн авсан');
     if ((acc || []).length >= LEAD_MAX) return fail('Энэ хүсэлтийг 3 агентлаг авсан байна');

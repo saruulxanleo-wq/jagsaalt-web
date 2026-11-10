@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { NEEDS, BUDGETS, SIZES, PRIORITIES } from '@/lib/match';
-import { catLabel, catTone, fmtNum } from '@/lib/config';
+import { NEEDS, BUDGETS, SIZES, PRIORITIES, BRANDS } from '@/lib/match';
+import { catLabel, catTone, fmtNum, fmtMnt } from '@/lib/config';
 import { Logo } from '../Card';
 const px = (ev, data) => { try { window.fbq && window.fbq('track', ev, data); } catch {} };
 const Opt = ({ on, onClick, children, disabled }) => <button type="button" onClick={onClick} disabled={disabled} aria-pressed={on}
@@ -29,23 +29,24 @@ function Before({ q }) {
 export default function Wizard() {
   const sp = useSearchParams();
   const [step, setStep] = useState(0);
-  const [q, setQ] = useState({ needs: [], budget: '', size: '', priority: '', industry: '', fb: '', ads: '' });
+  const [q, setQ] = useState({ needs: [], budget: '', size: '', brands: '', priority: '', industry: '', fb: '', ads: '' });
   const [res, setRes] = useState(null); const [pick, setPick] = useState([]);
   const [f, setF] = useState({ name: '', phone: '', email: '', company: '', note: '' }); const [sent, setSent] = useState(false); const [err, setErr] = useState(null); const [busy, setBusy] = useState(false);
   const utm = Object.fromEntries([...sp.entries()].filter(([k]) => /^(utm_|fbclid)/.test(k)).map(([k, v]) => [k, v.slice(0, 100)]));
   const steps = [
     { t: 'Юунд туслалцаа хэрэгтэй вэ?', h: '3 хүртэл сонгоно', ok: q.needs.length > 0, body: <div style={{ display: 'grid', gap: 10 }}>{Object.entries(NEEDS).map(([k, n]) => { const on = q.needs.includes(k); return <Opt key={k} on={on} disabled={!on && q.needs.length >= 3} onClick={() => setQ({ ...q, needs: on ? q.needs.filter(x => x !== k) : [...q.needs, k] })}>{n.label}</Opt>; })}</div> },
-    { t: 'Сард маркетингт хэр зарцуулах боломжтой вэ?', h: 'Агентлагийн үйлчилгээний төсөв (зар сурталчилгааны төлбөрөөс тусдаа)', ok: !!q.budget, auto: true, body: <div style={{ display: 'grid', gap: 10 }}>{Object.entries(BUDGETS).map(([k, b]) => <Opt key={k} on={q.budget === k} onClick={() => { setQ({ ...q, budget: k }); setTimeout(() => setStep(2), 180); }}>{b[0]}</Opt>)}</div> },
+    { t: 'Сард маркетингт хэр зарцуулах боломжтой вэ?', h: 'Бүх брэндийн нийт агентлагийн төсөв (зар сурталчилгааны төлбөрөөс тусдаа)', ok: !!q.budget, auto: true, body: <div style={{ display: 'grid', gap: 10 }}>{Object.entries(BUDGETS).map(([k, b]) => <Opt key={k} on={q.budget === k} onClick={() => { setQ({ ...q, budget: k }); setTimeout(() => setStep(2), 180); }}>{b[0]}</Opt>)}</div> },
     { t: 'Бизнес тань ямар хэмжээтэй вэ?', ok: !!q.size, body: <div style={{ display: 'grid', gap: 10 }}>{Object.entries(SIZES).map(([k, l]) => <Opt key={k} on={q.size === k} onClick={() => { setQ({ ...q, size: k }); setTimeout(() => setStep(3), 180); }}>{l}</Opt>)}</div> },
-    { t: 'Хамгийн их юуг чухалчлах вэ?', ok: !!q.priority, body: <div style={{ display: 'grid', gap: 10 }}>{Object.entries(PRIORITIES).map(([k, l]) => <Opt key={k} on={q.priority === k} onClick={() => { setQ({ ...q, priority: k }); setTimeout(() => setStep(4), 180); }}>{l}</Opt>)}</div> },
-    { t: 'Одоо Facebook-т зар сурталчилгаа явуулж байна уу?', ok: !!q.ads, body: <div style={{ display: 'grid', gap: 10 }}>{[['yes', 'Тийм, тогтмол явуулдаг'], ['some', 'Хааяа boost хийдэг'], ['no', 'Үгүй, одоогоор явуулахгүй байна']].map(([k, l]) => <Opt key={k} on={q.ads === k} onClick={() => { setQ({ ...q, ads: k }); setTimeout(() => setStep(5), 180); }}>{l}</Opt>)}</div> },
+    { t: 'Хэдэн брэнд агентлагт хариуцуулах вэ?', ok: !!q.brands, body: <div style={{ display: 'grid', gap: 10 }}>{Object.entries(BRANDS).map(([k, l]) => <Opt key={k} on={q.brands === k} onClick={() => { setQ({ ...q, brands: k }); setTimeout(() => setStep(4), 180); }}>{l}</Opt>)}</div> },
+    { t: 'Хамгийн их юуг чухалчлах вэ?', ok: !!q.priority, body: <div style={{ display: 'grid', gap: 10 }}>{Object.entries(PRIORITIES).map(([k, l]) => <Opt key={k} on={q.priority === k} onClick={() => { setQ({ ...q, priority: k }); setTimeout(() => setStep(5), 180); }}>{l}</Opt>)}</div> },
+    { t: 'Одоо Facebook-т зар сурталчилгаа явуулж байна уу?', ok: !!q.ads, body: <div style={{ display: 'grid', gap: 10 }}>{[['yes', 'Тийм, тогтмол явуулдаг'], ['some', 'Хааяа boost хийдэг'], ['no', 'Үгүй, одоогоор явуулахгүй байна']].map(([k, l]) => <Opt key={k} on={q.ads === k} onClick={() => { setQ({ ...q, ads: k }); setTimeout(() => setStep(6), 180); }}>{l}</Opt>)}</div> },
     { t: 'Ямар салбарт үйл ажиллагаа явуулдаг вэ?', h: 'Заавал биш', ok: true, body: <><input className="field" style={{ fontSize: 17 }} placeholder="Жишээ нь: ресторан, гоо сайхан, боловсрол" value={q.industry} maxLength={80} onChange={e => setQ({ ...q, industry: e.target.value })} />
       <label htmlFor="fbp" className="lab" style={{ display: 'block', marginTop: 18 }}>Facebook хуудасны линк <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш, хуудсаа үнэгүй үнэлүүлэх боломжтой</span></label>
       <input id="fbp" className="field" placeholder="facebook.com/..." value={q.fb} maxLength={200} onChange={e => setQ({ ...q, fb: e.target.value })} />
-      <div className="row" style={{ marginTop: 10, gap: 6 }}>{['Хоол, ресторан', 'Гоо сайхан', 'Боловсрол', 'Үл хөдлөх', 'Жижиглэн худалдаа', 'Эрүүл мэнд', 'Санхүү'].map(s => <button type="button" key={s} className="chip" onClick={() => setQ({ ...q, industry: s })}>{s}</button>)}</div></> },
+      <div className="row" style={{ marginTop: 10, gap: 6 }}>{['Дистрибьюшн, FMCG', 'Жижиглэн худалдаа', 'Үйлдвэрлэл', 'Хоол, ресторан', 'Гоо сайхан', 'Боловсрол', 'Үл хөдлөх', 'Эрүүл мэнд', 'Санхүү', 'Технологи'].map(s => <button type="button" key={s} className="chip" onClick={() => setQ({ ...q, industry: s })}>{s}</button>)}</div></> },
   ];
   async function finish() {
-    setStep(6); setRes(null);
+    setStep(7); setRes(null);
     const r = await fetch('/api/match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(q) }); const j = await r.json();
     setRes(j.results || []); setPick((j.results || []).slice(0, 3).map(x => x.slug)); px('ViewContent', { content_name: 'agency_match' });
   }
@@ -56,9 +57,9 @@ export default function Wizard() {
     if (r.ok) { setSent(true); px('Lead', { content_name: 'agency_match' }); } else setErr(j.error || 'Алдаа гарлаа');
   }
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [step]);
-  if (step < 6) { const s = steps[step]; return <section className="wrap" style={{ maxWidth: 640, marginTop: 10 }}>
+  if (step < 7) { const s = steps[step]; return <section className="wrap" style={{ maxWidth: 640, marginTop: 10 }}>
     {step === 0 && <div style={{ marginBottom: 22 }}><h1 className="h" style={{ fontSize: 'clamp(28px,6vw,40px)', fontWeight: 800 }}>Ямар агентлагтай хамтрах вэ?</h1>
-      <p style={{ color: 'var(--mute)', fontSize: 17, marginTop: 8 }}>6 асуултад хариулаад өөрт тохирох агентлагуудаа 1 минутад ол. Үнэгүй, бүртгэл шаардахгүй.</p></div>}
+      <p style={{ color: 'var(--mute)', fontSize: 17, marginTop: 8 }}>7 асуултад хариулаад өөрт тохирох агентлагуудаа 1 минутад ол. Үнэгүй, бүртгэл шаардахгүй.</p></div>}
     <div style={{ display: 'flex', gap: 6 }}>{steps.map((_, i) => <span key={i} style={{ flex: 1, height: 6, borderRadius: 9, background: i <= step ? 'var(--v)' : 'var(--line)' }} />)}</div>
     <div className="panel" style={{ marginTop: 16, padding: '26px 22px' }}>
       <span style={{ color: 'var(--mute)', fontWeight: 600, fontSize: 14 }}>{step + 1} / {steps.length}</span>
@@ -66,13 +67,12 @@ export default function Wizard() {
       <div style={{ marginTop: 18 }}>{s.body}</div>
       <div className="row" style={{ justifyContent: 'space-between', marginTop: 22 }}>
         {step > 0 ? <button type="button" className="btn ghost" onClick={() => setStep(step - 1)}>← Буцах</button> : <span />}
-        {(step === 0 || step === 5) && <button type="button" className="btn v" disabled={!s.ok} style={{ padding: '14px 26px' }} onClick={() => step === 5 ? finish() : setStep(step + 1)}>{step === 5 ? 'Агентлагуудаа харах →' : 'Үргэлжлүүлэх →'}</button>}
+        {(step === 0 || step === 6) && <button type="button" className="btn v" disabled={!s.ok} style={{ padding: '14px 26px' }} onClick={() => step === 6 ? finish() : setStep(step + 1)}>{step === 6 ? 'Агентлагуудаа харах →' : 'Үргэлжлүүлэх →'}</button>}
       </div>
     </div></section>; }
   return <section className="wrap" style={{ maxWidth: 820, marginTop: 10 }}>
     <h1 className="h" style={{ fontSize: 'clamp(26px,5vw,36px)', fontWeight: 800 }}>Танд тохирох агентлагууд</h1>
     <p style={{ color: 'var(--mute)', marginTop: 6 }}>{q.needs.map(k => NEEDS[k].label).join(' · ')} · {BUDGETS[q.budget]?.[0]} / сар</p>
-    <Before q={q} />
     {!res ? <p style={{ marginTop: 24 }}>Тулгаж байна…</p> : res.length === 0 ? <div className="panel" style={{ marginTop: 18 }}>Тохирох агентлаг олдсонгүй. <Link href="/" style={{ color: 'var(--v)' }}>Бүх жагсаалтыг үзэх →</Link></div> : <>
       <div style={{ display: 'grid', gap: 12, marginTop: 18 }}>{res.map((a, i) => { const on = pick.includes(a.slug); return <div key={a.slug} className="panel" style={{ padding: 18, display: 'flex', gap: 14, alignItems: 'flex-start', boxShadow: on ? 'inset 0 0 0 2.5px var(--v)' : undefined }}>
         <Logo a={a} size={56} radius={14} />
@@ -84,11 +84,20 @@ export default function Wizard() {
             <button type="button" className={'chip' + (on ? ' on' : '')} onClick={() => setPick(on ? pick.filter(x => x !== a.slug) : [...pick, a.slug])}>{on ? '✓ Үнийн санал авна' : '+ Үнийн санал авах'}</button>
             <Link href={`/a/${a.slug}`} target="_blank" className="chip">Профайл үзэх ↗</Link></div>
         </div></div>; })}</div>
+      {pick.length >= 2 && <div className="panel" style={{ marginTop: 22, overflowX: 'auto' }}>
+        <h2 className="h" style={{ fontSize: 20, fontWeight: 800 }}>Сонгосон агентлагуудыг харьцуулах</h2>
+        <table className="cmp"><thead><tr><th></th>{res.filter(a => pick.includes(a.slug)).map(a => <th key={a.slug}>{a.name}</th>)}</tr></thead><tbody>
+          {[['Чиглэл', a => a.categories.slice(0, 2).map(catLabel).join(', ')], ['Баг', a => a.team_size && a.team_size + ' хүн'], ['Үнэ (эхлэх)', a => a.min_price && fmtMnt(a.min_price) + '-с'], ['Үнийн санал', a => a.packages && a.packages + ' багц'], ['Кейс', a => a.cases && a.cases + ' кейс'], ['Ажилласан брэнд', a => a.clients?.length && a.clients.join(', ')], ['Идэвхтэй', a => a.active ? '✓ Сүүлийн 6 сард' : 'Сүүлд идэвхгүй'], ['Баталгаажсан', a => a.verified ? '✓ Тийм' : 'Үгүй'], ['FB дагагч', a => a.followers && fmtNum(a.followers)]]
+            .map(([l, f]) => <tr key={l}><td>{l}</td>{res.filter(a => pick.includes(a.slug)).map(a => <td key={a.slug}>{f(a) || <span className="na">Оруулаагүй</span>}</td>)}</tr>)}
+        </tbody></table>
+        <p style={{ color: 'var(--mute)', fontSize: 13.5, marginTop: 10 }}>«Оруулаагүй» гэдэг нь агентлаг профайлдаа энэ мэдээллийг бөглөөгүй гэсэн үг. Үнийн санал авахдаа асуугаарай.</p>
+      </div>}
       <div className="panel" style={{ marginTop: 22, background: 'var(--ink)', color: '#fff' }}>
-        {sent ? <div><h2 className="h" style={{ fontSize: 24, fontWeight: 800 }}>Баярлалаа! ✓</h2><p style={{ color: '#CFCAE6', marginTop: 8 }}>Хүсэлтийг тань хүлээн авлаа. Ажлын 1 өдөрт тантай холбогдож, сонгосон агентлагуудаас үнийн санал авахад тусална.</p></div> :
+        {sent ? <div><h2 className="h" style={{ fontSize: 24, fontWeight: 800 }}>Баярлалаа! ✓</h2><p style={{ color: '#CFCAE6', marginTop: 8 }}>Хүсэлтийг тань хүлээн авлаа. Ажлын 1 өдөрт тантай холбогдож брифийг тодруулна. Дараа нь 2–3 ажлын өдөрт агентлагуудын санал ирнэ.</p></div> :
         <form onSubmit={send} style={{ display: 'grid', gap: 12 }}>
           <h2 className="h" style={{ fontSize: 22, fontWeight: 800 }}>Сонгосон {pick.length} агентлагаас үнийн санал авах</h2>
-          <p style={{ color: '#CFCAE6', fontSize: 15 }}>Мэдээллээ үлдээгээрэй. Хэрэгцээг тань сонгосон болон тохирох 3 хүртэлх агентлагт дамжуулж, үнийн санал авахуулна. Танд үнэгүй.</p>
+          <p style={{ color: '#CFCAE6', fontSize: 15 }}>Танд үнэгүй. Хэрхэн явагдах вэ:</p>
+          <ol className="steps3"><li><b>Өнөөдөр</b> хүсэлтээ үлдээнэ</li><li><b>1 ажлын өдөрт</b> бид холбогдож брифийг тодруулна</li><li><b>2–3 ажлын өдөрт</b> сонгосон, тохирох 3 хүртэлх агентлагаас санал ирнэ</li></ol>
           <div className="row" style={{ gap: 10 }}>
             <input aria-label="Нэр" className="field" style={{ flex: 1, minWidth: 200, marginTop: 0 }} placeholder="Нэр *" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} required />
             <input aria-label="Байгууллага" className="field" style={{ flex: 1, minWidth: 200, marginTop: 0 }} placeholder="Байгууллага" value={f.company} onChange={e => setF({ ...f, company: e.target.value })} /></div>
@@ -101,6 +110,7 @@ export default function Wizard() {
           <p style={{ color: '#A9A3C4', fontSize: 13 }}>Мэдээллийг зөвхөн үнийн санал авахад ашиглаж, 3-аас илүү агентлагт өгөхгүй. <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал</Link></p>
         </form>}
       </div>
+      {['b0', 'b1', 'b2'].includes(q.budget) && <Before q={q} />}
       <button type="button" className="btn ghost" style={{ marginTop: 14 }} onClick={() => { setStep(0); setSent(false); }}>↺ Дахин эхлэх</button>
     </>}
   </section>;

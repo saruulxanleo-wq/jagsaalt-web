@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getAgency, listAgencies } from '@/lib/db';
 import { fmtNum, catsOf, catLabel, catTone, cap, SOCIALS, host, fmtPrice } from '@/lib/config';
 import OwnerTools from './OwnerTools';
+import QuoteBox from './QuoteBox';
 import ReportButton from './ReportButton';
 import Track from './Track';
 import { MemberPhoto } from '../../Avatar';
@@ -30,13 +31,13 @@ export default async function Profile({ params }) {
           <div style={{ marginTop: -56, display: 'inline-block', border: '6px solid #fff', borderRadius: 34, background: '#fff' }}><Logo a={a} size={112} radius={28} /></div>
           <h1 className="h" style={{ fontSize: 'clamp(30px,4vw,44px)', fontWeight: 800, marginTop: 12 }}>{a.name}</h1>
           <div className="row" style={{ marginTop: 12 }}>{catsOf(a).map(k => <span key={k} className={`cat ${catTone(k)}`}>{catLabel(k)}</span>)}<Badges a={a} /></div>
-          <p style={{ fontSize: 18, color: 'var(--mute)', marginTop: 20, maxWidth: 640 }}>{a.description || 'Тайлбар хараахан нэмэгдээгүй. Агентлагийн эзэн баталгаажаад өөрөө бөглөнө.'}</p>
+          <p style={{ fontSize: 18, color: 'var(--mute)', marginTop: 20, maxWidth: 640 }}>{a.description || 'Агентлаг танилцуулгаа хараахан оруулаагүй байна. Үнийн санал авахдаа үйлчилгээ, үнээ шууд асуугаарай.'}</p>
           {a.services?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Үйлчилгээ</h2><div className="row" style={{ marginTop: 12 }}>{a.services.map(s => <span key={s} className="chip">{cap(s)}</span>)}</div></>}
           {a.clients?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Харилцагч брэндүүд</h2><div className="row" style={{ marginTop: 12 }}>{a.clients.map(s => <span key={s} style={{ padding: '10px 16px', borderRadius: 14, background: 'var(--bg)', fontWeight: 700 }}>{s}</span>)}</div></>}
           {a.team?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Баг</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(210px,1fr))', gap: 10, marginTop: 12 }}>{a.team.map((m, i) => <div key={i} className="row" style={{ background: 'var(--bg)', borderRadius: 16, padding: '10px 12px', gap: 12, flexWrap: 'nowrap' }}><MemberPhoto m={m} size={48} /><div><b>{m.name}</b><div style={{ color: 'var(--mute)', fontSize: 14 }}>{m.role}</div></div></div>)}</div></>}
         </div>
         <aside style={{ marginTop: 24, display: 'grid', gap: 14, alignContent: 'start' }}>
-          <OwnerTools slug={a.slug} />
+          <QuoteBox slug={a.slug} name={a.name} />
           <div style={{ background: 'var(--bg)', borderRadius: 24, padding: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             {[[a.founded, 'Байгуулагдсан'], [a.team_size && a.team_size + ' хүн', 'Баг'], [a.followers != null && fmtNum(a.followers), 'FB дагагч'], [a.min_budget, 'Доод төсөв']].filter(([v]) => v).slice(0, 4).map(([v, l]) =>
               <div key={l}><div className="h" style={{ fontSize: String(v).length > 8 ? 18 : 26, fontWeight: 800 }}>{v}</div><div style={{ color: 'var(--mute)', fontSize: 14, fontWeight: 600 }}>{l}</div></div>)}
@@ -47,6 +48,7 @@ export default async function Profile({ params }) {
           {a.socials && Object.keys(a.socials).length > 0 && <div className="row" style={{ gap: 8 }}>
             {Object.entries(SOCIALS).filter(([k]) => a.socials[k]).map(([k, l]) => <a key={k} href={a.socials[k]} target="_blank" rel="noopener" className="chip" data-track="social">{l}</a>)}
             {a.socials.email && <a href={`mailto:${a.socials.email}`} className="chip" data-track="email">✉ {a.socials.email}</a>}</div>}
+          <OwnerTools slug={a.slug} />
           <ReportButton slug={a.slug} />
           {!a.verified && <div className="ok">Энэ агентлагийг удирддаг уу? <Link href={`/minii?claim=${a.slug}`} style={{ textDecoration: 'underline' }}>Эзэмших хүсэлт илгээ</Link></div>}
         </aside>
