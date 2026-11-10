@@ -22,7 +22,7 @@ export default function Root({ children }) {
         <div className="wrap"><nav className="top">
           <Link href="/" className="logo" aria-label={SITE_NAME}><img src="/logo.png" alt={SITE_NAME} width={199} height={34} /></Link>
           <Nav />
-          <div className="row"><Link href="/minii" className="btn ghost">Миний самбар</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
+          <div className="row topbtns"><Link href="/minii" className="btn ghost"><span className="hide-sm">Миний </span>самбар</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
         </nav></div>
         {children}
         <footer><div className="wrap" style={{ paddingTop: 34 }}><Subscribe source="footer" variant="footer" /></div><div className="wrap row" style={{ justifyContent: 'space-between', paddingTop: 32, paddingBottom: 32 }}>
