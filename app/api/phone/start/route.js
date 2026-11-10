@@ -13,7 +13,7 @@ export async function POST(req) {
   const cnt = p.sms_day === today ? (p.sms_count || 0) : 0;
   if (cnt >= 3) return fail('Өнөөдөр 3 удаа код авсан байна. Маргааш дахин оролдоорой.', 429);
   await d.from('profiles').update({ sms_day: today, sms_count: cnt + 1 }).eq('id', u.id);
-  const s = await sendCode(phone, 'jagsaalt');
+  const s = await sendCode(phone, 'brief.mn');
   if (!s.ok) return fail(s.data?.error?.message || 'SMS явуулж чадсангүй. Дахин оролдоно уу.', 502);
   await d.from('profiles').update({ pending_phone: phone, pending_verify_id: s.data.id }).eq('id', u.id);
   return json({ ok: true });

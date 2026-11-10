@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { PRODUCTS, priceFor, fmtMnt } from '@/lib/config';
-export const metadata = { title: 'Үнийн санал', description: 'jagsaalt.mn дээр онцлох байр, ивээн тэтгэлэг, клиентийн хүсэлтийн үнэ.' };
+export const metadata = { title: 'Үнийн санал', description: 'brief.mn дээр онцлох байр, ивээн тэтгэлэг, клиентийн хүсэлтийн үнэ.' };
 const CTA = { agency_featured: ['/minii?buy=featured', 'Агентлагаа онцлох болгох'], listing_sponsor: ['/tolbor?product=listing_sponsor', 'Хэрэгслээ онцлох'], lead: ['/minii#leads', 'Тохирох хүсэлтүүдээ харах'] };
 export default function Page() {
   return <section className="wrap" style={{ marginTop: 10 }}>

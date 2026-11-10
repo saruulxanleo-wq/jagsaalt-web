@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
   const a = await getAgency((await params).slug);
   if (!a) return {};
   const description = a.description || `${a.name} — ${catsOf(a).map(catLabel).join(', ')}. Монголын маркетингийн агентлагуудын жагсаалт.`;
-  return { title: a.name, description, alternates: { canonical: `/a/${a.slug}` }, openGraph: { title: `${a.name} | jagsaalt.mn`, description, images: a.logo_url ? [{ url: a.logo_url, width: 400, height: 400 }] : undefined }, twitter: { card: a.logo_url ? 'summary' : 'summary_large_image' } };
+  return { title: a.name, description, alternates: { canonical: `/a/${a.slug}` }, openGraph: { title: `${a.name} | brief.mn`, description, images: a.logo_url ? [{ url: a.logo_url, width: 400, height: 400 }] : undefined }, twitter: { card: a.logo_url ? 'summary' : 'summary_large_image' } };
 }
 export default async function Profile({ params }) {
   const { slug } = await params;

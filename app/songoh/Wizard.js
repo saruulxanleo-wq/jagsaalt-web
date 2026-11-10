@@ -23,7 +23,7 @@ const px = (ev, data) => { try { window.fbq && window.fbq('track', ev, data); } 
 const Opt = ({ on, onClick, children, disabled }) => <button type="button" onClick={onClick} disabled={disabled} aria-pressed={on}
   style={{ textAlign: 'left', padding: '16px 18px', borderRadius: 18, fontSize: 16.5, fontWeight: 600, background: on ? 'var(--ink)' : '#fff', color: on ? '#fff' : 'var(--ink)', boxShadow: on ? 'none' : 'inset 0 0 0 1.5px var(--line)', opacity: disabled ? .45 : 1, display: 'flex', alignItems: 'center', gap: 10 }}>
   <span style={{ width: 22, height: 22, borderRadius: 7, flex: 'none', display: 'grid', placeItems: 'center', background: on ? 'var(--l)' : 'var(--bg)', color: 'var(--ink)', fontSize: 14 }}>{on ? '✓' : ''}</span>{children}</button>;
-const U = (base, extra = '') => `${base}${base.includes('?') ? '&' : '?'}utm_source=jagsaalt&utm_medium=songoh${extra}`;
+const U = (base, extra = '') => `${base}${base.includes('?') ? '&' : '?'}utm_source=brief.mn&utm_medium=songoh${extra}`;
 // Агентлаг сонгохоос өмнөх алхам: SARUUL Score (9 000₮) ба SARUUL Framework (98 000₮)
 function Before({ q }) {
   const runsAds = q.ads === 'yes' || q.ads === 'some';

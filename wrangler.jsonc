@@ -7,7 +7,7 @@
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "vars": { "SITE_URL": "https://jagsaalt.saruulxanleo.workers.dev" },
   "keep_vars": true
-  // SITE_URL: домэйн авсны дараа https://jagsaalt.mn болгож солино.
+  // SITE_URL: brief.mn идэвхжмэгц https://brief.mn болгоно — тэгвэл workers.dev/www автоматаар brief.mn руу 301.
   // Нууц түлхүүрүүд: wrangler secret put SUPABASE_SECRET_KEY / WESEND_API_KEY
   // эсвэл Cloudflare dashboard → Worker → Settings → Variables and Secrets
 }

@@ -23,7 +23,7 @@ function Ask({ l, onClose }) {
     const j = await r.json().catch(() => ({})); setBusy(false); r.ok ? setOk(true) : setErr(j.error || 'Алдаа гарлаа'); }
   if (ok) return <div className="panel ok" style={{ padding: 14 }}>✓ Хүсэлт илгээгдлээ. Багийнхан ажлын 1 өдөрт холбогдож, кампанит ажлыг хамт төлөвлөнө.</div>;
   return <form onSubmit={send} style={{ display: 'grid', gap: 8 }}>
-    <p style={{ fontSize: 13.5, color: 'var(--mute)', margin: 0 }}>Инфлүэнсер сонгох, үнэ тохирох, гэрээ, тайланг jagsaalt-ийн баг зохион байгуулна. Олон инфлүэнсертэй кампанит ажилд тохиромжтой.</p>
+    <p style={{ fontSize: 13.5, color: 'var(--mute)', margin: 0 }}>Инфлүэнсер сонгох, үнэ тохирох, гэрээ, тайланг Брифийн баг зохион байгуулна. Олон инфлүэнсертэй кампанит ажилд тохиромжтой.</p>
     <input className="field" style={{ marginTop: 0 }} placeholder="Нэр *" required value={f.name} onChange={set('name')} aria-label="Нэр" />
     <input className="field" style={{ marginTop: 0 }} placeholder="Брэнд, байгууллага" value={f.company} onChange={set('company')} aria-label="Байгууллага" />
     <input className="field" style={{ marginTop: 0 }} placeholder="Утас *" inputMode="tel" value={f.phone} onChange={set('phone')} aria-label="Утас" />

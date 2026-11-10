@@ -42,7 +42,7 @@ export async function POST(req) {
   const og = origin(req);
   if (qpayOn()) {
     try {
-      const inv = await createInvoice({ code: row.code, amount: row.amount, description: `jagsaalt.mn · ${P.label} · ${row.target_name}`, callback: `${og}/api/qpay?code=${row.code}&t=${await sign('qpay:' + row.code)}` });
+      const inv = await createInvoice({ code: row.code, amount: row.amount, description: `brief.mn · ${P.label} · ${row.target_name}`, callback: `${og}/api/qpay?code=${row.code}&t=${await sign('qpay:' + row.code)}` });
       await d.from('orders').update({ qpay_invoice_id: inv.invoice_id }).eq('id', o.id);
       return json({ ok: true, code: row.code, amount: row.amount, qpay: inv });
     } catch (e) { console.log('qpay', e.message); /* QPay ажиллахгүй бол дансаар */ }

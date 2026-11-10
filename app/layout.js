@@ -5,10 +5,10 @@ import Subscribe from './Subscribe';
 import { siteUrl, SITE_NAME } from '@/lib/config';
 export const generateMetadata = async () => ({
   metadataBase: new URL(siteUrl()),
-  openGraph: { type: 'website', locale: 'mn_MN', siteName: 'jagsaalt.mn', images: [{ url: '/og.png', width: 1200, height: 630 }] },
+  openGraph: { type: 'website', locale: 'mn_MN', siteName: SITE_NAME, images: [{ url: '/og.png', width: 1200, height: 630 }] },
   twitter: { card: 'summary_large_image' },
-  title: { default: 'Монголын маркетингийн агентлагууд | ' + SITE_NAME, template: '%s | ' + SITE_NAME },
-  description: 'Монголын маркетингийн агентлагуудын нээлттэй жагсаалт. Ангиллаар шүүж, идэвхтэй эсэхийг хараад өөрт тохирохоо ол.',
+  title: { default: 'Монголын маркетингийн хаб: агентлаг, фрилансер, инфлүэнсер | ' + SITE_NAME, template: '%s | ' + SITE_NAME },
+  description: 'Монголын маркетингийн агентлаг, фрилансер, инфлүэнсер, хэрэгсэл, сургалт, коммюнити — бүгд нэг дор. Шүүж харьцуулаад өөрт тохирохоо ол.',
 });
 const [n1, n2] = SITE_NAME.split('.');
 export const dynamic = 'force-dynamic';
