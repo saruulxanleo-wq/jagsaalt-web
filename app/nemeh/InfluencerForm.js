@@ -1,4 +1,5 @@
 'use client';
+import { track } from '@/lib/track';
 import { useState } from 'react';
 import { api } from '@/lib/sbclient';
 import Mine from './Mine';
@@ -12,7 +13,7 @@ export default function InfluencerForm() {
   const tog = k => setF({ ...f, niches: f.niches.includes(k) ? f.niches.filter(x => x !== k) : f.niches.length >= 3 ? f.niches : [...f.niches, k] });
   async function submit(e) {
     e.preventDefault(); setBusy(true); setMsg(null);
-    const r = await api('/api/influencer/submit', { ...f, mine }); setBusy(false); r.ok ? setDone(true) : setMsg(r.error || 'Алдаа гарлаа');
+    const r = await api('/api/influencer/submit', { ...f, mine }); setBusy(false); r.ok ? (setDone(true), track('SubmitApplication', { content_name: 'influencer' })) : setMsg(r.error || 'Алдаа гарлаа');
   }
   if (done) return <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>Баярлалаа! Админ шалгаад нийтэлнэ. <Link href="/influencer" style={{ textDecoration: 'underline' }}>Инфлүэнсерүүд →</Link></div>;
   const pair = (k, lab, ph, nk) => <div className="row" style={{ gap: 10, alignItems: 'flex-end' }}>

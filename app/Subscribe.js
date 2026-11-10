@@ -1,4 +1,5 @@
 'use client';
+import { track } from '@/lib/track';
 import { useState } from 'react';
 import { SUB_ROLES } from '@/lib/config';
 // Маркетингийнхны имэйл бүртгэл. variant: 'footer' (бараан дэвсгэр) | 'card'
@@ -10,7 +11,7 @@ export default function Subscribe({ source = 'site', variant = 'card' }) {
     const r = await fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, role, source }) });
     const j = await r.json().catch(() => ({})); setBusy(false);
     setSt(r.ok ? (j.already ? 'already' : 'sent') : (j.error || 'Алдаа гарлаа'));
-    if (r.ok) try { window.fbq && window.fbq('track', 'CompleteRegistration', { content_name: 'newsletter_' + source }); } catch {}
+    if (r.ok) track('CompleteRegistration', { content_name: 'newsletter_' + source });
   }
   return <div className={'subbox' + (dark ? ' dark' : '')}>
     <div><b className="h" style={{ fontSize: dark ? 18 : 20 }}>Маркетингийн сар бүрийн тойм</b>

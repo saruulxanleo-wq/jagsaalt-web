@@ -1,11 +1,12 @@
 'use client';
+import { track } from '@/lib/track';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/sbclient';
 import { PRODUCTS, priceFor, fmtMnt, TYPES } from '@/lib/config';
 function QPayBox({ r }) {
   const [st, setSt] = useState('pending');
-  useEffect(() => { if (st !== 'pending') return; const t = setInterval(async () => { const j = await fetch('/api/order/check?code=' + r.code).then(x => x.json()).catch(() => ({})); if (j.status && j.status !== 'pending') setSt(j.status); }, 4000); return () => clearInterval(t); }, [st]);
+  useEffect(() => { if (st !== 'pending') return; const t = setInterval(async () => { const j = await fetch('/api/order/check?code=' + r.code).then(x => x.json()).catch(() => ({})); if (j.status && j.status !== 'pending') { setSt(j.status); if (j.status === 'paid') track('Purchase', { value: r.amount, currency: 'MNT', transaction_id: r.code }); } }, 4000); return () => clearInterval(t); }, [st]);
   if (st === 'paid') return <div className="panel ok"><b className="h" style={{ fontSize: 22 }}>Төлбөр орлоо ✓</b><p style={{ marginTop: 8 }}>Захиалга <b>{r.code}</b> идэвхжлээ. Баярлалаа!</p></div>;
   const q = r.qpay;
   return <div className="panel" style={{ display: 'grid', gap: 12, justifyItems: 'center', textAlign: 'center' }}>
@@ -38,7 +39,7 @@ export default function Pay({ product, target, slug, listings }) {
   async function go(e) {
     e.preventDefault(); setBusy(true); setErr(null);
     const r = await api('/api/order', { product, target: t, slug, months: m, contact }); setBusy(false);
-    r.ok ? setRes(r) : setErr(r.error === 'Нэвтэрнэ үү' ? 'Эхлээд «Миний самбар» хэсгээр нэвтэрнэ үү.' : r.error);
+    r.ok ? (setRes(r), track('InitiateCheckout', { content_name: r.product || 'order', value: r.amount, currency: 'MNT' })) : setErr(r.error === 'Нэвтэрнэ үү' ? 'Эхлээд «Миний самбар» хэсгээр нэвтэрнэ үү.' : r.error);
   }
   return <section className="wrap" style={{ marginTop: 10, maxWidth: 640 }}>
     <h1 className="h" style={{ fontSize: 32, fontWeight: 800 }}>{P.icon} {P.label}</h1>

@@ -1,4 +1,5 @@
 'use client';
+import { track } from '@/lib/track';
 import { useState } from 'react';
 import { api } from '@/lib/sbclient';
 import Mine from './Mine';
@@ -14,7 +15,7 @@ export default function ListingForm({ type }) {
   async function submit(e) {
     e.preventDefault(); setBusy(true); setMsg(null);
     const r = await api('/api/listing/submit', { ...f, type, mine }); setBusy(false);
-    r.ok ? setDone(true) : setMsg(r.error || 'Алдаа гарлаа');
+    r.ok ? (setDone(true), track('SubmitApplication', { content_name: 'listing_' + type })) : setMsg(r.error || 'Алдаа гарлаа');
   }
   if (done) return <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>Баярлалаа! Админ шалгаад нийтэлнэ. <Link href={t.path} style={{ textDecoration: 'underline' }}>{t.plural} →</Link></div>;
   return <form onSubmit={submit} className="panel" style={{ marginTop: 18, display: 'grid', gap: 18 }}>

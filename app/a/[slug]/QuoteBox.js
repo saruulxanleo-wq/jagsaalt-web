@@ -1,4 +1,5 @@
 'use client';
+import { track } from '@/lib/track';
 import { useState } from 'react';
 import Link from 'next/link';
 // Профайл дээрээс шууд үнийн санал авах (хүсэлт /api/lead-ээр энэ агентлагт очно)
@@ -10,7 +11,7 @@ export default function QuoteBox({ slug, name }) {
     e.preventDefault(); setBusy(true); setErr(null);
     const r = await fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...f, answers: { source: 'profile' }, agencies: [slug] }) });
     const j = await r.json().catch(() => ({})); setBusy(false);
-    if (r.ok) { setSent(true); try { window.fbq && window.fbq('track', 'Lead', { content_name: 'profile_quote' }); } catch {} } else setErr(j.error || 'Алдаа гарлаа');
+    if (r.ok) { setSent(true); track('Lead', { content_name: 'profile_quote' }); } else setErr(j.error || 'Алдаа гарлаа');
   }
   if (sent) return <div className="panel ok" style={{ padding: 18 }}><b>Хүсэлт илгээгдлээ ✓</b><p style={{ marginTop: 6 }}>Ажлын 1 өдөрт тантай холбогдож, {name}-аас үнийн санал авахад тусална.</p></div>;
   if (!open) return <button className="btn lime" style={{ padding: 16, fontSize: 16 }} onClick={() => setOpen(true)} data-track="social">Үнийн санал авах →</button>;

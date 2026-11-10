@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
+import { track } from '@/lib/track';
 import { TYPES, TOPICS, host, withUtm } from '@/lib/config';
-export const trackClick = lid => { if (!/^[0-9a-f-]{36}$/.test(lid)) return; const body = JSON.stringify({ lid, kind: 'click' }); if (!(navigator.sendBeacon && navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' })))) fetch('/api/track', { method: 'POST', body, headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(() => {}); };
+export const trackClick = lid => { if (!/^[0-9a-f-]{36}$/.test(lid)) return; track('Contact', { content_name: 'listing_click' }); const body = JSON.stringify({ lid, kind: 'click' }); if (!(navigator.sendBeacon && navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' })))) fetch('/api/track', { method: 'POST', body, headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(() => {}); };
 export default function ListingCard({ l, medium = 'hub' }) {
   const t = TYPES[l.type] || TYPES.tool; const href = withUtm(l.url, medium);
   return <div className={'card lcard t-' + l.type}>

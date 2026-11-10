@@ -1,4 +1,5 @@
 'use client';
+import { track } from '@/lib/track';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -19,7 +20,7 @@ function SelfServe({ q, hub }) {
     <Link href="/hereglsel" style={{ color: 'var(--v)', fontWeight: 700, display: 'inline-block', marginTop: 12 }}>Бүх хэрэгсэл, сургалт →</Link>
   </div>;
 }
-const px = (ev, data) => { try { window.fbq && window.fbq('track', ev, data); } catch {} };
+const px = track;
 const Opt = ({ on, onClick, children, disabled }) => <button type="button" onClick={onClick} disabled={disabled} aria-pressed={on}
   style={{ textAlign: 'left', padding: '16px 18px', borderRadius: 18, fontSize: 16.5, fontWeight: 600, background: on ? 'var(--ink)' : '#fff', color: on ? '#fff' : 'var(--ink)', boxShadow: on ? 'none' : 'inset 0 0 0 1.5px var(--line)', opacity: disabled ? .45 : 1, display: 'flex', alignItems: 'center', gap: 10 }}>
   <span style={{ width: 22, height: 22, borderRadius: 7, flex: 'none', display: 'grid', placeItems: 'center', background: on ? 'var(--l)' : 'var(--bg)', color: 'var(--ink)', fontSize: 14 }}>{on ? '✓' : ''}</span>{children}</button>;

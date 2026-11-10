@@ -1,4 +1,5 @@
 'use client';
+import { track as ev } from '@/lib/track';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { NICHES, REACH, fbPic, withUtm } from '@/lib/config';
@@ -20,7 +21,7 @@ function Ask({ l, onClose }) {
   const set = k => e => setF({ ...f, [k]: e.target.value });
   async function send(e) { e.preventDefault(); setBusy(true); setErr(null);
     const r = await fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...f, answers: { source: 'influencer', influencer: l.slug, influencer_name: l.name }, agencies: [] }) });
-    const j = await r.json().catch(() => ({})); setBusy(false); r.ok ? setOk(true) : setErr(j.error || 'Алдаа гарлаа'); }
+    const j = await r.json().catch(() => ({})); setBusy(false); r.ok ? (setOk(true), ev('Lead', { content_name: 'influencer_offer' })) : setErr(j.error || 'Алдаа гарлаа'); }
   if (ok) return <div className="panel ok" style={{ padding: 14 }}>✓ Хүсэлт илгээгдлээ. Багийнхан ажлын 1 өдөрт холбогдож, кампанит ажлыг хамт төлөвлөнө.</div>;
   return <form onSubmit={send} style={{ display: 'grid', gap: 8 }}>
     <p style={{ fontSize: 13.5, color: 'var(--mute)', margin: 0 }}>Инфлүэнсер сонгох, үнэ тохирох, гэрээ, тайланг Брифийн баг зохион байгуулна. Олон инфлүэнсертэй кампанит ажилд тохиромжтой.</p>
@@ -38,7 +39,7 @@ function Card({ l }) {
     <div className="top"><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div>{l.verified && <span className="vbadge" style={{ marginTop: 4 }}>✓ {l.dm_url ? 'Шууд хариулдаг' : 'Баталгаажсан'}</span>}</div></div>
     <div className="row" style={{ gap: 6 }}>{(l.niches || []).map(k => <span key={k} className="badge b-off">{NICHES[k] || k}</span>)}</div>
     <div className="pls">{PL.map(([k, lab, url, n]) => url(l) && <a key={k} href={withUtm(url(l), 'influencer')} target="_blank" rel="noopener" className={'pl pl-' + k} onClick={() => track(l.id, 'social')}><b>{lab}</b><span>{n(l) ? fmtNum(n(l)) : '—'}</span></a>)}</div>
-    {dm && <div style={{ marginTop: 4 }}><a href={dm.href} target="_blank" rel="noopener" className="btn dark" style={{ width: '100%', justifyContent: 'center' }} onClick={() => track(l.id, 'dm')}>💬 Шууд бичих</a>
+    {dm && <div style={{ marginTop: 4 }}><a href={dm.href} target="_blank" rel="noopener" className="btn dark" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { track(l.id, 'dm'); ev('Contact', { content_name: 'influencer_dm' }); }}>💬 Шууд бичих</a>
       <div style={{ fontSize: 12.5, color: 'var(--mute)', marginTop: 5, textAlign: 'center' }}>{dm.own ? `Инфлүэнсерийн ${dm.via} руу очно` : `${dm.via}-т нь шууд очно · хариу удаж магадгүй`}</div></div>}
     {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" onClick={() => { setAsk(true); track(l.id, 'social'); }}>Багаар зохион байгуулуулах</button>}
     {!l.verified && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=influencer:${l.id}`} className="ownlink" style={{ alignSelf: 'flex-start' }}>Энэ миний профайл</Link>}
