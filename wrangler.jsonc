@@ -5,7 +5,7 @@
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
-  "vars": { "SITE_URL": "https://brief.mn" },
+  "vars": { "SITE_URL": "https://brief.mn", "GA_ID": "G-WFLV05LVRS", "META_PIXEL_ID": "1848304923152588" },
   "keep_vars": true
   // SITE_URL: brief.mn идэвхжмэгц https://brief.mn болгоно — тэгвэл workers.dev/www автоматаар brief.mn руу 301.
   // Нууц түлхүүрүүд: wrangler secret put SUPABASE_SECRET_KEY / WESEND_API_KEY

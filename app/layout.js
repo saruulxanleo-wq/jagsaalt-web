@@ -2,6 +2,7 @@ import './globals.css';
 import Link from 'next/link';
 import Nav from './Nav';
 import Subscribe from './Subscribe';
+import AdminBell from './AdminBell';
 import { siteUrl, SITE_NAME } from '@/lib/config';
 export const generateMetadata = async () => ({
   metadataBase: new URL(siteUrl()),
@@ -26,7 +27,7 @@ export default function Root({ children }) {
         <div className="wrap"><nav className="top">
           <Link href="/" className="logo" aria-label={SITE_NAME}><img src="/logo.png" alt={SITE_NAME} width={199} height={34} /></Link>
           <Nav />
-          <div className="row topbtns"><Link href="/minii" className="btn ghost"><span className="hide-sm">Миний </span>самбар</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
+          <div className="row topbtns"><AdminBell /><Link href="/minii" className="btn ghost"><span className="hide-sm">Миний </span>самбар</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
         </nav></div>
         {children}
         <footer><div className="wrap" style={{ paddingTop: 34 }}><Subscribe source="footer" variant="footer" /></div><div className="wrap row" style={{ justifyContent: 'space-between', paddingTop: 32, paddingBottom: 32 }}>
