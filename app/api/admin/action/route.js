@@ -9,6 +9,10 @@ export async function POST(req) {
     else if (action === 'reject' || action === 'hide') await d.from('agencies').update({ status: 'rejected', updated_at: now }).eq('id', id);
     else if (action === 'delete') await d.from('agencies').delete().eq('id', id);
     else return fail('Буруу үйлдэл');
+  } else if (kind === 'influencer') {
+    if (action === 'delete') await d.from('influencers').delete().eq('id', id);
+    else if (['approve', 'reject', 'hide'].includes(action)) await d.from('influencers').update({ status: action === 'approve' ? 'approved' : 'rejected', updated_at: now }).eq('id', id);
+    else return fail('Буруу үйлдэл');
   } else if (kind === 'listing') {
     const set = { approve: { status: 'approved' }, reject: { status: 'rejected' }, hide: { status: 'rejected' }, sponsor: { sponsored: true }, unsponsor: { sponsored: false } }[action];
     if (action === 'delete') await d.from('listings').delete().eq('id', id);

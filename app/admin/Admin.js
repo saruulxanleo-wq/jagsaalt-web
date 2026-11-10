@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { sb, api } from '@/lib/sbclient';
-import { catsOf, catLabel, TYPES, TOPICS, host } from '@/lib/config';
+import { catsOf, catLabel, TYPES, TOPICS, host, NICHES, fmtNum } from '@/lib/config';
 import { NEEDS, BUDGETS, SIZES, PRIORITIES } from '@/lib/match';
 const ago = t => { const h = Math.round((Date.now() - new Date(t)) / 36e5); return h < 1 ? 'дөнгөж сая' : h < 24 ? `${h} цагийн өмнө` : `${Math.round(h / 24)} өдрийн өмнө`; };
 const Box = ({ title, n, children }) => <div className="panel" style={{ marginTop: 18 }}><h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>{title} <span style={{ color: 'var(--mute)' }}>{n}</span></h2><div style={{ display: 'grid', gap: 12, marginTop: 14 }}>{n ? children : <p style={{ color: 'var(--mute)' }}>Хоосон.</p>}</div></div>;
@@ -38,6 +38,13 @@ export default function Admin() {
       <div style={{ fontSize: 14 }}>{(l.answers?.needs || []).map(k => NEEDS[k]?.label).join(', ')} · {BUDGETS[l.answers?.budget]?.[0]} · {SIZES[l.answers?.size]} · {PRIORITIES[l.answers?.priority]}{l.answers?.industry && ` · ${l.answers.industry}`}</div>
       <div style={{ fontSize: 14 }}>Агентлаг: {l.agencies.map(s => <Link key={s} href={`/a/${s}`} style={{ color: 'var(--v)', marginRight: 8 }}>{s}</Link>)}{l.utm?.utm_campaign && <span style={{ color: 'var(--mute)' }}> · кампанит: {l.utm.utm_campaign}</span>}</div>
       {l.note && <div style={{ fontSize: 14, color: 'var(--mute)' }}>«{l.note}»</div>}</Row>)}</Box>
+    <Box title="Инфлүэнсер — шинэ санал" n={data.infPending.length}>{data.infPending.map(l => <Row key={l.id}
+      actions={<><button className="btn v" onClick={() => act('influencer', l.id, 'approve')}>Нийтлэх</button><button className="btn ghost" onClick={() => act('influencer', l.id, 'reject')}>Татгалзах</button></>}>
+      <b>{l.name}</b> <span style={{ color: 'var(--mute)' }}>· {(l.niches || []).map(k => NICHES[k]).join(', ')} · {ago(l.created_at)}</span>
+      <div style={{ fontSize: 14 }}>{l.fb_url && <a href={l.fb_url} target="_blank" rel="noopener" style={{ color: 'var(--v)' }}>FB {l.fb_followers ? fmtNum(l.fb_followers) : ''}</a>}{l.ig && <> · <a href={'https://www.instagram.com/' + l.ig} target="_blank" rel="noopener" style={{ color: 'var(--v)' }}>IG @{l.ig} {l.ig_followers ? fmtNum(l.ig_followers) : ''}</a></>}{l.tiktok && <> · <a href={'https://www.tiktok.com/@' + l.tiktok} target="_blank" rel="noopener" style={{ color: 'var(--v)' }}>TikTok {l.tiktok_followers ? fmtNum(l.tiktok_followers) : ''}</a></>}{l.contact && <span style={{ color: 'var(--mute)' }}> · холбоо: {l.contact}</span>}</div></Row>)}</Box>
+    <Box title="Инфлүэнсер — хамгийн их дарагдсан (30 хоног)" n={data.infTop.length}>{data.infTop.map(l => <Row key={l.id}
+      actions={<><button className="btn ghost" onClick={() => act('influencer', l.id, 'hide')}>Нуух</button><button className="btn ghost" onClick={() => act('influencer', l.id, 'delete', `«${l.name}»-ийг бүр устгах уу? Буцаах боломжгүй.`)}>Устгах</button></>}>
+      <b>{l.name}</b> <span style={{ color: 'var(--mute)' }}>· <b style={{ color: 'var(--ink)' }}>{l.clicks}</b> дарсан</span></Row>)}</Box>
     <Box title="Хэрэгсэл, сургалт, коммюнити — шинэ санал" n={data.listings.filter(l => l.status === 'pending').length}>{data.listings.filter(l => l.status === 'pending').map(l => <Row key={l.id}
       actions={<><button className="btn v" onClick={() => act('listing', l.id, 'approve')}>Нийтлэх</button><button className="btn ghost" onClick={() => act('listing', l.id, 'reject')}>Татгалзах</button></>}>
       <b>{l.name}</b> <span style={{ color: 'var(--mute)' }}>· {TYPES[l.type]?.label} · {(l.topics || []).map(k => TOPICS[k]).join(', ')}{l.price && ' · ' + l.price} · {ago(l.created_at)}</span>

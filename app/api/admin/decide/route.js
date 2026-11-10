@@ -3,9 +3,13 @@ const page = (SITE_URL, t, ok = true) => new Response(`<!doctype html><meta char
 export async function GET(req) {
   const SITE_URL = origin(req); const P = (t, ok) => page(SITE_URL, t, ok);
   const q = new URL(req.url).searchParams; const k = q.get('k'), id = q.get('id'), a = q.get('a');
-  if (!['claim', 'agency', 'listing'].includes(k) || !['approve', 'reject'].includes(a) || q.get('t') !== await sign(`${k}:${id}:${a}`)) return P('Линк буруу байна', false);
+  if (!['claim', 'agency', 'listing', 'influencer'].includes(k) || !['approve', 'reject'].includes(a) || q.get('t') !== await sign(`${k}:${id}:${a}`)) return P('Линк буруу байна', false);
   const d = db(); if (!d) return P('Систем тохируулагдаагүй', false);
   const now = new Date().toISOString();
+  if (k === 'influencer') {
+    const { data: l } = await d.from('influencers').update({ status: a === 'approve' ? 'approved' : 'rejected', updated_at: now }).eq('id', id).select('name').single();
+    return P(`«${esc(l?.name)}» ${a === 'approve' ? 'нийтлэгдлээ' : 'татгалзлаа'}`);
+  }
   if (k === 'listing') {
     const { data: l } = await d.from('listings').update({ status: a === 'approve' ? 'approved' : 'rejected', updated_at: now }).eq('id', id).select('name').single();
     return P(`«${esc(l?.name)}» ${a === 'approve' ? 'нийтлэгдлээ' : 'татгалзлаа'}`);
