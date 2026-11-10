@@ -1,12 +1,14 @@
 import { db, sign, mail, esc, origin } from '@/lib/server';
 import { activateOrder } from '@/lib/orders';
+import { decideOwn } from '@/lib/ownDecide';
 const page = (SITE_URL, t, ok = true) => new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><body style="font-family:system-ui;background:#F6F4FF;display:grid;place-items:center;min-height:100vh;margin:0"><div style="background:#fff;padding:40px;border-radius:24px;max-width:420px;text-align:center"><div style="font-size:40px">${ok ? '✓' : '✕'}</div><p style="font-size:18px">${t}</p><a href="${SITE_URL}" style="color:#6A3DF0">jagsaalt руу буцах</a></div>`, { headers: { 'content-type': 'text/html; charset=utf-8' } });
 export async function GET(req) {
   const SITE_URL = origin(req); const P = (t, ok) => page(SITE_URL, t, ok);
   const q = new URL(req.url).searchParams; const k = q.get('k'), id = q.get('id'), a = q.get('a');
-  if (!['claim', 'agency', 'listing', 'influencer', 'order'].includes(k) || !['approve', 'reject'].includes(a) || q.get('t') !== await sign(`${k}:${id}:${a}`)) return P('Линк буруу байна', false);
+  if (!['claim', 'agency', 'listing', 'influencer', 'order', 'own'].includes(k) || !['approve', 'reject'].includes(a) || q.get('t') !== await sign(`${k}:${id}:${a}`)) return P('Линк буруу байна', false);
   const d = db(); if (!d) return P('Систем тохируулагдаагүй', false);
   const now = new Date().toISOString();
+  if (k === 'own') { const r = await decideOwn(d, id, a === 'approve', SITE_URL); return r.error ? P(esc(r.error), false) : P(`«${esc(r.name)}» — ${a === 'approve' ? 'баталгаажлаа, хэрэглэгчид мэдэгдлээ' : 'татгалзлаа'}`); }
   if (k === 'order') {
     if (a === 'reject') { await d.from('orders').update({ status: 'cancelled' }).eq('id', id).eq('status', 'pending'); return P('Захиалга цуцлагдлаа'); }
     const r = await activateOrder(d, id); if (r.error) return P(r.error, false);
@@ -35,7 +37,7 @@ export async function GET(req) {
   }
   await d.from('claims').update({ status: a === 'approve' ? 'approved' : 'rejected', decided_at: now }).eq('id', id);
   if (user?.email) await mail(user.email, a === 'approve' ? `«${c.agencies.name}» баталгаажлаа` : `«${c.agencies.name}» хүсэлтийн хариу`,
-    a === 'approve' ? `<p>Сайн уу! «<b>${esc(c.agencies.name)}</b>» агентлагийг удирдах эрх чинь баталгаажлаа. Одоо профайлаа засаж болно.</p><p><a href="${SITE_URL}/minii">Миний агентлаг →</a></p>`
+    a === 'approve' ? `<p>Сайн уу! «<b>${esc(c.agencies.name)}</b>» агентлагийг удирдах эрх чинь баталгаажлаа. Одоо профайлаа засаж болно.</p><p><a href="${SITE_URL}/minii">Миний самбар →</a></p>`
       : `<p>Сайн уу! «${esc(c.agencies.name)}» агентлагийг эзэмших хүсэлтийг баталгаажуулж чадсангүй. Асуух зүйл байвал энэ и-мэйлд хариу бичээрэй.</p>`);
   return P(`«${esc(c.agencies.name)}» — ${a === 'approve' ? 'баталгаажлаа, хэрэглэгчид мэдэгдлээ' : 'татгалзлаа'}`);
 }

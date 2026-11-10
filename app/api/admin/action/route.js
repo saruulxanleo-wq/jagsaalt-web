@@ -1,4 +1,5 @@
 import { activateOrder } from '@/lib/orders';
+import { decideOwn } from '@/lib/ownDecide';
 import { db, fail, json, authUser, isAdmin, mail, esc, origin } from '@/lib/server';
 export async function POST(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна', 503);
@@ -23,6 +24,9 @@ export async function POST(req) {
     if (action === 'delete') await d.from('listings').delete().eq('id', id);
     else if (set) await d.from('listings').update({ ...set, updated_at: now }).eq('id', id);
     else return fail('Буруу үйлдэл');
+  } else if (kind === 'own') {
+    if (!['approve', 'reject'].includes(action)) return fail('Буруу үйлдэл');
+    const r = await decideOwn(d, id, action === 'approve', origin(req)); if (r.error) return fail(r.error);
   } else if (kind === 'report') {
     await d.from('reports').update({ resolved: true }).eq('id', id);
   } else if (kind === 'claim') {
@@ -36,7 +40,7 @@ export async function POST(req) {
     await d.from('claims').update({ status: action === 'approve' ? 'approved' : 'rejected', decided_at: now }).eq('id', id);
     const { data: { user } } = await d.auth.admin.getUserById(c.user_id);
     if (user?.email) await mail(user.email, `«${c.agencies.name}» ${action === 'approve' ? 'баталгаажлаа' : 'хүсэлтийн хариу'}`,
-      action === 'approve' ? `<p>«<b>${esc(c.agencies.name)}</b>»-ийг удирдах эрх чинь баталгаажлаа.</p><p><a href="${origin(req)}/minii">Миний агентлаг →</a></p>` : `<p>«${esc(c.agencies.name)}»-ийг эзэмших хүсэлтийг баталгаажуулж чадсангүй. Асуух зүйл байвал энэ и-мэйлд хариу бичээрэй.</p>`);
+      action === 'approve' ? `<p>«<b>${esc(c.agencies.name)}</b>»-ийг удирдах эрх чинь баталгаажлаа.</p><p><a href="${origin(req)}/minii">Миний самбар →</a></p>` : `<p>«${esc(c.agencies.name)}»-ийг эзэмших хүсэлтийг баталгаажуулж чадсангүй. Асуух зүйл байвал энэ и-мэйлд хариу бичээрэй.</p>`);
   } else return fail('Буруу төрөл');
   return json({ ok: true });
 }

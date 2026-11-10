@@ -29,10 +29,11 @@ function Ask({ l, onClose }) {
 function Card({ l }) {
   const [ask, setAsk] = useState(false);
   return <div className="card">
-    <div className="top"><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div></div></div>
+    <div className="top"><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div>{l.verified && <span className="vbadge" style={{ marginTop: 4 }}>✓ Баталгаажсан</span>}</div></div>
     <div className="row" style={{ gap: 6 }}>{(l.niches || []).map(k => <span key={k} className="badge b-off">{NICHES[k] || k}</span>)}</div>
     <div className="pls">{PL.map(([k, lab, url, n]) => url(l) && <a key={k} href={withUtm(url(l), 'influencer')} target="_blank" rel="noopener" className={'pl pl-' + k} onClick={() => track(l.id, 'social')}><b>{lab}</b><span>{n(l) ? fmtNum(n(l)) : '—'}</span></a>)}</div>
     {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" style={{ marginTop: 4 }} onClick={() => { setAsk(true); track(l.id, 'social'); }}>Хамтран ажиллах санал илгээх</button>}
+    {!l.verified && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=influencer:${l.id}`} className="ownlink" style={{ alignSelf: 'flex-start' }}>Энэ миний профайл</Link>}
   </div>;
 }
 export default function Influencers({ list }) {
@@ -58,6 +59,6 @@ export default function Influencers({ list }) {
     <div className="grid" style={{ marginTop: 20, alignItems: 'start' }}>{shown.slice(0, n).map(l => <Card key={l.slug} l={l} />)}</div>
     {shown.length > n && <div style={{ textAlign: 'center', marginTop: 24 }}><button className="btn ghost" onClick={() => setN(n + 36)}>Цааш үзэх ({shown.length - n})</button></div>}
     {!shown.length && <div className="panel" style={{ marginTop: 20, textAlign: 'center' }}>Олдсонгүй.</div>}
-    <p style={{ color: 'var(--mute)', fontSize: 14, marginTop: 28, maxWidth: 760 }}>Дагагчийн тоог нийтэд нээлттэй эх сурвалжаас авсан, бодит тооноос зөрж болно. Энэ таны профайл бөгөөд засуулах эсвэл хасуулах бол <Link href="/aldaa" style={{ textDecoration: 'underline' }}>энд мэдэгдээрэй</Link>.</p>
+    <p style={{ color: 'var(--mute)', fontSize: 14, marginTop: 28, maxWidth: 760 }}>Дагагчийн тоог нийтэд нээлттэй эх сурвалжаас авсан, бодит тооноос зөрж болно. Энэ чиний профайл бол картын доорх «Энэ миний профайл»-аар эзэмшиж, өөрөө засаарай. Хасуулах бол <Link href="/aldaa" style={{ textDecoration: 'underline' }}>энд мэдэгдээрэй</Link>.</p>
   </section>;
 }

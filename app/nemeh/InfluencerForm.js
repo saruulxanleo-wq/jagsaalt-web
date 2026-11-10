@@ -1,17 +1,18 @@
 'use client';
 import { useState } from 'react';
+import { api } from '@/lib/sbclient';
+import Mine from './Mine';
 import Link from 'next/link';
 import { NICHES } from '@/lib/config';
 const S = { color: 'var(--mute)', fontWeight: 500 };
 export default function InfluencerForm() {
   const [f, setF] = useState({ name: '', fb: '', ig: '', ig_followers: '', tiktok: '', tiktok_followers: '', youtube: '', bio: '', niches: [], contact: '' });
-  const [msg, setMsg] = useState(null); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
+  const [mine, setMine] = useState(false); const [msg, setMsg] = useState(null); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
   const set = k => e => setF({ ...f, [k]: e.target.value });
   const tog = k => setF({ ...f, niches: f.niches.includes(k) ? f.niches.filter(x => x !== k) : f.niches.length >= 3 ? f.niches : [...f.niches, k] });
   async function submit(e) {
     e.preventDefault(); setBusy(true); setMsg(null);
-    const r = await fetch('/api/influencer/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) });
-    const j = await r.json().catch(() => ({})); setBusy(false); r.ok ? setDone(true) : setMsg(j.error || 'Алдаа гарлаа');
+    const r = await api('/api/influencer/submit', { ...f, mine }); setBusy(false); r.ok ? setDone(true) : setMsg(r.error || 'Алдаа гарлаа');
   }
   if (done) return <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>Баярлалаа! Админ шалгаад нийтэлнэ. <Link href="/influencer" style={{ textDecoration: 'underline' }}>Инфлүэнсерүүд →</Link></div>;
   const pair = (k, lab, ph, nk) => <div className="row" style={{ gap: 10, alignItems: 'flex-end' }}>
@@ -28,6 +29,7 @@ export default function InfluencerForm() {
       <div className="row" style={{ marginTop: 9 }}>{Object.entries(NICHES).map(([k, v]) => { const on = f.niches.includes(k); return <button type="button" key={k} aria-pressed={on} className={'chip' + (on ? ' on' : '')} onClick={() => tog(k)}>{on && '✓ '}{v}</button>; })}</div></div>
     <div><label htmlFor="ib" className="lab">Товч танилцуулга <span style={S}>· заавал биш</span></label><input id="ib" className="field" maxLength={160} value={f.bio} onChange={set('bio')} /></div>
     <div><label htmlFor="ic" className="lab">Хамтран ажиллах утас эсвэл и-мэйл <span style={S}>· зөвхөн админ харна</span></label><input id="ic" className="field" maxLength={80} value={f.contact} onChange={set('contact')} /></div>
+    <Mine value={mine} onChange={setMine} what="Энэ миний профайл" />
     {msg && <div className="err">{msg}</div>}
     <button className="btn dark" disabled={busy || !f.niches.length} style={{ padding: 16 }}>{busy ? 'Түр хүлээ…' : 'Санал болгох →'}</button>
   </form>;

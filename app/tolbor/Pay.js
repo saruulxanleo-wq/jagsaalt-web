@@ -38,7 +38,7 @@ export default function Pay({ product, target, slug, listings }) {
   async function go(e) {
     e.preventDefault(); setBusy(true); setErr(null);
     const r = await api('/api/order', { product, target: t, slug, months: m, contact }); setBusy(false);
-    r.ok ? setRes(r) : setErr(r.error === 'Нэвтэрнэ үү' ? 'Эхлээд «Миний агентлаг» хэсгээр нэвтэрнэ үү.' : r.error);
+    r.ok ? setRes(r) : setErr(r.error === 'Нэвтэрнэ үү' ? 'Эхлээд «Миний самбар» хэсгээр нэвтэрнэ үү.' : r.error);
   }
   return <section className="wrap" style={{ marginTop: 10, maxWidth: 640 }}>
     <h1 className="h" style={{ fontSize: 32, fontWeight: 800 }}>{P.icon} {P.label}</h1>

@@ -22,7 +22,7 @@ export default function Root({ children }) {
         <div className="wrap"><nav className="top">
           <Link href="/" className="logo"><i /><span>{n1}<b>.{n2}</b></span></Link>
           <Nav />
-          <div className="row"><Link href="/minii" className="btn ghost">Миний агентлаг</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
+          <div className="row"><Link href="/minii" className="btn ghost">Миний самбар</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
         </nav></div>
         {children}
         <footer><div className="wrap" style={{ paddingTop: 34 }}><Subscribe source="footer" variant="footer" /></div><div className="wrap row" style={{ justifyContent: 'space-between', paddingTop: 32, paddingBottom: 32 }}>
