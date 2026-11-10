@@ -5,7 +5,8 @@
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
-  "vars": { "SITE_URL": "https://jagsaalt.saruulxanleo.workers.dev", "META_PIXEL_ID": "" }
+  "vars": { "SITE_URL": "https://jagsaalt.saruulxanleo.workers.dev" },
+  "keep_vars": true
   // SITE_URL: домэйн авсны дараа https://jagsaalt.mn болгож солино.
   // Нууц түлхүүрүүд: wrangler secret put SUPABASE_SECRET_KEY / WESEND_API_KEY
   // эсвэл Cloudflare dashboard → Worker → Settings → Variables and Secrets

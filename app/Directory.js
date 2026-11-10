@@ -3,7 +3,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import ToolStrip from './ToolStrip';
 import Link from 'next/link';
 import Card from './Card';
-import { CATS, CAT_TOPIC, isActive, catsOf, catLabel } from '@/lib/config';
+import { CATS, CAT_TOPIC, isActive, catsOf, catLabel, isFeatured } from '@/lib/config';
 const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 export default function Directory({ list, tools = [] }) {
   const [seed, setSeed] = useState(null); useEffect(() => setSeed(shuffle(tools)), [tools]);
@@ -13,8 +13,10 @@ export default function Directory({ list, tools = [] }) {
     const s = q.trim().toLowerCase();
     let r = list.filter(a => (cat === 'all' || catsOf(a).includes(cat)) && (!s || a.name.toLowerCase().includes(s) || (a.description || '').toLowerCase().includes(s)));
     if (sort === 'name') r = [...r].sort((x, y) => x.name.localeCompare(y.name));
-    return r;
-  }, [list, q, cat, sort]);
+    // Онцлох агентлагууд эхэнд (хуудас ачаалах бүрт дараалал нь солигдоно)
+    const f = (seed ? shuffle(r.filter(isFeatured)) : r.filter(isFeatured));
+    return f.length ? [...f, ...r.filter(a => !isFeatured(a))] : r;
+  }, [list, q, cat, sort, seed]);
   // Хэрэгслийн мөр: эхний 6 картын дараа, дараа нь 12 карт тутамд. Ивээн тэтгэсэн → ангилалд таарах → бусад
   const pool = useMemo(() => { const base = seed || tools, tp = CAT_TOPIC[cat];
     const rank = l => (l.sponsored ? 0 : 2) + (tp && (l.topics || []).includes(tp) ? 0 : 1);

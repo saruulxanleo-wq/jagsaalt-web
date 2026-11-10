@@ -77,7 +77,7 @@ export default function Wizard() {
       <div style={{ display: 'grid', gap: 12, marginTop: 18 }}>{res.map((a, i) => { const on = pick.includes(a.slug); return <div key={a.slug} className="panel" style={{ padding: 18, display: 'flex', gap: 14, alignItems: 'flex-start', boxShadow: on ? 'inset 0 0 0 2.5px var(--v)' : undefined }}>
         <Logo a={a} size={56} radius={14} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="row" style={{ justifyContent: 'space-between', gap: 8 }}><b className="h" style={{ fontSize: 18, fontWeight: 700 }}>{i + 1}. {a.name}</b>{a.verified && <span className="badge b-ver">✓ Баталгаажсан</span>}</div>
+          <div className="row" style={{ justifyContent: 'space-between', gap: 8 }}><b className="h" style={{ fontSize: 18, fontWeight: 700 }}>{i + 1}. {a.name}</b><span className="row" style={{ gap: 6 }}>{a.featured_until && new Date(a.featured_until) > new Date() && <span className="badge b-feat">⭐ Онцлох</span>}{a.verified && <span className="badge b-ver">✓ Баталгаажсан</span>}</span></div>
           <div className="row" style={{ gap: 6, marginTop: 6 }}>{a.categories.slice(0, 3).map(k => <span key={k} className={`cat ${catTone(k)}`}>{catLabel(k)}</span>)}{a.followers ? <span style={{ color: 'var(--mute)', fontSize: 13.5, fontWeight: 600 }}>{fmtNum(a.followers)} дагагч</span> : null}</div>
           <ul style={{ listStyle: 'none', padding: 0, marginTop: 10, display: 'grid', gap: 4, fontSize: 14.5 }}>{a.why.map(w => <li key={w}><span style={{ color: '#2FB344', fontWeight: 800 }}>✓</span> {w}</li>)}</ul>
           <div className="row" style={{ marginTop: 10, gap: 8 }}>
@@ -88,7 +88,7 @@ export default function Wizard() {
         {sent ? <div><h2 className="h" style={{ fontSize: 24, fontWeight: 800 }}>Баярлалаа! ✓</h2><p style={{ color: '#CFCAE6', marginTop: 8 }}>Хүсэлтийг тань хүлээн авлаа. Ажлын 1 өдөрт тантай холбогдож, сонгосон агентлагуудаас үнийн санал авахад тусална.</p></div> :
         <form onSubmit={send} style={{ display: 'grid', gap: 12 }}>
           <h2 className="h" style={{ fontSize: 22, fontWeight: 800 }}>Сонгосон {pick.length} агентлагаас үнийн санал авах</h2>
-          <p style={{ color: '#CFCAE6', fontSize: 15 }}>Мэдээллээ үлдээгээрэй. Бид хэрэгцээг тань агентлагуудад танилцуулж, үнийн саналыг нэг дор цуглуулж өгнө. Үнэгүй.</p>
+          <p style={{ color: '#CFCAE6', fontSize: 15 }}>Мэдээллээ үлдээгээрэй. Хэрэгцээг тань сонгосон болон тохирох 3 хүртэлх агентлагт дамжуулж, үнийн санал авахуулна. Танд үнэгүй.</p>
           <div className="row" style={{ gap: 10 }}>
             <input aria-label="Нэр" className="field" style={{ flex: 1, minWidth: 200, marginTop: 0 }} placeholder="Нэр *" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} required />
             <input aria-label="Байгууллага" className="field" style={{ flex: 1, minWidth: 200, marginTop: 0 }} placeholder="Байгууллага" value={f.company} onChange={e => setF({ ...f, company: e.target.value })} /></div>
@@ -98,7 +98,7 @@ export default function Wizard() {
           <textarea aria-label="Нэмэлт мэдээлэл" className="field" style={{ marginTop: 0 }} rows={2} placeholder="Нэмэлт мэдээлэл (заавал биш)" value={f.note} onChange={e => setF({ ...f, note: e.target.value })} />
           {err && <div className="err">{err}</div>}
           <button className="btn lime" disabled={busy || !pick.length} style={{ padding: 16, fontSize: 16 }}>{busy ? 'Илгээж байна…' : 'Үнийн санал авах →'}</button>
-          <p style={{ color: '#A9A3C4', fontSize: 13 }}>Мэдээллийг зөвхөн үнийн санал авахад ашиглана. <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал</Link></p>
+          <p style={{ color: '#A9A3C4', fontSize: 13 }}>Мэдээллийг зөвхөн үнийн санал авахад ашиглаж, 3-аас илүү агентлагт өгөхгүй. <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал</Link></p>
         </form>}
       </div>
       <button type="button" className="btn ghost" style={{ marginTop: 14 }} onClick={() => { setStep(0); setSent(false); }}>↺ Дахин эхлэх</button>

@@ -21,9 +21,10 @@ export async function GET(req) {
   const { data: iev } = await d.from('events').select('influencer_id').not('influencer_id', 'is', null).gte('created_at', new Date(Date.now() - 30 * 864e5).toISOString()).limit(50000);
   const ic = {}; for (const e of iev || []) ic[e.influencer_id] = (ic[e.influencer_id] || 0) + 1;
   const { data: itop } = Object.keys(ic).length ? await d.from('influencers').select('id,name,slug').in('id', Object.keys(ic).slice(0, 200)) : { data: [] };
+  const { data: orders } = await d.from('orders').select('id,code,product,target_name,months,amount,contact,status,created_at,paid_at').in('status', ['pending', 'paid']).order('created_at', { ascending: false }).limit(60);
   const { data: leads } = await d.from('leads').select('*').order('created_at', { ascending: false }).limit(50);
   const ids = [...new Set((claims || []).map(c => c.user_id))];
   const { data: profs } = ids.length ? await d.from('profiles').select('id,email,full_name').in('id', ids) : { data: [] };
   const pm = Object.fromEntries((profs || []).map(p => [p.id, p]));
-  return json({ infPending: infp || [], infTop: (itop || []).map(x => ({ ...x, clicks: ic[x.id] })).sort((a, b) => b.clicks - a.clicks).slice(0, 15), listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
+  return json({ orders: orders || [], infPending: infp || [], infTop: (itop || []).map(x => ({ ...x, clicks: ic[x.id] })).sort((a, b) => b.clicks - a.clicks).slice(0, 15), listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
 }

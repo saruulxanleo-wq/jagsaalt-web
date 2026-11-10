@@ -6,6 +6,7 @@ import { sb, api } from '@/lib/sbclient';
 import { catsOf } from '@/lib/config';
 import CatPicker from '../CatPicker';
 import EditAgency from './EditAgency';
+import Monetize from './Monetize';
 import FbPreview from '../FbPreview';
 const Step = ({ n, title, done, active, children }) => (
   <div className="panel" style={{ marginTop: 18, opacity: active || done ? 1 : .55 }}>
@@ -44,7 +45,7 @@ export default function Account() {
   if (!me) return <section className="wrap" style={{ padding: 60 }}>{err ? <div className="err">{err}</div> : 'Ачаалж байна…'}</section>;
   if (me.edit_agency) return <section className="wrap" style={{ marginTop: 20, maxWidth: 860 }}>
     <h1 className="h" style={{ fontSize: 34, fontWeight: 800 }}>Админ: {me.edit_agency.name}</h1>
-    <div className="panel" style={{ marginTop: 18 }}><EditAgency agency={me.edit_agency} adminSlug={me.edit_agency.slug} /></div></section>;
+    <div className="panel" style={{ marginTop: 18 }}><EditAgency agency={me.edit_agency} adminSlug={me.edit_agency.slug} /></div><Monetize agency={me.edit_agency} slug={me.edit_agency.slug} /></section>;
   const step = !me.phone_verified ? 1 : !me.agency ? 2 : 3;
   const pending = me.claim?.status === 'pending';
   return <section className="wrap" style={{ marginTop: 20, maxWidth: 860 }}>
@@ -79,6 +80,7 @@ export default function Account() {
     </Step>
     <Step n={3} title="Профайлаа засах" done={false} active={step === 3}>
       {me.agency && <EditAgency agency={me.agency} />}
+      {me.agency && <Monetize agency={me.agency} />}
     </Step>
   </section>;
 }

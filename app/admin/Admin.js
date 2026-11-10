@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { sb, api } from '@/lib/sbclient';
-import { catsOf, catLabel, TYPES, TOPICS, host, NICHES, fmtNum } from '@/lib/config';
+import { catsOf, catLabel, TYPES, TOPICS, host, NICHES, fmtNum, PRODUCTS, fmtMnt } from '@/lib/config';
 import { NEEDS, BUDGETS, SIZES, PRIORITIES } from '@/lib/match';
 const ago = t => { const h = Math.round((Date.now() - new Date(t)) / 36e5); return h < 1 ? 'дөнгөж сая' : h < 24 ? `${h} цагийн өмнө` : `${Math.round(h / 24)} өдрийн өмнө`; };
 const Box = ({ title, n, children }) => <div className="panel" style={{ marginTop: 18 }}><h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>{title} <span style={{ color: 'var(--mute)' }}>{n}</span></h2><div style={{ display: 'grid', gap: 12, marginTop: 14 }}>{n ? children : <p style={{ color: 'var(--mute)' }}>Хоосон.</p>}</div></div>;
@@ -38,6 +38,11 @@ export default function Admin() {
       <div style={{ fontSize: 14 }}>{(l.answers?.needs || []).map(k => NEEDS[k]?.label).join(', ')} · {BUDGETS[l.answers?.budget]?.[0]} · {SIZES[l.answers?.size]} · {PRIORITIES[l.answers?.priority]}{l.answers?.industry && ` · ${l.answers.industry}`}</div>
       <div style={{ fontSize: 14 }}>Агентлаг: {l.agencies.map(s => <Link key={s} href={`/a/${s}`} style={{ color: 'var(--v)', marginRight: 8 }}>{s}</Link>)}{l.utm?.utm_campaign && <span style={{ color: 'var(--mute)' }}> · кампанит: {l.utm.utm_campaign}</span>}</div>
       {l.note && <div style={{ fontSize: 14, color: 'var(--mute)' }}>«{l.note}»</div>}</Row>)}</Box>
+    <Box title="Захиалга — төлбөр хүлээгдэж буй" n={data.orders.filter(o => o.status === 'pending').length}>{data.orders.filter(o => o.status === 'pending').map(o => <Row key={o.id}
+      actions={<><button className="btn v" onClick={() => act('order', o.id, 'approve', `${o.code}: ${fmtMnt(o.amount)} дансанд орсон уу? Идэвхжүүлэх үү?`)}>Төлбөр орсон</button><button className="btn ghost" onClick={() => act('order', o.id, 'reject')}>Цуцлах</button></>}>
+      <b>{o.code}</b> · {PRODUCTS[o.product]?.label}{o.months > 1 && ` · ${o.months} сар`} · <b>{fmtMnt(o.amount)}</b> <span style={{ color: 'var(--mute)' }}>· {o.target_name} · {o.contact} · {ago(o.created_at)}</span></Row>)}</Box>
+    <Box title={`Төлөгдсөн захиалга · нийт ${fmtMnt(data.orders.filter(o => o.status === 'paid').reduce((s, o) => s + o.amount, 0))}`} n={data.orders.filter(o => o.status === 'paid').length}>{data.orders.filter(o => o.status === 'paid').map(o => <Row key={o.id}>
+      <b>{o.code}</b> · {PRODUCTS[o.product]?.label} · {fmtMnt(o.amount)} <span style={{ color: 'var(--mute)' }}>· {o.target_name} · {ago(o.paid_at)}</span></Row>)}</Box>
     <Box title="Инфлүэнсер — шинэ санал" n={data.infPending.length}>{data.infPending.map(l => <Row key={l.id}
       actions={<><button className="btn v" onClick={() => act('influencer', l.id, 'approve')}>Нийтлэх</button><button className="btn ghost" onClick={() => act('influencer', l.id, 'reject')}>Татгалзах</button></>}>
       <b>{l.name}</b> <span style={{ color: 'var(--mute)' }}>· {(l.niches || []).map(k => NICHES[k]).join(', ')} · {ago(l.created_at)}</span>

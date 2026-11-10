@@ -26,7 +26,7 @@ export default function Root({ children }) {
         {children}
         <footer><div className="wrap row" style={{ justifyContent: 'space-between', paddingTop: 32, paddingBottom: 32 }}>
           <div className="logo" style={{ color: '#fff' }}><i /><span>{n1}<b style={{ color: 'var(--l)' }}>.{n2}</b></span></div>
-          <p style={{ fontSize: 14 }}>Идэвхтэй эсэхийг Saruul RADAR шалгана · Үнэгүй жагсаалт · <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал ба нөхцөл</Link> · <Link href="/aldaa" style={{ textDecoration: 'underline' }}>Алдаа мэдээлэх</Link></p>
+          <p style={{ fontSize: 14 }}>Идэвхтэй эсэхийг Saruul RADAR шалгана · Үнэгүй жагсаалт · <Link href="/une" style={{ textDecoration: 'underline' }}>Үнийн санал</Link> · <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал ба нөхцөл</Link> · <Link href="/aldaa" style={{ textDecoration: 'underline' }}>Алдаа мэдээлэх</Link></p>
         </div></footer>
       </body>
     </html>

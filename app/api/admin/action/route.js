@@ -1,3 +1,4 @@
+import { activateOrder } from '@/lib/orders';
 import { db, fail, json, authUser, isAdmin, mail, esc, origin } from '@/lib/server';
 export async function POST(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна', 503);
@@ -8,6 +9,10 @@ export async function POST(req) {
     if (action === 'approve') await d.from('agencies').update({ status: 'approved', updated_at: now }).eq('id', id);
     else if (action === 'reject' || action === 'hide') await d.from('agencies').update({ status: 'rejected', updated_at: now }).eq('id', id);
     else if (action === 'delete') await d.from('agencies').delete().eq('id', id);
+    else return fail('Буруу үйлдэл');
+  } else if (kind === 'order') {
+    if (action === 'approve') { const r = await activateOrder(d, id); if (r.error) return fail(r.error); }
+    else if (action === 'reject') await d.from('orders').update({ status: 'cancelled' }).eq('id', id).eq('status', 'pending');
     else return fail('Буруу үйлдэл');
   } else if (kind === 'influencer') {
     if (action === 'delete') await d.from('influencers').delete().eq('id', id);

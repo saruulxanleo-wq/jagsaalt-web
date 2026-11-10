@@ -76,3 +76,5 @@ footer{background:var(--ink);color:#CFCAE6;margin-top:80px}
 .pl{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border-radius:14px;background:var(--bg,#F4F2FA);font-size:13px;transition:transform .15s}
 .pl:hover{transform:translateY(-2px)}.pl b{font-weight:700}.pl span{font-size:17px;font-weight:800}
 .pl-fb{background:#E7F0FE;color:#1559C8}.pl-ig{background:#FCE8F1;color:#B3246A}.pl-tt{background:#E9F7F6;color:#127A72}.pl-yt{background:#FDECEC;color:#C42B2B}
+
+.badge.b-feat{background:#FFF3C4;color:#7A5A00}.card.feat{box-shadow:0 0 0 2px #F5C542,0 10px 30px rgba(245,197,66,.18)}
