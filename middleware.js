@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { SITE_URL } from './lib/config';
 // Хуучин *.workers.dev болон www. хаягаас үндсэн домэйн рүү 301 (API-г хөндөхгүй: QPay callback гэх мэт)
 export function middleware(req) {
-  const canon = (process.env.SITE_URL || '').replace(/\/$/, '');
+  const canon = SITE_URL.replace(/\/$/, '');
   let ch; try { ch = new URL(canon).host; } catch { return NextResponse.next(); }
   const host = req.headers.get('host') || '';
   if (!ch || ch.endsWith('workers.dev') || host === ch || host.startsWith('localhost')) return NextResponse.next();
