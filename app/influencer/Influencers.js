@@ -54,7 +54,7 @@ export default function Influencers({ list }) {
   return <section className="wrap" style={{ marginTop: 10 }}>
     <h1 className="h" style={{ fontSize: 'clamp(28px,3.6vw,42px)', fontWeight: 800 }}>Монголын инфлүэнсерүүд</h1>
     <p style={{ color: 'var(--mute)', fontSize: 17, marginTop: 8, maxWidth: 720 }}>Facebook, Instagram, TikTok-д 10 000-аас дээш дагагчтай {list.length} бүтээгч. Чиглэл, хүрээгээр шүүгээд шууд хуудас руу нь ороорой.</p>
-    <div className="row" style={{ marginTop: 18, gap: 10 }}>
+    <div className="row ifl" style={{ marginTop: 18, gap: 10 }}>
       <input className="field" style={{ marginTop: 0, maxWidth: 340, borderRadius: 999 }} placeholder="Нэрээр хайх…" value={q} onChange={e => setQ(e.target.value)} aria-label="Хайх" />
       <select className="field" style={{ marginTop: 0, width: 'auto', borderRadius: 999 }} value={rc} onChange={e => setRc(e.target.value)} aria-label="Дагагч">{REACH.map(r => <option key={r[0]} value={r[0]}>{r[0] === 'all' ? 'Дагагч: бүгд' : r[1]}</option>)}</select>
       <select className="field" style={{ marginTop: 0, width: 'auto', borderRadius: 999 }} value={pf} onChange={e => setPf(e.target.value)} aria-label="Платформ"><option value="all">Платформ: бүгд</option><option value="fb">Facebook</option><option value="ig">Instagram</option><option value="tt">TikTok</option></select>
