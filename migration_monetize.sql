@@ -28,3 +28,4 @@ create table if not exists lead_access (
 );
 alter table lead_access enable row level security;
 select 'ok';
+alter table orders add column if not exists qpay_invoice_id text;

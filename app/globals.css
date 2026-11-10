@@ -78,3 +78,5 @@ footer{background:var(--ink);color:#CFCAE6;margin-top:80px}
 .pl-fb{background:#E7F0FE;color:#1559C8}.pl-ig{background:#FCE8F1;color:#B3246A}.pl-tt{background:#E9F7F6;color:#127A72}.pl-yt{background:#FDECEC;color:#C42B2B}
 
 .badge.b-feat{background:#FFF3C4;color:#7A5A00}.card.feat{box-shadow:0 0 0 2px #F5C542,0 10px 30px rgba(245,197,66,.18)}
+.qbanks{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;width:100%}.qbank{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;padding:8px;border-radius:12px;background:var(--bg)}.qbank img{width:40px;height:40px;border-radius:10px}
+@media(min-width:900px){.qbanks{display:none}}

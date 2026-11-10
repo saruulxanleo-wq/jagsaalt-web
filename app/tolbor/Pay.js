@@ -1,9 +1,23 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/sbclient';
 import { PRODUCTS, priceFor, fmtMnt, TYPES } from '@/lib/config';
+function QPayBox({ r }) {
+  const [st, setSt] = useState('pending');
+  useEffect(() => { if (st !== 'pending') return; const t = setInterval(async () => { const j = await fetch('/api/order/check?code=' + r.code).then(x => x.json()).catch(() => ({})); if (j.status && j.status !== 'pending') setSt(j.status); }, 4000); return () => clearInterval(t); }, [st]);
+  if (st === 'paid') return <div className="panel ok"><b className="h" style={{ fontSize: 22 }}>Төлбөр орлоо ✓</b><p style={{ marginTop: 8 }}>Захиалга <b>{r.code}</b> идэвхжлээ. Баярлалаа!</p></div>;
+  const q = r.qpay;
+  return <div className="panel" style={{ display: 'grid', gap: 12, justifyItems: 'center', textAlign: 'center' }}>
+    <b className="h" style={{ fontSize: 20 }}>QPay-ээр төлөх · {fmtMnt(r.amount)}</b>
+    {q.qr_image && <img src={'data:image/png;base64,' + q.qr_image} alt="QPay QR" style={{ width: 240, height: 240, borderRadius: 16, background: '#fff' }} />}
+    <p style={{ color: 'var(--mute)', margin: 0 }}>Банкны аппаараа QR уншуулах эсвэл доороос банкаа сонго. Төлбөр ормогц энэ хуудас өөрөө шинэчлэгдэнэ.</p>
+    {q.urls?.length > 0 && <div className="qbanks">{q.urls.map(u => <a key={u.name} href={u.link} className="qbank">{u.logo && <img src={u.logo} alt="" />}<span>{u.name}</span></a>)}</div>}
+    <div style={{ color: 'var(--mute)', fontSize: 14 }}>Захиалгын дугаар: <b>{r.code}</b> · төлбөр хүлээж байна…</div>
+  </div>;
+}
 export function BankBox({ r }) {
+  if (r.qpay) return <QPayBox r={r} />;
   const b = r.bank || {}; const copy = t => navigator.clipboard?.writeText(t);
   return <div className="panel ok" style={{ display: 'grid', gap: 10 }}>
     <b className="h" style={{ fontSize: 20 }}>Захиалга үүслээ ✓</b>

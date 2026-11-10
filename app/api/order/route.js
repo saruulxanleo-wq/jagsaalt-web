@@ -2,6 +2,8 @@ import { db, fail, json, authUser, editableAgency, mail, ADMIN_EMAIL, decideLink
 import { PRODUCTS, priceFor, fmtMnt, LEAD_MAX } from '@/lib/config';
 import { score } from '@/lib/match';
 import { bank } from '@/lib/orders';
+import { qpayOn, createInvoice } from '@/lib/qpay';
+import { sign } from '@/lib/server';
 const code = () => 'J' + Array.from(crypto.getRandomValues(new Uint8Array(5)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
 // Захиалга үүсгэнэ → дансны мэдээлэл + гүйлгээний утга буцаана, админд имэйл
 export async function POST(req) {
@@ -29,13 +31,20 @@ export async function POST(req) {
     if ((acc || []).some(x => x.agency_id === ag.id)) return fail('Та энэ хүсэлтийг аль хэдийн авсан');
     if ((acc || []).length >= LEAD_MAX) return fail('Энэ хүсэлтийг 3 агентлаг авсан байна');
     const { data: dup } = await d.from('orders').select('code,amount').eq('product', 'lead').eq('target_id', lead.id).eq('agency_id', ag.id).eq('status', 'pending').maybeSingle();
-    if (dup) return json({ ok: true, code: dup.code, amount: dup.amount, bank: bank() });
+    if (dup) await d.from('orders').update({ status: 'cancelled' }).eq('code', dup.code);
     Object.assign(row, { target_id: lead.id, target_name: 'Клиентийн хүсэлт ' + lead.created_at.slice(0, 10), agency_id: ag.id });
   }
   row.code = code();
   const { data: o, error } = await d.from('orders').insert(row).select('id').single();
   if (error) return fail('Захиалга үүсгэж чадсангүй', 500);
   const og = origin(req);
+  if (qpayOn()) {
+    try {
+      const inv = await createInvoice({ code: row.code, amount: row.amount, description: `jagsaalt.mn · ${P.label} · ${row.target_name}`, callback: `${og}/api/qpay?code=${row.code}&t=${await sign('qpay:' + row.code)}` });
+      await d.from('orders').update({ qpay_invoice_id: inv.invoice_id }).eq('id', o.id);
+      return json({ ok: true, code: row.code, amount: row.amount, qpay: inv });
+    } catch (e) { console.log('qpay', e.message); /* QPay ажиллахгүй бол дансаар */ }
+  }
   await mail(ADMIN_EMAIL(), `Захиалга ${row.code}: ${P.label} · ${fmtMnt(row.amount)}`, `<p><b>${esc(P.label)}</b>${months > 1 ? ` · ${months} сар` : ''}<br>${esc(row.target_name)}<br>Дүн: <b>${fmtMnt(row.amount)}</b><br>Гүйлгээний утга: <b>${row.code}</b><br>Холбоо барих: ${esc(row.contact || '-')}</p><p>Дансандаа ${row.code} утгатай ${fmtMnt(row.amount)} орсныг шалгаад:</p><p>${btn(await decideLink(og, 'order', o.id, 'approve'), 'Төлбөр орсон — идэвхжүүлэх', '#2FB344')}${btn(await decideLink(og, 'order', o.id, 'reject'), 'Цуцлах', '#E8452A')}</p>`);
   return json({ ok: true, code: row.code, amount: row.amount, bank: bank() });
 }
