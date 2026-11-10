@@ -1,7 +1,7 @@
 import { db, sign, mail, esc, origin } from '@/lib/server';
 import { activateOrder } from '@/lib/orders';
 import { decideOwn } from '@/lib/ownDecide';
-const page = (SITE_URL, t, ok = true) => new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><body style="font-family:system-ui;background:#F6F4FF;display:grid;place-items:center;min-height:100vh;margin:0"><div style="background:#fff;padding:40px;border-radius:24px;max-width:420px;text-align:center"><div style="font-size:40px">${ok ? '✓' : '✕'}</div><p style="font-size:18px">${t}</p><a href="${SITE_URL}" style="color:#6A3DF0">brief.mn руу буцах</a></div>`, { headers: { 'content-type': 'text/html; charset=utf-8' } });
+const page = (SITE_URL, t, ok = true) => new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><body style="font-family:system-ui;background:#F3F8F4;display:grid;place-items:center;min-height:100vh;margin:0"><div style="background:#fff;padding:40px;border-radius:24px;max-width:420px;text-align:center"><div style="font-size:40px">${ok ? '✓' : '✕'}</div><p style="font-size:18px">${t}</p><a href="${SITE_URL}" style="color:#0B8A3E">brief.mn руу буцах</a></div>`, { headers: { 'content-type': 'text/html; charset=utf-8' } });
 export async function GET(req) {
   const SITE_URL = origin(req); const P = (t, ok) => page(SITE_URL, t, ok);
   const q = new URL(req.url).searchParams; const k = q.get('k'), id = q.get('id'), a = q.get('a');

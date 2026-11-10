@@ -12,6 +12,6 @@ export async function POST(req) {
   if (ex) await d.from('subscribers').update({ role: role || undefined, status: 'pending' }).eq('id', ex.id);
   else { const { error } = await d.from('subscribers').insert({ email, role, source }); if (error) return fail('Хадгалж чадсангүй', 500); }
   const o = origin(req), t = await sign('sub:' + email);
-  await mail(email, 'И-мэйлээ баталгаажуулна уу', page(o, `Маркетингийн сар бүрийн тоймд бүртгүүлсэнд баярлалаа. Доорх товчийг дарж баталгаажуулаарай:</p><p><a href="${o}/api/subscribe/confirm?e=${encodeURIComponent(email)}&t=${t}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#6A3DF0;color:#fff;text-decoration:none;font-weight:700">Баталгаажуулах</a></p><p style="color:#888;font-size:13px">Хэрэв та бүртгүүлээгүй бол энэ имэйлийг үл тоомсорлоорой.`));
+  await mail(email, 'И-мэйлээ баталгаажуулна уу', page(o, `Маркетингийн сар бүрийн тоймд бүртгүүлсэнд баярлалаа. Доорх товчийг дарж баталгаажуулаарай:</p><p><a href="${o}/api/subscribe/confirm?e=${encodeURIComponent(email)}&t=${t}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#0B8A3E;color:#fff;text-decoration:none;font-weight:700">Баталгаажуулах</a></p><p style="color:#888;font-size:13px">Хэрэв та бүртгүүлээгүй бол энэ имэйлийг үл тоомсорлоорой.`));
   return json({ ok: true });
 }

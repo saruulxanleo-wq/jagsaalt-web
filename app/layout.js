@@ -20,13 +20,13 @@ export default function Root({ children }) {
       <body>
         {pid && <script dangerouslySetInnerHTML={{ __html: pixel(pid) }} />}
         <div className="wrap"><nav className="top">
-          <Link href="/" className="logo"><i /><span>{n1}<b>.{n2}</b></span></Link>
+          <Link href="/" className="logo" aria-label={SITE_NAME}><img src="/logo.png" alt={SITE_NAME} width={199} height={34} /></Link>
           <Nav />
           <div className="row"><Link href="/minii" className="btn ghost">Миний самбар</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
         </nav></div>
         {children}
         <footer><div className="wrap" style={{ paddingTop: 34 }}><Subscribe source="footer" variant="footer" /></div><div className="wrap row" style={{ justifyContent: 'space-between', paddingTop: 32, paddingBottom: 32 }}>
-          <div className="logo" style={{ color: '#fff' }}><i /><span>{n1}<b style={{ color: 'var(--l)' }}>.{n2}</b></span></div>
+          <div className="logo" style={{ color: '#fff' }}><i /><span>{n1}<b style={{ color: '#2BD46E' }}>.{n2}</b></span></div>
           <p style={{ fontSize: 14 }}>Идэвхтэй эсэхийг Saruul RADAR шалгана · Үнэгүй жагсаалт · <Link href="/une" style={{ textDecoration: 'underline' }}>Үнийн санал</Link> · <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал ба нөхцөл</Link> · <Link href="/aldaa" style={{ textDecoration: 'underline' }}>Алдаа мэдээлэх</Link></p>
         </div></footer>
       </body>

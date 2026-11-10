@@ -1,10 +1,10 @@
 // Багийн гишүүний бэлэн дүрслэлүүд (эрэгтэй m1–m3, эмэгтэй f1–f3). Зураг оруулаагүй үед сонгоно.
 export const AVATARS = {
-  m1: { bg: '#EDE6FF', skin: '#F2C9A5', hair: '#1F1A2E', shirt: '#6A3DF0', g: 'm', style: 1 },
+  m1: { bg: '#E1F4E7', skin: '#F2C9A5', hair: '#1F1A2E', shirt: '#0B8A3E', g: 'm', style: 1 },
   m2: { bg: '#D9F4F6', skin: '#D9A27C', hair: '#3B2A20', shirt: '#0B7A8A', g: 'm', style: 2 },
   m3: { bg: '#EEFBD2', skin: '#C68A62', hair: '#14121F', shirt: '#14121F', g: 'm', style: 3 },
   f1: { bg: '#FFE6DF', skin: '#F2C9A5', hair: '#2A1E1A', shirt: '#E8452A', g: 'f', style: 1 },
-  f2: { bg: '#EDE6FF', skin: '#E3B08C', hair: '#5A3A28', shirt: '#6A3DF0', g: 'f', style: 2 },
+  f2: { bg: '#E1F4E7', skin: '#E3B08C', hair: '#5A3A28', shirt: '#0B8A3E', g: 'f', style: 2 },
   f3: { bg: '#EEFBD2', skin: '#C68A62', hair: '#14121F', shirt: '#3F5A06', g: 'f', style: 3 },
 };
 export default function Avatar({ id, size = 56 }) {
