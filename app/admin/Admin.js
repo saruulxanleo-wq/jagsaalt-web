@@ -35,7 +35,8 @@ export default function Admin() {
   };
   if (s === undefined) return <section className="wrap" style={{ padding: 40 }}>…</section>;
   if (!s) return <section className="wrap" style={{ padding: 40 }}><Link href="/minii" className="btn dark">Нэвтрэх</Link></section>;
-  if (err && !data) return <section className="wrap" style={{ padding: 40 }}><div className="err">{err}</div></section>;
+  if (err && !data) return <section className="wrap" style={{ padding: 40, display: 'grid', gap: 14 }}><div className="err">{err}{err === 'Зөвхөн админ' && <> · Одоо <b>{s.user?.email || 'тодорхойгүй'}</b> бүртгэлээр нэвтэрсэн байна.</>}</div>
+    <button className="btn ghost" style={{ justifySelf: 'start' }} onClick={async () => { await sb().auth.signOut(); location.href = '/minii'; }}>Гараад өөр бүртгэлээр нэвтрэх</button></section>;
   if (!data) return <section className="wrap" style={{ padding: 40 }}>Ачаалж байна…</section>;
   return <section className="wrap" style={{ maxWidth: 980, marginTop: 10 }}>
     <div className="row" style={{ justifyContent: 'space-between' }}>
