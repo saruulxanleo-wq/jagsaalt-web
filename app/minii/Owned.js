@@ -54,7 +54,7 @@ function EditListing({ l, onSaved }) {
   </form>;
 }
 function EditInfluencer({ l, onSaved }) {
-  const [f, setF] = useState({ bio: l.bio || '', photo_url: l.photo_url || '', niches: l.niches || [], ig: l.ig || '', tiktok: l.tiktok || '', fb_url: l.fb_url || '', youtube: l.youtube || '' });
+  const [f, setF] = useState({ bio: l.bio || '', photo_url: l.photo_url || '', niches: l.niches || [], ig: l.ig || '', tiktok: l.tiktok || '', fb_url: l.fb_url || '', youtube: l.youtube || '', dm_url: (l.dm_url || '').replace(/^(tel:\+976|tel:|mailto:)/, '') });
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(null);
   const set = k => e => setF({ ...f, [k]: e.target.value });
   const tog = k => setF({ ...f, niches: f.niches.includes(k) ? f.niches.filter(x => x !== k) : f.niches.length >= 3 ? f.niches : [...f.niches, k] });
@@ -66,6 +66,8 @@ function EditInfluencer({ l, onSaved }) {
     <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
       <div style={{ flex: 1, minWidth: 220 }}><label className="lab">Facebook</label><input className="field" value={f.fb_url} onChange={set('fb_url')} /></div>
       <div style={{ flex: 1, minWidth: 220 }}><label className="lab">YouTube</label><input className="field" value={f.youtube} onChange={set('youtube')} /></div></div>
+    <div><label className="lab">Хамтын ажлын санал хаашаа ирэх вэ? <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· «Шууд бичих» товч энэ рүү очно</span></label><input className="field" placeholder="m.me/… , wa.me/… , 99112233 эсвэл имэйл" value={f.dm_url} onChange={set('dm_url')} />
+      <p style={{ fontSize: 13.5, color: 'var(--mute)', marginTop: 6 }}>Хоосон бол Facebook Messenger эсвэл Instagram DM руу чинь очно. Бөглөвөл картад «✓ Шууд хариулдаг» тэмдэг гарна.</p></div>
     <div><label className="lab">Зургийн линк <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input className="field" value={f.photo_url} onChange={set('photo_url')} /></div>
     <div className="row">{Object.entries(NICHES).map(([k, v]) => chip(f.niches.includes(k), k, v, tog))}</div>
     <p style={{ fontSize: 13.5, color: 'var(--mute)' }}>Дагагчийн тоог бид нийтэд нээлттэй эх сурвалжаас тогтмол шинэчилнэ.</p>

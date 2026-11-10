@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { NICHES, REACH, fbPic, withUtm } from '@/lib/config';
 const fmtNum = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n || 0);
 const track = (id, kind) => { if (!/^[0-9a-f-]{36}$/.test(id)) return; const body = JSON.stringify({ iid: id, kind }); navigator.sendBeacon?.('/api/track', new Blob([body], { type: 'application/json' })); };
+// «Шууд бичих»: эзэмшигчийн сонгосон суваг → Facebook Messenger → Instagram DM
+const fbId = u => { try { const x = new URL(u); return x.searchParams.get('id') || x.pathname.split('/').filter(Boolean)[0] || null; } catch { return null; } };
+export const dmOf = l => l.dm_url ? { href: l.dm_url, via: l.dm_url.startsWith('tel:') ? 'утас' : l.dm_url.startsWith('mailto:') ? 'имэйл' : /wa\.me|whatsapp/.test(l.dm_url) ? 'WhatsApp' : 'өөрийн сонгосон суваг', own: true }
+  : l.fb_url && fbId(l.fb_url) ? { href: 'https://m.me/' + encodeURIComponent(fbId(l.fb_url)), via: 'Messenger' }
+  : l.ig ? { href: 'https://ig.me/m/' + encodeURIComponent(l.ig), via: 'Instagram DM' } : null;
 const PL = [['fb', 'Facebook', l => l.fb_url, l => l.fb_followers], ['ig', 'Instagram', l => l.ig && 'https://www.instagram.com/' + l.ig, l => l.ig_followers], ['tt', 'TikTok', l => l.tiktok && 'https://www.tiktok.com/@' + l.tiktok, l => l.tiktok_followers], ['yt', 'YouTube', l => l.youtube, l => l.yt_followers]];
 function Photo({ l }) {
   const [bad, setBad] = useState(false); const src = l.photo_url || (l.fb_url && fbPic(l.fb_url));
@@ -16,23 +21,26 @@ function Ask({ l, onClose }) {
   async function send(e) { e.preventDefault(); setBusy(true); setErr(null);
     const r = await fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...f, answers: { source: 'influencer', influencer: l.slug, influencer_name: l.name }, agencies: [] }) });
     const j = await r.json().catch(() => ({})); setBusy(false); r.ok ? setOk(true) : setErr(j.error || 'Алдаа гарлаа'); }
-  if (ok) return <div className="panel ok" style={{ padding: 14 }}>✓ Хүсэлт илгээгдлээ. Ажлын 1 өдөрт холбогдож, {l.name}-тай холбоно.</div>;
+  if (ok) return <div className="panel ok" style={{ padding: 14 }}>✓ Хүсэлт илгээгдлээ. Багийнхан ажлын 1 өдөрт холбогдож, кампанит ажлыг хамт төлөвлөнө.</div>;
   return <form onSubmit={send} style={{ display: 'grid', gap: 8 }}>
+    <p style={{ fontSize: 13.5, color: 'var(--mute)', margin: 0 }}>Инфлүэнсер сонгох, үнэ тохирох, гэрээ, тайланг jagsaalt-ийн баг зохион байгуулна. Олон инфлүэнсертэй кампанит ажилд тохиромжтой.</p>
     <input className="field" style={{ marginTop: 0 }} placeholder="Нэр *" required value={f.name} onChange={set('name')} aria-label="Нэр" />
     <input className="field" style={{ marginTop: 0 }} placeholder="Брэнд, байгууллага" value={f.company} onChange={set('company')} aria-label="Байгууллага" />
     <input className="field" style={{ marginTop: 0 }} placeholder="Утас *" inputMode="tel" value={f.phone} onChange={set('phone')} aria-label="Утас" />
-    <textarea className="field" style={{ marginTop: 0 }} rows={2} placeholder="Ямар хамтын ажиллагаа? (пост, reels, төсөв)" value={f.note} onChange={set('note')} aria-label="Санал" />
+    <textarea className="field" style={{ marginTop: 0 }} rows={2} placeholder="Юу хийлгэх вэ? (пост, reels, хэдэн инфлүэнсер, төсөв)" value={f.note} onChange={set('note')} aria-label="Санал" />
     {err && <div className="err">{err}</div>}
     <div className="row" style={{ gap: 8 }}><button className="btn dark" disabled={busy}>{busy ? '…' : 'Илгээх'}</button><button type="button" className="btn ghost" onClick={onClose}>Болих</button></div>
   </form>;
 }
 function Card({ l }) {
-  const [ask, setAsk] = useState(false);
+  const [ask, setAsk] = useState(false); const dm = dmOf(l);
   return <div className="card">
-    <div className="top"><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div>{l.verified && <span className="vbadge" style={{ marginTop: 4 }}>✓ Баталгаажсан</span>}</div></div>
+    <div className="top"><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div>{l.verified && <span className="vbadge" style={{ marginTop: 4 }}>✓ {l.dm_url ? 'Шууд хариулдаг' : 'Баталгаажсан'}</span>}</div></div>
     <div className="row" style={{ gap: 6 }}>{(l.niches || []).map(k => <span key={k} className="badge b-off">{NICHES[k] || k}</span>)}</div>
     <div className="pls">{PL.map(([k, lab, url, n]) => url(l) && <a key={k} href={withUtm(url(l), 'influencer')} target="_blank" rel="noopener" className={'pl pl-' + k} onClick={() => track(l.id, 'social')}><b>{lab}</b><span>{n(l) ? fmtNum(n(l)) : '—'}</span></a>)}</div>
-    {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" style={{ marginTop: 4 }} onClick={() => { setAsk(true); track(l.id, 'social'); }}>Хамтран ажиллах санал илгээх</button>}
+    {dm && <div style={{ marginTop: 4 }}><a href={dm.href} target="_blank" rel="noopener" className="btn dark" style={{ width: '100%', justifyContent: 'center' }} onClick={() => track(l.id, 'dm')}>💬 Шууд бичих</a>
+      <div style={{ fontSize: 12.5, color: 'var(--mute)', marginTop: 5, textAlign: 'center' }}>{dm.own ? `Инфлүэнсерийн ${dm.via} руу очно` : `${dm.via}-т нь шууд очно · хариу удаж магадгүй`}</div></div>}
+    {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" onClick={() => { setAsk(true); track(l.id, 'social'); }}>Багаар зохион байгуулуулах</button>}
     {!l.verified && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=influencer:${l.id}`} className="ownlink" style={{ alignSelf: 'flex-start' }}>Энэ миний профайл</Link>}
   </div>;
 }
