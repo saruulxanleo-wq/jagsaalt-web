@@ -7,6 +7,7 @@ import { catsOf } from '@/lib/config';
 import CatPicker from '../CatPicker';
 import EditAgency from './EditAgency';
 import Monetize from './Monetize';
+import Subscribe from '../Subscribe';
 import FbPreview from '../FbPreview';
 const Step = ({ n, title, done, active, children }) => (
   <div className="panel" style={{ marginTop: 18, opacity: active || done ? 1 : .55 }}>
@@ -81,6 +82,7 @@ export default function Account() {
     <Step n={3} title="Профайлаа засах" done={false} active={step === 3}>
       {me.agency && <EditAgency agency={me.agency} />}
       {me.agency && <Monetize agency={me.agency} />}
+      <div style={{ marginTop: 18 }}><Subscribe source="account" /></div>
     </Step>
   </section>;
 }
