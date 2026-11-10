@@ -12,7 +12,8 @@ export async function GET(req) {
   const { data: pend } = await d.from('orders').select('target_id,code,amount').eq('product', 'lead').eq('agency_id', ag.id).eq('status', 'pending');
   const out = [];
   for (const l of leads || []) {
-    const a = l.answers || {}; const m = a.source === 'profile' ? (l.agencies || []).includes(ag.slug) : score(ag, a); const mine = (acc || []).some(x => x.lead_id === l.id && x.agency_id === ag.id);
+    const a = l.answers || {}; if (a.source && a.source !== 'profile') continue;
+    const m = a.source === 'profile' ? (l.agencies || []).includes(ag.slug) : score(ag, a); const mine = (acc || []).some(x => x.lead_id === l.id && x.agency_id === ag.id);
     if (!m && !mine) continue;
     const taken = (acc || []).filter(x => x.lead_id === l.id).length;
     out.push({ id: l.id, created_at: l.created_at, needs: (a.needs || []).map(k => NEEDS[k]?.label).filter(Boolean), budget: BUDGETS[a.budget]?.[0] || null, size: SIZES[a.size] || null, priority: PRIORITIES[a.priority] || null, industry: a.industry || null,

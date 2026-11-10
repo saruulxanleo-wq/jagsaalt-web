@@ -14,7 +14,7 @@ export async function POST(req) {
   if (error) return fail('Хадгалж чадсангүй', 500);
   const o = origin(req);
   await mail(ADMIN_EMAIL(), `Шинэ клиент: ${name}${row.company ? ' · ' + row.company : ''}`, `<p><b>${esc(name)}</b>${row.company ? ' · ' + esc(row.company) : ''}<br>${esc(phone)} ${esc(email)}</p>
-<p>Хэрэгцээ: ${esc((q.needs || []).map(k => NEEDS[k]?.label).filter(Boolean).join(', '))}<br>Төсөв: ${esc(BUDGETS[q.budget]?.[0] || '-')} / сар<br>Хэмжээ: ${esc(SIZES[q.size] || '-')}<br>Брэнд: ${esc(BRANDS[q.brands] || '-')}${q.source === 'profile' ? '<br>Эх сурвалж: агентлагийн профайл' : ''}<br>Чухалчлах: ${esc(PRIORITIES[q.priority] || '-')}${q.industry ? '<br>Салбар: ' + esc(q.industry) : ''}<br>Зар: ${esc(ADS[q.ads] || '-')}${q.fb ? '<br>FB: ' + esc(q.fb) : ''}</p>
+<p>Хэрэгцээ: ${esc((q.needs || []).map(k => NEEDS[k]?.label).filter(Boolean).join(', '))}<br>Төсөв: ${esc(BUDGETS[q.budget]?.[0] || '-')} / сар<br>Хэмжээ: ${esc(SIZES[q.size] || '-')}<br>Брэнд: ${esc(BRANDS[q.brands] || '-')}${q.source === 'profile' ? '<br>Эх сурвалж: агентлагийн профайл' : q.source === 'influencer' ? '<br><b>Инфлүэнсертэй хамтрах хүсэлт: ' + esc(q.influencer_name || q.influencer) + '</b>' : ''}<br>Чухалчлах: ${esc(PRIORITIES[q.priority] || '-')}${q.industry ? '<br>Салбар: ' + esc(q.industry) : ''}<br>Зар: ${esc(ADS[q.ads] || '-')}${q.fb ? '<br>FB: ' + esc(q.fb) : ''}</p>
 ${row.note ? `<p>Нэмэлт: ${esc(row.note)}</p>` : ''}<p>Сонгосон агентлагууд: ${row.agencies.map(s => `<a href="${o}/a/${s}">${esc(s)}</a>`).join(', ')}</p><p>UTM: ${esc(JSON.stringify(row.utm))}</p><p><a href="${o}/admin">Админ →</a></p>`);
   return json({ ok: true });
 }

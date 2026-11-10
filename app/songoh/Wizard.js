@@ -5,6 +5,20 @@ import { useSearchParams } from 'next/navigation';
 import { NEEDS, BUDGETS, SIZES, PRIORITIES, BRANDS } from '@/lib/match';
 import { catLabel, catTone, fmtNum, fmtMnt } from '@/lib/config';
 import { Logo } from '../Card';
+import ListingCard from '../ListingCard';
+// Хэрэгцээ → хэрэгслийн сэдэв
+const NEED_TOPIC = { social: ['social', 'content'], ads: ['ads'], brand: ['brand', 'design'], video: ['content'], web: ['design'], pr: ['pr'], influencer: ['social'], strategy: ['brand', 'data'], all: ['ads', 'social'] };
+function SelfServe({ q, hub }) {
+  const want = new Set(q.needs.flatMap(k => NEED_TOPIC[k] || []));
+  const pick = [...hub].sort((a, b) => ((b.topics || []).filter(t => want.has(t)).length - (a.topics || []).filter(t => want.has(t)).length) || (a.price === 'Үнэгүй' ? -1 : 1)).slice(0, 3);
+  if (!pick.length) return null;
+  return <div className="strip" style={{ marginTop: 22 }}>
+    <b className="h" style={{ fontSize: 18 }}>Төсөв бага бол: өөрөө эхлэх</b>
+    <p style={{ color: 'var(--mute)', margin: '6px 0 12px', fontSize: 14.5 }}>Сард 1.5 саяас бага төсөвтэй үед агентлагаас гадна фрийлансер эсвэл өөрөө хийх нь илүү үр ашигтай байх нь бий. Эхлэхэд хэрэгтэй хэрэгсэл, сургалтууд:</p>
+    <div className="strip-row">{pick.map(l => <ListingCard key={l.id} l={l} medium="songoh" />)}</div>
+    <Link href="/hereglsel" style={{ color: 'var(--v)', fontWeight: 700, display: 'inline-block', marginTop: 12 }}>Бүх хэрэгсэл, сургалт →</Link>
+  </div>;
+}
 const px = (ev, data) => { try { window.fbq && window.fbq('track', ev, data); } catch {} };
 const Opt = ({ on, onClick, children, disabled }) => <button type="button" onClick={onClick} disabled={disabled} aria-pressed={on}
   style={{ textAlign: 'left', padding: '16px 18px', borderRadius: 18, fontSize: 16.5, fontWeight: 600, background: on ? 'var(--ink)' : '#fff', color: on ? '#fff' : 'var(--ink)', boxShadow: on ? 'none' : 'inset 0 0 0 1.5px var(--line)', opacity: disabled ? .45 : 1, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -26,7 +40,7 @@ function Before({ q }) {
         href={U('https://saruul.work/framework')} cta="Дэлгэрэнгүй" hot={runsAds} />
     </div></div>;
 }
-export default function Wizard() {
+export default function Wizard({ hub = [] }) {
   const sp = useSearchParams();
   const [step, setStep] = useState(0);
   const [q, setQ] = useState({ needs: [], budget: '', size: '', brands: '', priority: '', industry: '', fb: '', ads: '' });
@@ -84,6 +98,7 @@ export default function Wizard() {
             <button type="button" className={'chip' + (on ? ' on' : '')} onClick={() => setPick(on ? pick.filter(x => x !== a.slug) : [...pick, a.slug])}>{on ? '✓ Үнийн санал авна' : '+ Үнийн санал авах'}</button>
             <Link href={`/a/${a.slug}`} target="_blank" className="chip">Профайл үзэх ↗</Link></div>
         </div></div>; })}</div>
+      {['b1', 'b2'].includes(q.budget) && <SelfServe q={q} hub={hub} />}
       {pick.length >= 2 && <div className="panel" style={{ marginTop: 22, overflowX: 'auto' }}>
         <h2 className="h" style={{ fontSize: 20, fontWeight: 800 }}>Сонгосон агентлагуудыг харьцуулах</h2>
         <table className="cmp"><thead><tr><th></th>{res.filter(a => pick.includes(a.slug)).map(a => <th key={a.slug}>{a.name}</th>)}</tr></thead><tbody>
@@ -110,7 +125,6 @@ export default function Wizard() {
           <p style={{ color: '#A9A3C4', fontSize: 13 }}>Мэдээллийг зөвхөн үнийн санал авахад ашиглаж, 3-аас илүү агентлагт өгөхгүй. <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал</Link></p>
         </form>}
       </div>
-      {['b0', 'b1', 'b2'].includes(q.budget) && <Before q={q} />}
       <button type="button" className="btn ghost" style={{ marginTop: 14 }} onClick={() => { setStep(0); setSent(false); }}>↺ Дахин эхлэх</button>
     </>}
   </section>;

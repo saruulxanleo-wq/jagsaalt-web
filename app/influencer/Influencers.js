@@ -10,11 +10,29 @@ function Photo({ l }) {
   return src && !bad ? <img src={src} alt="" loading="lazy" onError={() => setBad(true)} className="logoimg" style={{ width: 56, height: 56, borderRadius: '50%' }} />
     : <span className="logoimg licon" style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--v)', color: '#fff', fontSize: 22 }}>{l.name.trim()[0]}</span>;
 }
+function Ask({ l, onClose }) {
+  const [f, setF] = useState({ name: '', company: '', phone: '', email: '', note: '' }); const [busy, setBusy] = useState(false); const [err, setErr] = useState(null); const [ok, setOk] = useState(false);
+  const set = k => e => setF({ ...f, [k]: e.target.value });
+  async function send(e) { e.preventDefault(); setBusy(true); setErr(null);
+    const r = await fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...f, answers: { source: 'influencer', influencer: l.slug, influencer_name: l.name }, agencies: [] }) });
+    const j = await r.json().catch(() => ({})); setBusy(false); r.ok ? setOk(true) : setErr(j.error || 'Алдаа гарлаа'); }
+  if (ok) return <div className="panel ok" style={{ padding: 14 }}>✓ Хүсэлт илгээгдлээ. Ажлын 1 өдөрт холбогдож, {l.name}-тай холбоно.</div>;
+  return <form onSubmit={send} style={{ display: 'grid', gap: 8 }}>
+    <input className="field" style={{ marginTop: 0 }} placeholder="Нэр *" required value={f.name} onChange={set('name')} aria-label="Нэр" />
+    <input className="field" style={{ marginTop: 0 }} placeholder="Брэнд, байгууллага" value={f.company} onChange={set('company')} aria-label="Байгууллага" />
+    <input className="field" style={{ marginTop: 0 }} placeholder="Утас *" inputMode="tel" value={f.phone} onChange={set('phone')} aria-label="Утас" />
+    <textarea className="field" style={{ marginTop: 0 }} rows={2} placeholder="Ямар хамтын ажиллагаа? (пост, reels, төсөв)" value={f.note} onChange={set('note')} aria-label="Санал" />
+    {err && <div className="err">{err}</div>}
+    <div className="row" style={{ gap: 8 }}><button className="btn dark" disabled={busy}>{busy ? '…' : 'Илгээх'}</button><button type="button" className="btn ghost" onClick={onClose}>Болих</button></div>
+  </form>;
+}
 function Card({ l }) {
+  const [ask, setAsk] = useState(false);
   return <div className="card">
     <div className="top"><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div></div></div>
     <div className="row" style={{ gap: 6 }}>{(l.niches || []).map(k => <span key={k} className="badge b-off">{NICHES[k] || k}</span>)}</div>
     <div className="pls">{PL.map(([k, lab, url, n]) => url(l) && <a key={k} href={withUtm(url(l), 'influencer')} target="_blank" rel="noopener" className={'pl pl-' + k} onClick={() => track(l.id, 'social')}><b>{lab}</b><span>{n(l) ? fmtNum(n(l)) : '—'}</span></a>)}</div>
+    {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" style={{ marginTop: 4 }} onClick={() => { setAsk(true); track(l.id, 'social'); }}>Хамтран ажиллах санал илгээх</button>}
   </div>;
 }
 export default function Influencers({ list }) {
@@ -37,7 +55,7 @@ export default function Influencers({ list }) {
       <button className={'chip' + (ni === 'all' ? ' on' : '')} onClick={() => setNi('all')}>Бүгд<span>{list.length}</span></button>
       {Object.keys(NICHES).filter(k => counts[k]).map(k => <button key={k} className={'chip' + (ni === k ? ' on' : '')} onClick={() => setNi(k)}>{NICHES[k]}<span>{counts[k]}</span></button>)}
     </div>
-    <div className="grid" style={{ marginTop: 20 }}>{shown.slice(0, n).map(l => <Card key={l.slug} l={l} />)}</div>
+    <div className="grid" style={{ marginTop: 20, alignItems: 'start' }}>{shown.slice(0, n).map(l => <Card key={l.slug} l={l} />)}</div>
     {shown.length > n && <div style={{ textAlign: 'center', marginTop: 24 }}><button className="btn ghost" onClick={() => setN(n + 36)}>Цааш үзэх ({shown.length - n})</button></div>}
     {!shown.length && <div className="panel" style={{ marginTop: 20, textAlign: 'center' }}>Олдсонгүй.</div>}
     <p style={{ color: 'var(--mute)', fontSize: 14, marginTop: 28, maxWidth: 760 }}>Дагагчийн тоог нийтэд нээлттэй эх сурвалжаас авсан, бодит тооноос зөрж болно. Энэ таны профайл бөгөөд засуулах эсвэл хасуулах бол <Link href="/aldaa" style={{ textDecoration: 'underline' }}>энд мэдэгдээрэй</Link>.</p>
