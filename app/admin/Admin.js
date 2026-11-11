@@ -13,10 +13,39 @@ function SubStats() {
   useEffect(() => { api('/api/admin/subscribers').then(r => r.ok && setS(r)); }, []);
   async function csv() { const { data } = await sb().auth.getSession(); const r = await fetch('/api/admin/subscribers?csv=1', { headers: { Authorization: 'Bearer ' + data.session?.access_token } }); const b = await r.blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'subscribers.csv'; a.click(); }
   if (!s) return null;
-  return <div className="panel" style={{ marginTop: 18 }}><div className="row" style={{ justifyContent: 'space-between' }}><h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>✉ Имэйл бүртгэл</h2><button className="btn ghost" onClick={csv}>CSV татах (идэвхтэй)</button></div>
+  return <div className="panel" style={{ marginTop: 18 }}><div className="row" style={{ justifyContent: 'space-between' }}><h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>✉ Товхимолын бүртгэл</h2><button className="btn ghost" onClick={csv}>CSV татах (идэвхтэй)</button></div>
     <div className="row" style={{ gap: 18, marginTop: 10 }}><div><b className="h" style={{ fontSize: 28 }}>{s.active}</b> баталгаажсан</div><div style={{ color: 'var(--mute)' }}>{s.pending} хүлээгдэж буй · {s.unsub} цуцалсан</div></div>
-    <div style={{ marginTop: 8, fontSize: 14, color: 'var(--mute)' }}>{Object.entries(s.byRole).map(([k, v]) => `${SUB_ROLES[k] || k}: ${v}`).join(' · ')}</div>
+    <div style={{ marginTop: 8, fontSize: 14, color: 'var(--mute)' }}>{Object.entries(s.byRole).map(([k, v]) => `${k === '—' ? 'Үүрэг сонгоогүй' : SUB_ROLES[k] || k}: ${v}`).join(' · ')}</div>
     <div style={{ marginTop: 4, fontSize: 14, color: 'var(--mute)' }}>Эх сурвалж: {Object.entries(s.bySource).map(([k, v]) => `${k} ${v}`).join(' · ')}</div></div>;
+}
+const CTAGS = { sub: 'Товхимол', user: 'Бүртгэлтэй хэрэглэгч', agency: 'Агентлагийн эзэн', owner: 'Профайлын эзэн', lead: 'Үнийн санал хүссэн', order: 'Захиалагч' };
+function Contacts() {
+  const [rows, setRows] = useState(null); const [t, setT] = useState('all'); const [q, setQ] = useState('');
+  useEffect(() => { api('/api/admin/contacts').then(r => setRows(r.ok ? r.rows : [])); }, []);
+  async function csv() { const { data } = await sb().auth.getSession(); const r = await fetch('/api/admin/contacts?csv=1', { headers: { Authorization: 'Bearer ' + data.session?.access_token } }); const b = await r.blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'brief-contacts.csv'; a.click(); }
+  if (!rows) return <div className="panel" style={{ marginTop: 18 }}>Ачаалж байна…</div>;
+  const cnt = k => rows.filter(r => r.tags.includes(k)).length;
+  const shown = rows.filter(r => (t === 'all' || (t === 'consent' ? r.consent : r.tags.includes(t))) && (!q.trim() || (r.email + ' ' + r.name + ' ' + r.company + ' ' + r.phone).toLowerCase().includes(q.trim().toLowerCase())));
+  const fd = x => x ? new Date(x).toISOString().slice(0, 10) : '';
+  return <div className="panel" style={{ marginTop: 18 }}>
+    <div className="row" style={{ justifyContent: 'space-between' }}><h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>👥 Бүх имэйл <span style={{ color: 'var(--mute)' }}>{rows.length}</span></h2><button className="btn ghost" onClick={csv}>CSV татах (бүгд)</button></div>
+    <p style={{ fontSize: 13.5, color: 'var(--mute)', marginTop: 6 }}>Сайттай ямар нэг байдлаар холбогдсон хүн бүр нэг удаа (давхардалгүй). Масс имэйл зөвхөн «Товхимолд зөвшөөрсөн» хүмүүст явуулна — бусдад нь зөвхөн ажил хэргийн хариу.</p>
+    <div className="row" style={{ gap: 8, marginTop: 12 }}>
+      <button type="button" className={'chip' + (t === 'all' ? ' on' : '')} onClick={() => setT('all')}>Бүгд<span>{rows.length}</span></button>
+      <button type="button" className={'chip' + (t === 'consent' ? ' on' : '')} onClick={() => setT('consent')}>✓ Товхимолд зөвшөөрсөн<span>{rows.filter(r => r.consent).length}</span></button>
+      {Object.entries(CTAGS).map(([k, v]) => cnt(k) > 0 && <button key={k} type="button" className={'chip' + (t === k ? ' on' : '')} onClick={() => setT(k)}>{v}<span>{cnt(k)}</span></button>)}
+    </div>
+    <input className="field" placeholder="Имэйл, нэр, утсаар хайх…" value={q} onChange={e => setQ(e.target.value)} style={{ marginTop: 12 }} />
+    <div style={{ marginTop: 12, overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+      <thead><tr style={{ textAlign: 'left', color: 'var(--mute)' }}>{['Имэйл', 'Нэр / байгууллага', 'Утас', 'Ангилал', 'Сүүлд'].map(h => <th key={h} style={{ padding: '8px 10px', borderBottom: '1.5px solid var(--line)', fontWeight: 600 }}>{h}</th>)}</tr></thead>
+      <tbody>{shown.map(r => <tr key={r.email}>
+        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--line)' }}><a href={'mailto:' + r.email} style={{ color: 'var(--ink)', fontWeight: 600 }}>{r.email}</a>{r.consent && <span title="Товхимолд зөвшөөрсөн" style={{ color: 'var(--v)' }}> ✓</span>}</td>
+        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--line)' }}>{[r.name, r.company].filter(Boolean).join(' · ')}{r.note.length > 0 && <div style={{ color: 'var(--mute)', fontSize: 12.5 }}>{r.note.join(', ')}</div>}</td>
+        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--line)', whiteSpace: 'nowrap' }}>{r.phone}</td>
+        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--line)' }}>{r.tags.map(k => <span key={k} className="badge b-off" style={{ marginRight: 4, display: 'inline-block', marginBottom: 2 }}>{CTAGS[k]}</span>)}</td>
+        <td style={{ padding: '9px 10px', borderBottom: '1px solid var(--line)', whiteSpace: 'nowrap', color: 'var(--mute)' }}>{fd(r.last)}</td></tr>)}</tbody></table>
+      {!shown.length && <p style={{ color: 'var(--mute)', padding: 12 }}>Олдсонгүй.</p>}</div>
+  </div>;
 }
 export default function Admin() {
   const [rf, setRf] = useState(null);
@@ -83,7 +112,7 @@ export default function Admin() {
   const LST = { new: ['Шинэ', '#B45309', '#FEF3C7'], forwarded: ['Дамжуулсан', '#1D4ED8', '#DBEAFE'], won: ['Ажил болсон', '#08662D', '#E1F4E7'], lost: ['Болоогүй', '#475569', '#E2E8F0'] };
   const leadsAll = data.leads || []; const newLeads = leadsAll.filter(l => (l.status || 'new') === 'new').length;
   const lshown = leadsAll.filter(l => lf === 'all' || (l.status || 'new') === lf);
-  const tabs = [['leads', '🎯 Үнийн санал', newLeads], ['inbox', '📥 Хүсэлтүүд', pendingN], ['content', '🗂 Нийтлэгдсэн'], ['stats', '📊 Статистик'], ['tools', '🛠 Хэрэгсэл']];
+  const tabs = [['leads', '🎯 Үнийн санал', newLeads], ['inbox', '📥 Хүсэлтүүд', pendingN], ['contacts', '👥 Имэйлүүд'], ['content', '🗂 Нийтлэгдсэн'], ['stats', '📊 Статистик'], ['tools', '🛠 Хэрэгсэл']];
   const chip = (on, k, v, n, f) => <button key={k} type="button" className={'chip' + (on ? ' on' : '')} onClick={f}>{v}{n != null && <span>{n}</span>}</button>;
   return <section className="wrap" style={{ maxWidth: 1040, marginTop: 10 }}>
     <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -165,6 +194,7 @@ export default function Admin() {
         actions={<><button className="btn ghost" onClick={() => A('influencer', l.id, 'hide')}>Нуух</button><button className="btn ghost" onClick={() => A('influencer', l.id, 'delete', `«${l.name}»-ийг бүр устгах уу? Буцаах боломжгүй.`)}>Устгах</button></>}>
         <b>{l.name}</b> <span style={{ color: 'var(--mute)' }}>· <b style={{ color: 'var(--ink)' }}>{l.clicks}</b> дарсан</span></Row>)}</Box>
     </>}
+    {tab === 'contacts' && <Contacts />}
     {tab === 'stats' && <>
       <SubStats />
       <Box title={`Агентлаг — хамгийн их үзэлттэй (30 хоног · нийт ${data.totalViews} үзэлт, ${data.totalClicks} дарсан)`} n={data.top.length}>
