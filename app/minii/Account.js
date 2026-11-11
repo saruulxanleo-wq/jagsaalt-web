@@ -19,7 +19,7 @@ const Step = ({ n, title, done, active, children }) => (
     {active && <div style={{ marginTop: 18 }}>{children}</div>}
   </div>);
 export default function Account() {
-  const q = useSearchParams(); const claimSlug = q.get('claim'); const editSlug = q.get('edit'); const ownQ = q.get('own');
+  const q = useSearchParams(); const claimSlug = q.get('claim'); const editSlug = q.get('edit'); const ownQ = q.get('own'); const nextQ = (q.get('next') || '').startsWith('/') && !(q.get('next') || '').startsWith('//') ? q.get('next') : null;
   const [agOpen, setAgOpen] = useState(!!claimSlug);
   const [session, setSession] = useState(undefined);
   const [me, setMe] = useState(null);
@@ -33,9 +33,9 @@ export default function Account() {
     return () => s.subscription.unsubscribe();
   }, []);
   async function load() { const qs = new URLSearchParams(); if (editSlug) qs.set('edit', editSlug); if (ownQ) qs.set('own', ownQ); const r = await api('/api/me' + (qs.toString() ? '?' + qs : '')); if (r.ok) { setMe(r); if (r.agency) setEd({ description: r.agency.description || '', website: r.agency.website || '', phone_public: r.agency.phone_public || '', services: (r.agency.services || []).join(', '), categories: catsOf(r.agency) }); } else setErr(r.error); }
-  useEffect(() => { if (session) load(); }, [session]);
+  useEffect(() => { if (session && nextQ) { location.replace(nextQ); return; } if (session) load(); }, [session]);
   const run = async (fn) => { setBusy(true); setErr(null); try { await fn(); } finally { setBusy(false); } };
-  const login = () => sb().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/minii' + (claimSlug ? '?claim=' + claimSlug : ownQ ? '?own=' + ownQ : ''), queryParams: { prompt: 'select_account' } } });
+  const login = () => sb().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/minii' + (claimSlug ? '?claim=' + claimSlug : ownQ ? '?own=' + ownQ : nextQ ? '?next=' + encodeURIComponent(nextQ) : ''), queryParams: { prompt: 'select_account' } } });
   if (session === undefined) return <section className="wrap" style={{ padding: 60 }}>Түр хүлээ…</section>;
   if (!session) return <section className="wrap" style={{ marginTop: 30, maxWidth: 560 }}>
     <div className="panel" style={{ textAlign: 'center', padding: 44 }}>

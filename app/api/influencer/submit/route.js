@@ -16,7 +16,7 @@ export async function POST(req) {
   if (!fb_url && !ig && !tiktok && !youtube) return fail('Ядаж нэг сошиал хаяг оруул');
   const niches = (Array.isArray(b.niches) ? b.niches : []).filter(k => NICHES[k]).slice(0, 3); if (!niches.length) return fail('1–3 чиглэл сонго');
   const u = b.mine ? await authUser(req, d) : null;
-  const row = { owner_id: u?.id || null, name, fb_url, ig, tiktok, youtube, niches, bio: String(b.bio || '').trim().slice(0, 160) || null, contact: String(b.contact || '').trim().slice(0, 80) || null,
+  const row = { owner_id: null, name, fb_url, ig, tiktok, youtube, niches, bio: String(b.bio || '').trim().slice(0, 160) || null, contact: String(b.contact || '').trim().slice(0, 80) || null,
     ig_followers: num(b.ig_followers), tiktok_followers: num(b.tiktok_followers), yt_followers: num(b.yt_followers), fb_followers: null };
   if (fb_url) { const { data: ex } = await d.from('influencers').select('id').eq('fb_url', fb_url).maybeSingle(); if (ex) return fail('Энэ Facebook хаяг аль хэдийн бүртгэлтэй'); const p = await fbPage(fb_url).catch(() => null); if (p?.followers) row.fb_followers = p.followers; }
   if (ig) { const { data: ex } = await d.from('influencers').select('id').eq('ig', ig).maybeSingle(); if (ex) return fail('Энэ Instagram хаяг аль хэдийн бүртгэлтэй'); }
@@ -25,5 +25,5 @@ export async function POST(req) {
   if (error) return fail('Хадгалж чадсангүй', 500);
   const o = origin(req);
   await mail(ADMIN_EMAIL(), `Шинэ инфлүэнсер: ${name}`, `<p><b>${esc(name)}</b> · ${niches.map(k => NICHES[k]).join(', ')}<br>${[fb_url && `FB: ${esc(fb_url)} (${row.fb_followers ?? '?'})`, ig && `IG: @${esc(ig)} (${row.ig_followers ?? '?'})`, tiktok && `TikTok: @${esc(tiktok)} (${row.tiktok_followers ?? '?'})`, youtube && `YouTube: ${esc(youtube)}`].filter(Boolean).join('<br>')}${row.contact ? '<br>Холбоо барих: ' + esc(row.contact) : ''}${u ? `<br><b>Өөрийнх гэж мэдүүлсэн:</b> ${esc(u.email)} — нийтэлбэл энэ хүнийх болно` : ''}</p><p>${btn(await decideLink(o, 'influencer', data.id, 'approve'), 'Нийтлэх', '#2FB344')}${btn(await decideLink(o, 'influencer', data.id, 'reject'), 'Татгалзах', '#E8452A')}</p>`);
-  return json({ ok: true });
+  return json({ ok: true, own: u ? 'influencer:' + data.id : null });
 }
