@@ -1,4 +1,4 @@
-import { db, fail, json, authUser, mail, ADMIN_EMAIL, decideLink, esc, btn, origin } from '@/lib/server';
+import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin } from '@/lib/server';
 import { TYPES, TOPICS, cap } from '@/lib/config';
 // Хэрэгсэл / сургалт / коммюнити санал → pending, админд и-мэйл
 export async function POST(req) {
@@ -17,5 +17,10 @@ export async function POST(req) {
   if (error) return fail('Хадгалж чадсангүй', 500);
   const o = origin(req);
   await mail(ADMIN_EMAIL(), `Шинэ ${TYPES[b.type].label.toLowerCase()}: ${name}`, `<p><b>${esc(name)}</b> · ${TYPES[b.type].label}${row.price ? ' · ' + esc(row.price) : ''}<br>${esc(description)}<br><a href="${esc(url)}">${esc(url)}</a>${row.contact ? '<br>Холбоо барих: ' + esc(row.contact) : ''}${u ? `<br><b>Эзэмшигч гэж мэдүүлсэн:</b> ${esc(u.email)} — нийтэлбэл энэ хүнийх болно` : ''}</p><p>${btn(await decideLink(o, 'listing', data.id, 'approve'), 'Нийтлэх', '#2FB344')}${btn(await decideLink(o, 'listing', data.id, 'reject'), 'Татгалзах', '#E8452A')}</p>`);
-  return json({ ok: true, own: u ? 'listing:' + data.id : null });
+  if (u) { // өөрийнхөө профайл: утас баталгаажсан бол эзэмших хүсэлтийг шууд үүсгэнэ
+    const p = await getProfile(d, u);
+    if (p?.phone_verified_at) { await d.from('item_claims').insert({ kind: 'listing', item_id: data.id, user_id: u.id, phone: p.phone, note: 'Өөрөө (нэмэхдээ)', proof: '' }); return json({ ok: true, claimed: true }); }
+    return json({ ok: true, own: 'listing:' + data.id });
+  }
+  return json({ ok: true });
 }

@@ -12,9 +12,9 @@ export default function InfluencerForm({ self }) {
   const tog = k => setF({ ...f, niches: f.niches.includes(k) ? f.niches.filter(x => x !== k) : f.niches.length >= 3 ? f.niches : [...f.niches, k] });
   async function submit(e) {
     e.preventDefault(); setBusy(true); setMsg(null);
-    const r = await api('/api/influencer/submit', { ...f, mine }); setBusy(false); if (r.ok && r.own) { location.href = '/minii?own=' + r.own; return; } r.ok ? (setDone(true), track('SubmitApplication', { content_name: 'influencer' })) : setMsg(r.error || 'Алдаа гарлаа');
+    const r = await api('/api/influencer/submit', { ...f, mine }); setBusy(false); if (r.ok && r.own) { location.href = '/minii?own=' + r.own; return; } if (r.claimed) setMsg(null); r.ok ? (setDone(true), track('SubmitApplication', { content_name: 'influencer' })) : setMsg(r.error || 'Алдаа гарлаа');
   }
-  if (done) return <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>Баярлалаа! Админ шалгаад нийтэлнэ. <Link href="/influencer" style={{ textDecoration: 'underline' }}>Инфлүэнсерүүд →</Link></div>;
+  if (done) return <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>{self ? 'Баярлалаа! Бид шалгаад нийтэлж, «✓ Баталгаажсан» болгоно. Батлагдмагц и-мэйлээр мэдэгдэнэ.' : 'Баярлалаа! Админ шалгаад нийтэлнэ.'} <Link href="/influencer" style={{ textDecoration: 'underline' }}>Инфлүэнсерүүд →</Link></div>;
   const pair = (k, lab, ph, nk) => <div className="row" style={{ gap: 10, alignItems: 'flex-end' }}>
     <div style={{ flex: 2, minWidth: 200 }}><label htmlFor={k} className="lab">{lab}</label><input id={k} className="field" placeholder={ph} value={f[k]} onChange={set(k)} /></div>
     {nk && <div style={{ flex: 1, minWidth: 120 }}><label htmlFor={nk} className="lab">Дагагч</label><input id={nk} className="field" inputMode="numeric" placeholder="25000" value={f[nk]} onChange={set(nk)} /></div>}</div>;

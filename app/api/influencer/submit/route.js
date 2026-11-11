@@ -1,4 +1,4 @@
-import { db, fail, json, authUser, mail, ADMIN_EMAIL, decideLink, esc, btn, origin } from '@/lib/server';
+import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin } from '@/lib/server';
 import { NICHES, cap } from '@/lib/config';
 import { normFb } from '@/lib/fb';
 import { fbPage } from '@/lib/fbpage';
@@ -25,5 +25,10 @@ export async function POST(req) {
   if (error) return fail('Хадгалж чадсангүй', 500);
   const o = origin(req);
   await mail(ADMIN_EMAIL(), `Шинэ инфлүэнсер: ${name}`, `<p><b>${esc(name)}</b> · ${niches.map(k => NICHES[k]).join(', ')}<br>${[fb_url && `FB: ${esc(fb_url)} (${row.fb_followers ?? '?'})`, ig && `IG: @${esc(ig)} (${row.ig_followers ?? '?'})`, tiktok && `TikTok: @${esc(tiktok)} (${row.tiktok_followers ?? '?'})`, youtube && `YouTube: ${esc(youtube)}`].filter(Boolean).join('<br>')}${row.contact ? '<br>Холбоо барих: ' + esc(row.contact) : ''}${u ? `<br><b>Өөрийнх гэж мэдүүлсэн:</b> ${esc(u.email)} — нийтэлбэл энэ хүнийх болно` : ''}</p><p>${btn(await decideLink(o, 'influencer', data.id, 'approve'), 'Нийтлэх', '#2FB344')}${btn(await decideLink(o, 'influencer', data.id, 'reject'), 'Татгалзах', '#E8452A')}</p>`);
-  return json({ ok: true, own: u ? 'influencer:' + data.id : null });
+  if (u) { // өөрийнхөө профайл: утас баталгаажсан бол эзэмших хүсэлтийг шууд үүсгэнэ
+    const p = await getProfile(d, u);
+    if (p?.phone_verified_at) { await d.from('item_claims').insert({ kind: 'influencer', item_id: data.id, user_id: u.id, phone: p.phone, note: 'Өөрөө (нэмэхдээ)', proof: '' }); return json({ ok: true, claimed: true }); }
+    return json({ ok: true, own: 'influencer:' + data.id });
+  }
+  return json({ ok: true });
 }

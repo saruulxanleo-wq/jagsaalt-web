@@ -13,10 +13,10 @@ export default function ListingForm({ type, self }) {
   const tog = k => setF({ ...f, topics: f.topics.includes(k) ? f.topics.filter(x => x !== k) : f.topics.length >= 3 ? f.topics : [...f.topics, k] });
   async function submit(e) {
     e.preventDefault(); setBusy(true); setMsg(null);
-    const r = await api('/api/listing/submit', { ...f, type, mine }); setBusy(false); if (r.ok && r.own) { location.href = '/minii?own=' + r.own; return; }
+    const r = await api('/api/listing/submit', { ...f, type, mine }); setBusy(false); if (r.ok && r.own) { location.href = '/minii?own=' + r.own; return; } if (r.claimed) setMsg(null);
     r.ok ? (setDone(true), track('SubmitApplication', { content_name: 'listing_' + type })) : setMsg(r.error || 'Алдаа гарлаа');
   }
-  if (done) return <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>Баярлалаа! Админ шалгаад нийтэлнэ. <Link href={t.path} style={{ textDecoration: 'underline' }}>{t.plural} →</Link></div>;
+  if (done) return <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>{self ? 'Баярлалаа! Бид шалгаад нийтэлж, «✓ Баталгаажсан» болгоно. Батлагдмагц и-мэйлээр мэдэгдэнэ.' : 'Баярлалаа! Админ шалгаад нийтэлнэ.'} <Link href={t.path} style={{ textDecoration: 'underline' }}>{t.plural} →</Link></div>;
   return <form onSubmit={submit} className="panel" style={{ marginTop: 18, display: 'grid', gap: 18 }}>
     <div><label htmlFor="ln" className="lab">Нэр</label><input id="ln" required className="field" maxLength={80} placeholder={PH[type][0]} value={f.name} onChange={set('name')} /></div>
     <div><label htmlFor="lu" className="lab">Линк</label><input id="lu" required className="field" placeholder={type === 'community' ? 'facebook.com/groups/…' : type === 'freelancer' ? 'Facebook профайл, LinkedIn эсвэл портфолио' : 'https://…'} value={f.url} onChange={set('url')} /></div>

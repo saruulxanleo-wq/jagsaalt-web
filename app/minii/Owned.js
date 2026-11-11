@@ -6,32 +6,19 @@ import { resize } from './EditAgency';
 import { TYPES, TOPICS, NICHES, PRODUCTS, priceFor, fmtMnt } from '@/lib/config';
 import { BankBox } from '../tolbor/Pay';
 const fmtN = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n || 0);
-const PROOF = {
-  community: 'Группийнхээ тайлбар (About) эсвэл админ постонд доорх кодыг түр тавиад, тэр постын линкийг оруул.',
-  freelancer: 'Facebook профайл эсвэл портфолиогийнхоо bio-д доорх кодыг түр тавиад линкийг оруул.',
-  course: 'Сургалтын FB пэйж эсвэл вэбсайтын хуудсанд кодыг түр тавина уу. Эсвэл тухайн домэйны и-мэйлээр (жишээ нь info@сургалт.mn) бидэнд код илгээ.',
-  media: 'Байгууллагынхаа вэбсайт эсвэл FB пэйжид кодыг түр тавина уу. Эсвэл тухайн домэйны и-мэйлээр бидэнд код илгээ.',
-  tool: 'Хэрэгслийн вэбсайт эсвэл FB пэйжид кодыг түр тавина уу. Эсвэл тухайн домэйны и-мэйлээр бидэнд код илгээ.',
-  influencer: 'Instagram/TikTok bio эсвэл Facebook пост дээрээ кодыг түр тавиад линкийг оруул.',
-};
+const ROLES = ['Өөрөө', 'Менежер', 'Эзэмшигч', 'Ажилтан'];
 export function ClaimItem({ own, onDone }) {
-  const [note, setNote] = useState(''); const [proof, setProof] = useState(''); const [busy, setBusy] = useState(false); const [err, setErr] = useState(null); const [ok, setOk] = useState(false);
+  const [note, setNote] = useState('Өөрөө'); const [busy, setBusy] = useState(false); const [err, setErr] = useState(null); const [ok, setOk] = useState(false);
   if (own.mine) return <div className="ok" style={{ marginTop: 18 }}>«{own.name}» аль хэдийн чинийх. Доороос засна.</div>;
   if (own.taken) return <div className="err" style={{ marginTop: 18 }}>«{own.name}» өөр хүнд баталгаажсан байна. Алдаа гэж үзвэл бидэнтэй холбогд.</div>;
-  if (ok) return <div className="panel ok" style={{ marginTop: 18 }}>Хүсэлт илгээгдлээ. Код болон линкийг шалгаад батлагдмагц и-мэйлээр мэдэгдэнэ.</div>;
+  if (ok) return <div className="panel ok" style={{ marginTop: 18 }}>Хүсэлт илгээгдлээ. Бид шалгаад баталгаажуулмагц и-мэйлээр мэдэгдэнэ.</div>;
   const label = own.kind === 'influencer' ? 'Инфлүэнсер профайл' : TYPES[own.type]?.label;
-  return <form className="panel" style={{ marginTop: 18, display: 'grid', gap: 14, boxShadow: 'inset 0 0 0 3px var(--v)' }} onSubmit={async e => { e.preventDefault(); setBusy(true); setErr(null); const r = await api('/api/own/claim', { own: own.kind + ':' + own.id, note, proof }); setBusy(false); r.ok ? (setOk(true), onDone?.()) : setErr(r.error); }}>
-    <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>Эзэмших: {own.name} <span style={{ color: 'var(--mute)', fontSize: 15 }}>· {label}</span></h2>
-    <div style={{ background: 'var(--bg)', borderRadius: 16, padding: 14 }}>
-      <div style={{ fontSize: 14, color: 'var(--mute)' }}>Баталгаажуулах код</div>
-      <div className="h" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '.08em' }}>{own.code}</div>
-      <p style={{ fontSize: 14.5, marginTop: 6 }}>{PROOF[own.type] || PROOF.tool} Батлагдсаны дараа кодыг устгаж болно.</p>
-      {own.url && <a href={own.url} target="_blank" rel="noopener" style={{ fontSize: 14, color: 'var(--v)' }}>{own.url} ↗</a>}
-    </div>
-    <div><label htmlFor="on" className="lab">Ямар холбоотой вэ?</label><input id="on" className="field" required placeholder={own.type === 'community' ? 'Группийн админ / үүсгэн байгуулагч' : own.kind === 'influencer' ? 'Өөрөө / менежер' : 'Үүсгэн байгуулагч, багш…'} value={note} onChange={e => setNote(e.target.value)} /></div>
-    <div><label htmlFor="op" className="lab">Код тавьсан линк <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· эсвэл аль и-мэйлээс илгээснээ бич</span></label><input id="op" className="field" value={proof} onChange={e => setProof(e.target.value)} /></div>
+  return <form className="panel" style={{ marginTop: 18, display: 'grid', gap: 14, boxShadow: 'inset 0 0 0 3px var(--v)' }} onSubmit={async e => { e.preventDefault(); setBusy(true); setErr(null); const r = await api('/api/own/claim', { own: own.kind + ':' + own.id, note }); setBusy(false); r.ok ? (setOk(true), onDone?.()) : setErr(r.error); }}>
+    <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>«{own.name}» чинийх үү? <span style={{ color: 'var(--mute)', fontSize: 15 }}>· {label}</span></h2>
+    <div><span className="lab">Чи хэн нь вэ?</span><div className="row" style={{ marginTop: 8 }}>{ROLES.map(r => <button type="button" key={r} aria-pressed={note === r} className={'chip' + (note === r ? ' on' : '')} onClick={() => setNote(r)}>{note === r && '✓ '}{r}</button>)}</div></div>
+    <p style={{ fontSize: 14.5, color: 'var(--mute)', margin: 0 }}>Бид баталгаажсан утас, и-мэйлээр чинь холбогдож эсвэл тухайн хуудсаар нь шалгаад батална. Батлагдмагц «✓ Баталгаажсан» тэмдэг гарч, мэдээллээ өөрөө засна.</p>
     {err && <div className="err">{err}</div>}
-    <button className="btn dark" disabled={busy} style={{ padding: 15 }}>{busy ? 'Илгээж байна…' : 'Эзэмших хүсэлт илгээх →'}</button>
+    <button className="btn dark" disabled={busy} style={{ padding: 15 }}>{busy ? 'Илгээж байна…' : 'Баталгаажуулах хүсэлт илгээх →'}</button>
   </form>;
 }
 const chip = (on, k, v, tog) => <button type="button" key={k} aria-pressed={on} className={'chip' + (on ? ' on' : '')} onClick={() => tog(k)}>{on && '✓ '}{v}</button>;

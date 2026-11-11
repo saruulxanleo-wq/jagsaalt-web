@@ -12,7 +12,7 @@ export async function POST(req) {
   const it = await getItem(d, t.kind, t.id); if (!it) return fail('Олдсонгүй', 404);
   if (it.owner_id === u.id) return fail('Энэ аль хэдийн чинийх');
   if (it.owner_id) return fail('Энэ өөр хүнд баталгаажсан байна. Алдаа гэж үзвэл бидэнтэй холбогд.');
-  const note = String(b.note || '').trim().slice(0, 300); if (note.length < 3) return fail('Ямар холбоотой вэ гэдгээ бич');
+  const note = String(b.note || '').trim().slice(0, 300); if (note.length < 2) return fail('Чи хэн нь вэ гэдгээ сонго');
   const proof = String(b.proof || '').trim().slice(0, 300);
   const { data: c, error } = await d.from('item_claims').insert({ kind: t.kind, item_id: t.id, user_id: u.id, phone: p.phone, note, proof }).select('id').single();
   if (error) return fail(error.code === '23505' ? 'Хүсэлт чинь аль хэдийн шалгагдаж байна' : 'Хадгалж чадсангүй', error.code === '23505' ? 400 : 500);
