@@ -23,7 +23,12 @@ export async function GET(req) {
   const ic = {}; for (const e of iev || []) ic[e.influencer_id] = (ic[e.influencer_id] || 0) + 1;
   const { data: itop } = Object.keys(ic).length ? await d.from('influencers').select('id,name,slug').in('id', Object.keys(ic).slice(0, 200)) : { data: [] };
   const { data: orders } = await d.from('orders').select('id,code,product,target_name,months,amount,contact,status,created_at,paid_at').in('status', ['pending', 'paid']).order('created_at', { ascending: false }).limit(60);
-  const { data: leads } = await d.from('leads').select('*').order('created_at', { ascending: false }).limit(50);
+  const { data: leads } = await d.from('leads').select('*').order('created_at', { ascending: false }).limit(500);
+  const lslugs = [...new Set((leads || []).flatMap(l => l.agencies || []))];
+  const { data: lags } = lslugs.length ? await d.from('agencies').select('id,slug,name,fb_url').in('slug', lslugs) : { data: [] };
+  const { data: lmem } = (lags || []).length ? await d.from('agency_members').select('agency_id').in('agency_id', lags.map(a => a.id)) : { data: [] };
+  const owned = new Set((lmem || []).map(m => m.agency_id));
+  const leadAgencies = Object.fromEntries((lags || []).map(a => [a.slug, { name: a.name, fb_url: a.fb_url, owned: owned.has(a.id) }]));
   const { data: icl } = await d.from('item_claims').select('*').eq('status', 'pending').order('created_at', { ascending: false });
   const ownClaims = await Promise.all((icl || []).map(async c => { const { data: it } = await d.from(c.kind === 'listing' ? 'listings' : 'influencers').select(c.kind === 'listing' ? 'name,type,url' : 'name,fb_url,ig').eq('id', c.item_id).maybeSingle(); return { ...c, item: it, code: await ownCode(c.user_id, c.kind, c.item_id) }; }));
   const ids = [...new Set([...(claims || []), ...ownClaims].map(c => c.user_id))];
@@ -46,5 +51,5 @@ export async function GET(req) {
   const { data: lprofs } = lids.length ? await d.from('profiles').select('id,email,full_name').in('id', lids) : { data: [] };
   (lprofs || []).forEach(p => { pm[p.id] = p; });
   const log = { agencies: lagS || [], claims: (lclA || []).map(c => ({ ...c, user: pm[c.user_id] || null })), itemClaims: licItems.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: lrep || [], influencers: noBulk(linf), listings: noBulk(llst), orders: lord || [] };
-  return json({ log, orders: orders || [], infPending: infp || [], infTop: (itop || []).map(x => ({ ...x, clicks: ic[x.id] })).sort((a, b) => b.clicks - a.clicks).slice(0, 15), listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), ownClaims: ownClaims.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
+  return json({ leadAgencies, log, orders: orders || [], infPending: infp || [], infTop: (itop || []).map(x => ({ ...x, clicks: ic[x.id] })).sort((a, b) => b.clicks - a.clicks).slice(0, 15), listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), ownClaims: ownClaims.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
 }

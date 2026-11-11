@@ -27,7 +27,7 @@ export default function Admin() {
     setRf(`Дууслаа: ${tot}-аас ${ok} агентлагийн мэдээлэл шинэчлэгдлээ`);
   }
   const [s, setS] = useState(undefined); const [data, setData] = useState(null); const [err, setErr] = useState(null); const [q, setQ] = useState('');
-  const [tab, setTab] = useState('inbox'); const [fs, setFs] = useState('pending'); const [ft, setFt] = useState('all'); const [open, setOpen] = useState(null);
+  const [tab, setTab] = useState('leads'); const [lf, setLf] = useState('all'); const [fs, setFs] = useState('pending'); const [ft, setFt] = useState('all'); const [open, setOpen] = useState(null);
   const [seen, setSeen] = useState({});
   useEffect(() => { try { setSeen(JSON.parse(localStorage.getItem('brief_admin_read') || '{}')); } catch {} }, []);
   const saveSeen = x => { setSeen(x); try { localStorage.setItem('brief_admin_read', JSON.stringify(x)); } catch {} };
@@ -53,10 +53,6 @@ export default function Admin() {
   const ST = { pending: ['Шийдвэр хүлээж буй', '#B45309', '#FEF3C7'], approved: ['Батлагдсан', '#08662D', '#E1F4E7'], rejected: ['Татгалзсан', '#9F1239', '#FFE4E6'], done: ['Шийдэгдсэн', '#475569', '#E2E8F0'], info: ['Мэдээлэл', '#1D4ED8', '#DBEAFE'] };
   const stOf = s => s === 'approved' || s === 'paid' ? 'approved' : s === 'rejected' || s === 'cancelled' ? 'rejected' : s === 'pending' ? 'pending' : s;
   const items = [
-    ...(data.leads || []).map(l => ({ key: 'lead' + l.id, type: 'lead', icon: '🎯', label: 'Үнийн санал', at: l.created_at, st: 'info', title: <>{l.name}{l.company && ` · ${l.company}`}</>, sub: `${l.phone || ''} ${l.email || ''}`,
-      body: <><div>{(l.answers?.needs || []).map(k => NEEDS[k]?.label).join(', ')} · {BUDGETS[l.answers?.budget]?.[0]} · {SIZES[l.answers?.size]} · {PRIORITIES[l.answers?.priority]}{l.answers?.industry && ` · ${l.answers.industry}`}</div>
-        <div>Агентлаг: {l.agencies.map(s => <Link key={s} href={`/a/${s}`} style={{ color: 'var(--v)', marginRight: 8 }}>{s}</Link>)}{l.utm?.utm_campaign && <span style={{ color: 'var(--mute)' }}> · кампанит: {l.utm.utm_campaign}</span>}</div>{l.note && <div style={{ color: 'var(--mute)' }}>«{l.note}»</div>}</>,
-      actions: l.phone && <a className="btn v" href={`tel:${l.phone}`}>Залгах</a> })),
     ...(L.agencies || []).map(a => ({ key: 'ag' + a.id, type: 'agency', icon: '🏢', label: a.added_by === 'owner' ? 'Агентлаг (эзэн нэмсэн)' : 'Агентлаг санал', at: a.created_at, st: stOf(a.status), decided: a.status !== 'pending' && a.updated_at, title: a.name, sub: catsOf(a).map(catLabel).join(', '),
       body: <>{lnk(a.fb_url, a.fb_url?.replace('https://www.', ''))}{a.status === 'approved' && <> · <Link href={`/a/${a.slug}`} style={{ color: 'var(--v)' }}>профайл</Link></>}</>,
       actions: a.status === 'pending' && <><button className="btn v" onClick={() => A('agency', a.id, 'approve')}>Нэмэх</button><button className="btn ghost" onClick={() => A('agency', a.id, 'reject')}>Татгалзах</button></> })),
@@ -80,11 +76,14 @@ export default function Admin() {
       body: <>{o.status === 'pending' ? 'Төлбөр хүлээгдэж байна. QPay-ээр төлбөл автоматаар батлагдана, дансаар шилжүүлсэн бол гүйлгээний утгад энэ код байгаа эсэхийг шалга.' : o.status === 'paid' ? 'Төлөгдсөн, идэвхжсэн.' : 'Цуцлагдсан.'}</>,
       actions: o.status === 'pending' && <><button className="btn v" onClick={() => A('order', o.id, 'approve', `${o.code}: ${fmtMnt(o.amount)} дансанд орсон уу? Идэвхжүүлэх үү?`)}>Төлбөр орсон</button><button className="btn ghost" onClick={() => A('order', o.id, 'reject')}>Цуцлах</button></> })),
   ].sort((a, b) => String(b.at).localeCompare(String(a.at)));
-  const TYPESF = { lead: 'Үнийн санал', agency: 'Агентлаг', influencer: 'Инфлүэнсер', listing: 'Мэргэжилтэн, бусад', claim: 'Эзэмших', report: 'Алдаа', order: 'Захиалга' };
+  const TYPESF = { agency: 'Агентлаг', influencer: 'Инфлүэнсер', listing: 'Мэргэжилтэн, бусад', claim: 'Эзэмших', report: 'Алдаа', order: 'Захиалга' };
   const pendingN = items.filter(i => i.st === 'pending').length;
   const unreadN = items.filter(i => !seen[i.key]).length;
   const shown = items.filter(i => (fs === 'all' || (fs === 'pending' ? i.st === 'pending' : fs === 'unread' ? !seen[i.key] : i.st !== 'pending' && i.st !== 'info')) && (ft === 'all' || i.type === ft));
-  const tabs = [['inbox', '📥 Хүсэлтүүд', pendingN], ['content', '🗂 Нийтлэгдсэн'], ['stats', '📊 Статистик'], ['tools', '🛠 Хэрэгсэл']];
+  const LST = { new: ['Шинэ', '#B45309', '#FEF3C7'], forwarded: ['Дамжуулсан', '#1D4ED8', '#DBEAFE'], won: ['Ажил болсон', '#08662D', '#E1F4E7'], lost: ['Болоогүй', '#475569', '#E2E8F0'] };
+  const leadsAll = data.leads || []; const newLeads = leadsAll.filter(l => (l.status || 'new') === 'new').length;
+  const lshown = leadsAll.filter(l => lf === 'all' || (l.status || 'new') === lf);
+  const tabs = [['leads', '🎯 Үнийн санал', newLeads], ['inbox', '📥 Хүсэлтүүд', pendingN], ['content', '🗂 Нийтлэгдсэн'], ['stats', '📊 Статистик'], ['tools', '🛠 Хэрэгсэл']];
   const chip = (on, k, v, n, f) => <button key={k} type="button" className={'chip' + (on ? ' on' : '')} onClick={f}>{v}{n != null && <span>{n}</span>}</button>;
   return <section className="wrap" style={{ maxWidth: 1040, marginTop: 10 }}>
     <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -95,6 +94,40 @@ export default function Admin() {
       {tabs.map(([k, v, n]) => <button key={k} type="button" onClick={() => setTab(k)} style={{ background: 'none', border: 0, padding: '10px 14px', fontWeight: 700, fontSize: 15.5, cursor: 'pointer', color: tab === k ? 'var(--ink)' : 'var(--mute)', borderBottom: tab === k ? '3px solid var(--v)' : '3px solid transparent', marginBottom: -1.5 }}>{v}{n ? <b style={{ marginLeft: 6, background: '#E5383B', color: '#fff', borderRadius: 99, padding: '1px 8px', fontSize: 12.5 }}>{n}</b> : null}</button>)}
     </div>
     {err && <div className="err" style={{ marginTop: 12 }}>{err}</div>}
+    {tab === 'leads' && <>
+      <div className="row" style={{ gap: 8, marginTop: 16 }}>
+        {chip(lf === 'all', 'all', 'Бүгд', leadsAll.length, () => setLf('all'))}
+        {Object.entries(LST).map(([k, v]) => chip(lf === k, k, v[0], leadsAll.filter(l => (l.status || 'new') === k).length, () => setLf(k)))}
+      </div>
+      <p style={{ fontSize: 13.5, color: 'var(--mute)', marginTop: 10 }}>Эзэнтэй агентлагт хүсэлт автоматаар имэйлээр очно. Эзэнгүй бол Messenger-ээр гараар дамжуулаад «Дамжуулсан» гэж тэмдэглэ.</p>
+      {!lshown.length && <div className="panel" style={{ marginTop: 14, color: 'var(--mute)' }}>Энд юу ч алга.</div>}
+      {lshown.map(l => { const q = l.answers || {}, st = l.status || 'new', S = LST[st] || LST.new;
+        const facts = [['Хэрэгцээ', (q.needs || []).map(k => NEEDS[k]?.label).filter(Boolean).join(', ')], ['Төсөв', BUDGETS[q.budget]?.[0]], ['Хэмжээ', SIZES[q.size]], ['Чухалчилдаг', PRIORITIES[q.priority]], ['Салбар', q.industry]].filter(x => x[1]);
+        return <div key={l.id} className="panel" style={{ marginTop: 14, display: 'grid', gap: 12 }}>
+          <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}><b style={{ fontSize: 18 }}>{l.name}</b>{l.company && <span style={{ fontWeight: 600 }}>· {l.company}</span>}<span style={{ fontSize: 12.5, fontWeight: 700, color: S[1], background: S[2], borderRadius: 99, padding: '2px 9px' }}>{S[0]}</span></div>
+              <div style={{ fontSize: 14, color: 'var(--mute)', marginTop: 4 }}>{fmtD(l.created_at)} · {ago(l.created_at)} · {q.source === 'profile' ? 'агентлагийн профайлаас' : q.source === 'influencer' ? 'инфлүэнсерийн хуудаснаас' : 'агентлаг сонгох шалгуураас'}{l.utm?.utm_campaign && ` · кампанит: ${l.utm.utm_campaign}`}</div>
+            </div>
+            <select className="field" aria-label="Төлөв" style={{ marginTop: 0, width: 'auto', padding: '9px 12px' }} value={st} onChange={e => act('lead', l.id, 'status:' + e.target.value)}>{Object.entries(LST).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</select>
+          </div>
+          <div className="row" style={{ gap: 8 }}>{l.phone && <a className="btn v" href={'tel:' + l.phone}>📞 {l.phone}</a>}{l.email && <a className="btn ghost" href={'mailto:' + l.email}>✉ {l.email}</a>}</div>
+          {(facts.length > 0 || l.note) && <div style={{ background: 'var(--bg)', borderRadius: 14, padding: '12px 14px', fontSize: 14.5, display: 'grid', gap: 4 }}>
+            {facts.map(([k, v]) => <div key={k}><span style={{ color: 'var(--mute)' }}>{k}:</span> {v}</div>)}{l.note && <div><span style={{ color: 'var(--mute)' }}>Нэмэлт:</span> «{l.note}»</div>}</div>}
+          {q.source === 'influencer' && q.influencer && <div style={{ fontSize: 14.5 }}>Инфлүэнсер: <Link href="/influencer" style={{ color: 'var(--v)' }}>{q.influencer}</Link></div>}
+          {(l.agencies || []).length > 0 && <div style={{ display: 'grid', gap: 6 }}>
+            <span className="lab" style={{ margin: 0 }}>Сонгосон агентлаг ({l.agencies.length})</span>
+            {l.agencies.map(sl => { const a = (data.leadAgencies || {})[sl] || { name: sl }, sent = (l.sent || {})[sl], hand = (l.handled || {})[sl];
+              return <div key={sl} className="row" style={{ justifyContent: 'space-between', gap: 10, border: '1.5px solid var(--line)', borderRadius: 14, padding: '10px 12px' }}>
+                <div style={{ minWidth: 0 }}><Link href={`/a/${sl}`} style={{ fontWeight: 700 }}>{a.name}</Link>
+                  <div style={{ fontSize: 13.5, color: sent || hand ? 'var(--v)' : a.owned ? '#B45309' : 'var(--mute)' }}>
+                    {sent ? `✓ Эзэнд нь имэйлээр очсон · ${fmtD(sent)}` : a.owned ? 'Эзэнтэй, гэхдээ имэйл явсангүй' : 'Эзэнгүй — гараар дамжуулах'}{hand && ` · ✓ гараар дамжуулсан ${fmtD(hand)}`}</div></div>
+                <div className="row" style={{ gap: 6 }}>{a.fb_url && <a className="btn ghost" href={a.fb_url} target="_blank" rel="noopener">FB хуудас</a>}
+                  <button type="button" className={hand ? 'btn ghost' : 'btn dark'} onClick={() => act('lead', l.id, 'mark:' + sl)}>{hand ? 'Тэмдэг арилгах' : 'Дамжуулсан'}</button></div>
+              </div>; })}
+          </div>}
+        </div>; })}
+    </>}
     {tab === 'inbox' && <>
       <div className="row" style={{ gap: 8, marginTop: 16 }}>
         {chip(fs === 'pending', 'p', 'Шийдвэр хүлээж буй', pendingN, () => setFs('pending'))}

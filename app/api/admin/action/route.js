@@ -30,6 +30,11 @@ export async function POST(req) {
   } else if (kind === 'own') {
     if (!['approve', 'reject'].includes(action)) return fail('Буруу үйлдэл');
     const r = await decideOwn(d, id, action === 'approve', origin(req)); if (r.error) return fail(r.error);
+  } else if (kind === 'lead') {
+    const { data: l } = await d.from('leads').select('handled').eq('id', id).single(); if (!l) return fail('Олдсонгүй');
+    if (String(action).startsWith('mark:')) { const h = { ...(l.handled || {}) }; const k = String(action).slice(5, 80); h[k] ? delete h[k] : (h[k] = now); await d.from('leads').update({ handled: h }).eq('id', id); }
+    else if (String(action).startsWith('status:') && ['new', 'forwarded', 'won', 'lost'].includes(action.slice(7))) await d.from('leads').update({ status: action.slice(7) }).eq('id', id);
+    else return fail('Буруу үйлдэл');
   } else if (kind === 'report') {
     await d.from('reports').update({ resolved: true }).eq('id', id);
   } else if (kind === 'claim') {
