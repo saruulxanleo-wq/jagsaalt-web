@@ -22,8 +22,10 @@ async function uploadImg(file, kind, slug) {
   const r = await fetch('/api/agency/logo', { method: 'POST', headers: { Authorization: 'Bearer ' + data.session?.access_token }, body: fd });
   const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Хадгалж чадсангүй'); return j.url;
 }
-const Sec = ({ title, hint, children, open }) => <details open={open} style={{ borderTop: '1.5px dashed var(--line)', paddingTop: 14 }}>
-  <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>{title} <span style={{ color: 'var(--mute)', fontWeight: 500, fontSize: 14 }}>· {hint}</span></summary>
+// Хоосон хэсэг нээлттэй, «Дутуу» тэмдэгтэй; бөглөсөн нь хураалттай «✓»
+const Sec = ({ id, title, hint, why, children, done }) => <details id={id} open={!done} style={{ borderTop: '1.5px dashed var(--line)', paddingTop: 14, ...(done ? {} : { background: '#FFFBEB', margin: '0 -14px', padding: '14px 14px 16px', borderRadius: 14, borderTop: 0, boxShadow: 'inset 0 0 0 1.5px #FCD34D' }) }}>
+  <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>{title} <span style={{ color: 'var(--mute)', fontWeight: 500, fontSize: 14 }}>· {hint}</span> {done ? <span style={{ color: 'var(--v)', fontSize: 14 }}>✓</span> : <span style={{ fontSize: 12.5, fontWeight: 700, color: '#B45309', background: '#FEF3C7', borderRadius: 99, padding: '2px 9px', marginLeft: 4 }}>Дутуу</span>}</summary>
+  {!done && why && <p style={{ fontSize: 13.5, color: '#92400E', margin: '8px 0 0' }}>{why}</p>}
   <div style={{ display: 'grid', gap: 14, marginTop: 14 }}>{children}</div></details>;
 const F = ({ id, label, ...p }) => <div style={{ flex: 1, minWidth: 200 }}><label htmlFor={id} className="lab">{label}</label><input id={id} className="field" {...p} /></div>;
 function Stats({ slug }) {
@@ -74,12 +76,13 @@ export default function EditAgency({ agency, adminSlug }) {
   }
   const setItem = (k, i, f, v) => setEd(ed => ({ ...ed, [k]: ed[k].map((x, j) => j === i ? { ...x, [f]: v } : x) }));
   const pct = completeness({ ...a, ...ed, clients: ed.clients.split(',').filter(s => s.trim()), socials: Object.fromEntries(Object.entries(ed.socials).filter(([, v]) => v)) });
+  const missing = [[!a.logo_url && 'lg', 'Лого'], [!ed.description && 'ds', 'Товч тайлбар'], [!ed.services?.length && 'sv', 'Үйлчилгээ'], [!(ed.founded && ed.team_size) && 's-facts', 'Товч баримт'], [!Object.values(ed.socials || {}).some(Boolean) && !ed.website && 's-soc', 'Сошиал / вэб'], [!ed.packages.length && 's-pkg', 'Үнийн багц'], [!ed.clients.trim() && 's-cl', 'Харилцагч брэнд'], [!ed.cases.length && 's-case', 'Кейс'], [!ed.team.length && 's-team', 'Баг']].filter(x => x[0]);
   return <form onSubmit={save} style={{ display: 'grid', gap: 16 }}>
     <Stats slug={adminSlug} />
     <div className="row" style={{ gap: 16, alignItems: 'center' }}>
       <Logo a={a} size={84} radius={22} />
       <div style={{ flex: 1 }}>
-        <label className="btn ghost" style={{ cursor: 'pointer' }}>{up ? 'Хуулж байна…' : 'Лого солих'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={logo} style={{ display: 'none' }} disabled={up} /></label>
+        <label id="lg" className="btn ghost" style={{ cursor: 'pointer' }}>{up ? 'Хуулж байна…' : 'Лого солих'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={logo} style={{ display: 'none' }} disabled={up} /></label>
         <p style={{ fontSize: 13, color: 'var(--mute)', marginTop: 6 }}>Дөрвөлжин зураг тохиромжтой. Автоматаар 400×400 болно.</p>
       </div>
       <div style={{ minWidth: 180 }}>
@@ -87,24 +90,29 @@ export default function EditAgency({ agency, adminSlug }) {
         <div style={{ height: 8, borderRadius: 99, background: 'var(--bg)', marginTop: 6 }}><div style={{ width: pct + '%', height: '100%', borderRadius: 99, background: pct >= 80 ? '#2FB344' : 'var(--v)' }} /></div>
       </div>
     </div>
+    {missing.length > 0 && <div className="panel" style={{ padding: '14px 16px', background: '#FFFBEB', boxShadow: 'inset 0 0 0 1.5px #FCD34D' }}>
+      <b>Профайл {pct}% бүрэн — дутуу {missing.length} хэсэг:</b>
+      <div className="row" style={{ gap: 6, marginTop: 8 }}>{missing.map(([id, l]) => <button type="button" key={id} className="chip" onClick={() => { const el = document.getElementById(id); if (el) { if (el.tagName === 'DETAILS') el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.querySelector('input,textarea,select,button')?.focus?.({ preventScroll: true }); } }}>+ {l}</button>)}</div>
+      <p style={{ fontSize: 13.5, color: '#92400E', margin: '8px 0 0' }}>Дарахад тухайн хэсэг рүү шилжинэ. Бөглөсний дараа доороос «Хадгалах» дар.</p>
+    </div>}
     <div><label htmlFor="ds" className="lab">Товч тайлбар</label><textarea id="ds" rows={3} maxLength={400} className="field" style={{ resize: 'vertical' }} value={ed.description} onChange={set('description')} /></div>
     <TagInput id="sv" label="Үйлчилгээ" value={ed.services} onChange={v => setEd({ ...ed, services: v })} suggestions={SERVICES} placeholder="Жагсаалтаас сонго эсвэл өөрөө бичээд Enter дар" />
     <CatPicker value={ed.categories} onChange={v => setEd({ ...ed, categories: v })} />
     <div className="row" style={{ gap: 14 }}><F id="wb" label="Вэбсайт" value={ed.website} onChange={set('website')} /><F id="pp" label="Утас" value={ed.phone_public} onChange={set('phone_public')} /></div>
-    <Sec title="Товч баримт" hint="он, баг, төсөв" open={!!(ed.founded || ed.team_size || ed.min_budget)}>
+    <Sec id="s-facts" title="Товч баримт" hint="он, баг, төсөв" done={!!(ed.founded && ed.team_size)} why="Харилцагч төсөв, багийн хэмжээгээр шүүдэг — бөглөөгүй бол шүүлтүүрт гарахгүй.">
       <div className="row" style={{ gap: 14 }}>
         <F id="fd" label="Байгуулагдсан он" inputMode="numeric" placeholder="2017" value={ed.founded} onChange={set('founded')} />
         <div style={{ flex: 1, minWidth: 200 }}><label htmlFor="ts" className="lab">Багийн хэмжээ</label><select id="ts" className="field" value={ed.team_size} onChange={set('team_size')}><option value="">—</option>{TEAM_SIZES.map(s => <option key={s} value={s}>{s} хүн</option>)}</select></div>
         <F id="mb" label="Төслийн доод төсөв" placeholder="1 сая ₮-өөс" value={ed.min_budget} onChange={set('min_budget')} />
       </div>
     </Sec>
-    <Sec title="Сошиал" hint="линкүүд" open={Object.values(agency.socials || {}).some(Boolean)}>
+    <Sec id="s-soc" title="Сошиал" hint="линкүүд" done={Object.values(ed.socials || {}).some(Boolean)}>
       <div className="row" style={{ gap: 14 }}>
         {Object.entries(SOCIALS).map(([k, l]) => <F key={k} id={'s' + k} label={l} placeholder={`${k}.com/...`} value={ed.socials[k]} onChange={e => setEd({ ...ed, socials: { ...ed.socials, [k]: e.target.value } })} />)}
         <F id="sem" label="И-мэйл" type="email" value={ed.socials.email} onChange={e => setEd({ ...ed, socials: { ...ed.socials, email: e.target.value } })} />
       </div>
     </Sec>
-    <Sec title="Үйлчилгээ, үнийн санал" hint={`${ed.packages.length}/10`} open={!!agency.packages?.length}>
+    <Sec id="s-pkg" title="Үйлчилгээ, үнийн санал" hint={`${ed.packages.length}/10`} done={ed.packages.length > 0} why="Үнэтэй багц бүхий агентлагт үнийн санал илүү олон ирдэг — ойролцоо үнэ ч хангалттай.">
       {ed.packages.map((pk, i) => <div key={i} style={{ background: 'var(--bg)', borderRadius: 18, padding: 16, display: 'grid', gap: 12 }}>
         <div className="row" style={{ gap: 12, alignItems: 'flex-end' }}>
           <F id={'pt' + i} label="Багцын нэр" placeholder="Сошиал менежмент — Стандарт" value={pk.title} onChange={list('packages', i, 'title')} required />
@@ -124,10 +132,10 @@ export default function EditAgency({ agency, adminSlug }) {
       </div>)}
       {ed.packages.length < 10 && <button type="button" className="btn ghost" style={{ justifySelf: 'start' }} onClick={() => setEd({ ...ed, packages: [...ed.packages, { title: '', items: [], type: 'negotiable', min: '', max: '', period: 'month' }] })}>+ Багц нэмэх</button>}
     </Sec>
-    <Sec title="Харилцагч брэндүүд" hint="таслалаар" open={!!agency.clients?.length}>
+    <Sec id="s-cl" title="Харилцагч брэндүүд" hint="таслалаар" done={!!ed.clients.trim()} why="Таньдаг брэндийн нэр итгэл төрүүлэх хамгийн хурдан арга.">
       <F id="cl" label="Ажилласан брэндүүд" placeholder="Unitel, Khan Bank, Gobi" value={ed.clients} onChange={set('clients')} />
     </Sec>
-    <Sec title="Кейс" hint={`${ed.cases.length}/6`} open={!!agency.cases?.length}>
+    <Sec id="s-case" title="Кейс" hint={`${ed.cases.length}/6`} done={ed.cases.length > 0} why="Нэг ч гэсэн кейс (зураг + үр дүн) нэмбэл профайл хамаагүй хүчтэй харагдана.">
       {ed.cases.map((c, i) => <div key={i} style={{ background: 'var(--bg)', borderRadius: 18, padding: 16, display: 'grid', gap: 10 }}>
         <div className="row" style={{ gap: 12 }}><F id={'ct' + i} label="Гарчиг" value={c.title} onChange={list('cases', i, 'title')} required /><F id={'cc' + i} label="Клиент" value={c.client} onChange={list('cases', i, 'client')} /></div>
         <F id={'cr' + i} label="Үр дүн (нэг өгүүлбэр)" placeholder="3 сард борлуулалт 40% өссөн" value={c.result} onChange={list('cases', i, 'result')} />
@@ -141,7 +149,7 @@ export default function EditAgency({ agency, adminSlug }) {
       </div>)}
       {ed.cases.length < 6 && <button type="button" className="btn ghost" style={{ justifySelf: 'start' }} onClick={() => setEd({ ...ed, cases: [...ed.cases, { title: '', client: '', result: '', link: '', image: '' }] })}>+ Кейс нэмэх</button>}
     </Sec>
-    <Sec title="Баг" hint={`${ed.team.length}/12`} open={!!agency.team?.length}>
+    <Sec id="s-team" title="Баг" hint={`${ed.team.length}/12`} done={ed.team.length > 0} why="Хүмүүс хэнтэй ажиллахаа харахыг хүсдэг — 2–3 гишүүн хангалттай.">
       {ed.team.map((m, i) => <div key={i} style={{ background: 'var(--bg)', borderRadius: 18, padding: 14, display: 'grid', gap: 10 }}>
         <div className="row" style={{ gap: 12, alignItems: 'flex-end' }}>
           <MemberPhoto m={m} size={52} />
