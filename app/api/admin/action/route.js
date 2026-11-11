@@ -1,4 +1,5 @@
 import { activateOrder } from '@/lib/orders';
+import { TYPES } from '@/lib/config';
 import { decideOwn } from '@/lib/ownDecide';
 import { db, fail, json, authUser, isAdmin, mail, esc, origin } from '@/lib/server';
 export async function POST(req) {
@@ -21,7 +22,9 @@ export async function POST(req) {
     else return fail('Буруу үйлдэл');
   } else if (kind === 'listing') {
     const set = { approve: { status: 'approved' }, reject: { status: 'rejected' }, hide: { status: 'rejected' }, sponsor: { sponsored: true }, unsponsor: { sponsored: false } }[action];
+    const ty = String(action || '').startsWith('type:') && action.slice(5);
     if (action === 'delete') await d.from('listings').delete().eq('id', id);
+    else if (ty && TYPES[ty]) await d.from('listings').update({ type: ty, updated_at: now }).eq('id', id);
     else if (set) await d.from('listings').update({ ...set, updated_at: now }).eq('id', id);
     else return fail('Буруу үйлдэл');
   } else if (kind === 'own') {
