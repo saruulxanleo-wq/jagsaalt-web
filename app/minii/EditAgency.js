@@ -7,7 +7,7 @@ import TagInput from '../TagInput';
 import Avatar, { AVATARS, MemberPhoto } from '../Avatar';
 import CatPicker from '../CatPicker';
 import { Logo } from '../Card';
-async function resize(file, wide) {
+export async function resize(file, wide) {
   const img = await createImageBitmap(file); const c = document.createElement('canvas');
   if (wide) { // кейс: 1200×750 (16:10) болгож тайрна
     const W = 1200, H = 750, r = Math.max(W / img.width, H / img.height); c.width = W; c.height = H;

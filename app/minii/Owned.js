@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { api } from '@/lib/sbclient';
+import { api, sb } from '@/lib/sbclient';
+import { resize } from './EditAgency';
 import { TYPES, TOPICS, NICHES, PRODUCTS, priceFor, fmtMnt } from '@/lib/config';
 import { BankBox } from '../tolbor/Pay';
 const fmtN = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n || 0);
@@ -34,6 +35,30 @@ export function ClaimItem({ own, onDone }) {
   </form>;
 }
 const chip = (on, k, v, tog) => <button type="button" key={k} aria-pressed={on} className={'chip' + (on ? ' on' : '')} onClick={() => tog(k)}>{on && '✓ '}{v}</button>;
+// Зураг файлаар оруулах: 400×400 webp болгож шахаад шууд хадгална
+function ImgPick({ own, value, onChange, label, round }) {
+  const [busy, setBusy] = useState(false); const [err, setErr] = useState(null);
+  async function pick(e) {
+    const file = e.target.files?.[0]; e.target.value = ''; if (!file) return;
+    setBusy(true); setErr(null);
+    try {
+      const blob = await resize(file, false); const fd = new FormData();
+      fd.append('file', new File([blob], 'img.webp', { type: 'image/webp' })); fd.append('own', own);
+      const { data } = await sb().auth.getSession();
+      const r = await fetch('/api/own/image', { method: 'POST', headers: { Authorization: 'Bearer ' + data.session?.access_token }, body: fd });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Хадгалж чадсангүй'); onChange(j.url);
+    } catch (x) { setErr(x.message); } setBusy(false);
+  }
+  return <div><label className="lab">{label}</label>
+    <div className="row" style={{ gap: 14, marginTop: 6 }}>
+      {value ? <img src={value} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: round ? '50%' : 14, border: '1.5px solid var(--line)' }} />
+        : <div style={{ width: 64, height: 64, borderRadius: round ? '50%' : 14, border: '1.5px dashed var(--line)', display: 'grid', placeItems: 'center', color: 'var(--mute)', fontSize: 22 }}>+</div>}
+      <label className="btn ghost" style={{ cursor: 'pointer' }}>{busy ? 'Хуулж байна…' : value ? 'Зураг солих' : 'Зураг оруулах'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={pick} hidden disabled={busy} /></label>
+      {value && !busy && <button type="button" className="btn ghost" onClick={() => onChange('')}>Хасах</button>}
+    </div>
+    <p style={{ fontSize: 13, color: 'var(--mute)', marginTop: 6 }}>Дөрвөлжин тайрч автоматаар шахна. Хасвал «Хадгалах» дарж баталгаажуул.</p>
+    {err && <div className="err" style={{ marginTop: 8 }}>{err}</div>}</div>;
+}
 function EditListing({ l, onSaved }) {
   const [f, setF] = useState({ name: l.name || '', maker: l.maker || '', description: l.description || '', price: l.price || '', url: l.url || '', logo_url: l.logo_url || '', topics: l.topics || [] });
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(null);
@@ -48,7 +73,7 @@ function EditListing({ l, onSaved }) {
     <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
       <div style={{ flex: 2, minWidth: 220 }}><label className="lab">Линк</label><input className="field" value={f.url} onChange={set('url')} /></div>
       <div style={{ flex: 1, minWidth: 160 }}><label className="lab">Үнэ</label><input className="field" value={f.price} onChange={set('price')} maxLength={40} /></div></div>
-    <div><label className="lab">{fl ? 'Зургийн' : 'Логоны'} линк <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input className="field" placeholder="https://…png" value={f.logo_url} onChange={set('logo_url')} /></div>
+    <ImgPick own={'listing:' + l.id} label={fl ? 'Зураг' : 'Лого'} round={fl} value={f.logo_url} onChange={v => setF(x => ({ ...x, logo_url: v }))} />
     <div className="row">{Object.entries(TOPICS).map(([k, v]) => chip(f.topics.includes(k), k, v, tog))}</div>
     {msg && <div className={msg[0]}>{msg[1]}</div>}
     <button className="btn dark" disabled={busy}>{busy ? '…' : 'Хадгалах'}</button>
@@ -69,7 +94,7 @@ function EditInfluencer({ l, onSaved }) {
       <div style={{ flex: 1, minWidth: 220 }}><label className="lab">YouTube</label><input className="field" value={f.youtube} onChange={set('youtube')} /></div></div>
     <div><label className="lab">Хамтын ажлын санал хаашаа ирэх вэ? <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· «Шууд бичих» товч энэ рүү очно</span></label><input className="field" placeholder="m.me/… , wa.me/… , 99112233 эсвэл имэйл" value={f.dm_url} onChange={set('dm_url')} />
       <p style={{ fontSize: 13.5, color: 'var(--mute)', marginTop: 6 }}>Хоосон бол Facebook Messenger эсвэл Instagram DM руу чинь очно. Бөглөвөл картад «✓ Шууд хариулдаг» тэмдэг гарна.</p></div>
-    <div><label className="lab">Зургийн линк <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input className="field" value={f.photo_url} onChange={set('photo_url')} /></div>
+    <ImgPick own={'influencer:' + l.id} label="Профайл зураг" round value={f.photo_url} onChange={v => setF(x => ({ ...x, photo_url: v }))} />
     <div className="row">{Object.entries(NICHES).map(([k, v]) => chip(f.niches.includes(k), k, v, tog))}</div>
     <p style={{ fontSize: 13.5, color: 'var(--mute)' }}>Дагагчийн тоог бид нийтэд нээлттэй эх сурвалжаас тогтмол шинэчилнэ.</p>
     {msg && <div className={msg[0]}>{msg[1]}</div>}
