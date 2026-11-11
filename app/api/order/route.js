@@ -20,7 +20,7 @@ export async function POST(req) {
   } else if (b.product === 'listing_sponsor') {
     const { data: l } = await d.from('listings').select('id,name,status,owner_id').eq('id', String(b.target || '')).maybeSingle();
     if (!l || l.status !== 'approved') return fail('Хэрэгслээ сонгоно уу');
-    if (l.owner_id && l.owner_id !== u?.id && !isAdmin(u)) return fail('Энэ картыг зөвхөн эзэмшигч нь ивээн тэтгэнэ');
+    if (l.owner_id && l.owner_id !== u?.id && !isAdmin(u)) return fail('Энэ картыг зөвхөн эзэмшигч нь онцлох болгоно');
     if (!row.contact) return fail('Холбоо барих утас эсвэл и-мэйлээ бичнэ үү');
     Object.assign(row, { target_id: l.id, target_name: l.name });
   } else {

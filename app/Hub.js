@@ -23,6 +23,6 @@ export default function Hub({ type, list }) {
     {shown.length === 0 && <div className="panel" style={{ marginTop: 20, textAlign: 'center' }}>
       <p style={{ fontSize: 17 }}>{list.length ? 'Олдсонгүй.' : `Одоогоор ${t.label.toLowerCase()} нэмэгдээгүй байна.`}</p>
       <Link href={'/nemeh?type=' + type} className="btn v" style={{ marginTop: 14 }}>Эхнийх нь болж нэмэх →</Link></div>}
-    <p style={{ color: 'var(--mute)', fontSize: 14, marginTop: 28 }}>Жагсаалтад нэмэх үнэгүй. «Ивээн тэтгэсэн» гэсэн тэмдэгтэй нь төлбөртэй байршил.</p>
+    <p style={{ color: 'var(--mute)', fontSize: 14, marginTop: 28 }}>Жагсаалтад нэмэх үнэгүй. «Онцлох» гэсэн тэмдэгтэй нь төлбөртэй байршил.</p>
   </section>;
 }

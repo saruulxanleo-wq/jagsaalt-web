@@ -17,7 +17,7 @@ export default function Directory({ list, tools = [], initialCat = 'all', title 
     const f = (seed ? shuffle(r.filter(isFeatured)) : r.filter(isFeatured));
     return f.length ? [...f, ...r.filter(a => !isFeatured(a))] : r;
   }, [list, q, cat, sort, seed]);
-  // Хэрэгслийн мөр: эхний 6 картын дараа, дараа нь 12 карт тутамд. Ивээн тэтгэсэн → ангилалд таарах → бусад
+  // Хэрэгслийн мөр: эхний 6 картын дараа, дараа нь 12 карт тутамд. Онцлох → ангилалд таарах → бусад
   const pool = useMemo(() => { const base = seed || tools, tp = CAT_TOPIC[cat];
     const rank = l => (l.sponsored ? 0 : 2) + (tp && (l.topics || []).includes(tp) ? 0 : 1);
     return [...base].sort((x, y) => rank(x) - rank(y)); }, [seed, tools, cat]);

@@ -106,7 +106,7 @@ function Sponsor({ l }) {
   const on = l.sponsored || (l.sponsored_until && new Date(l.sponsored_until) > new Date());
   const order = async m => { setBusy(true); setErr(null); const r = await api('/api/order', { product: 'listing_sponsor', target: l.id, months: m }); setBusy(false); r.ok ? setRes(r) : setErr(r.error); };
   return <div style={{ marginTop: 14, borderTop: '1.5px dashed var(--line)', paddingTop: 14 }}>
-    <b>🚀 Ивээн тэтгэсэн байршил</b>{on && l.sponsored_until && <span style={{ color: 'var(--mute)' }}> · {new Date(l.sponsored_until).toLocaleDateString('mn-MN')} хүртэл</span>}
+    <b>⭐ Онцлох байршил</b>{on && l.sponsored_until && <span style={{ color: 'var(--mute)' }}> · {new Date(l.sponsored_until).toLocaleDateString('mn-MN')} хүртэл</span>}
     <p style={{ color: 'var(--mute)', fontSize: 14.5, marginTop: 4 }}>{PRODUCTS.listing_sponsor.perks.join('. ')}.</p>
     <div className="row" style={{ marginTop: 10 }}>{[1, 3].map(m => <button key={m} type="button" className={m === 3 ? 'btn dark' : 'btn ghost'} disabled={busy} onClick={() => order(m)}>{m} сар · {fmtMnt(priceFor('listing_sponsor', m))}{m === 3 && ' (−15%)'}</button>)}</div>
     {err && <div className="err" style={{ marginTop: 10 }}>{err}</div>}

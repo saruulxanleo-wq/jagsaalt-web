@@ -15,7 +15,7 @@ export default function ListingCard({ l, medium = 'hub' }) {
       <div className="row" style={{ gap: 6 }}>
         <span className={'cat ' + t.tone}>{t.icon} {t.label}</span>
         {l.verified && <span className="vbadge">✓ Баталгаажсан</span>}
-        {l.sponsored && <span className="badge b-off">Ивээн тэтгэсэн</span>}
+        {l.sponsored && <span className="badge b-off">Онцлох</span>}
         {(l.topics || []).slice(0, 2).map(k => <span key={k} className="badge b-off">{TOPICS[k]}</span>)}
       </div>
       {l.description && <p style={{ color: 'var(--mute)', fontSize: 14.5 }}>{l.description}</p>}
