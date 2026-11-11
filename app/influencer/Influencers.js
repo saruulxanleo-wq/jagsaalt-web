@@ -46,17 +46,21 @@ function Card({ l }) {
   </div>;
 }
 export default function Influencers({ list }) {
-  const [q, setQ] = useState(''); const [ni, setNi] = useState('all'); const [rc, setRc] = useState('all'); const [pf, setPf] = useState('all'); const [n, setN] = useState(36);
+  const [q, setQ] = useState(''); const [ni, setNi] = useState('all'); const [rc, setRc] = useState('all'); const [pf, setPf] = useState('all'); const [so, setSo] = useState('top'); const [n, setN] = useState(36);
   const counts = useMemo(() => list.reduce((m, l) => ((l.niches || []).forEach(k => m[k] = (m[k] || 0) + 1), m), {}), [list]);
   const R = REACH.find(r => r[0] === rc);
   const shown = list.filter(l => (ni === 'all' || (l.niches || []).includes(ni)) && l.reach >= R[2] && l.reach < R[3]
     && (pf === 'all' || (pf === 'fb' ? l.fb_url : pf === 'ig' ? l.ig : l.tiktok))
-    && (!q.trim() || (l.name + ' ' + (l.ig || '') + ' ' + (l.bio || '')).toLowerCase().includes(q.trim().toLowerCase())));
+    && (!q.trim() || (l.name + ' ' + (l.ig || '') + ' ' + (l.bio || '')).toLowerCase().includes(q.trim().toLowerCase())))
+    .sort(so === 'new' ? (a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))
+      : so === 'reach' ? (a, b) => (b.reach || 0) - (a.reach || 0)
+      : (a, b) => (b.verified ? 1 : 0) - (a.verified ? 1 : 0) || (b.dm_url ? 1 : 0) - (a.dm_url ? 1 : 0) || (b.reach || 0) - (a.reach || 0));
   return <section className="wrap" style={{ marginTop: 10 }}>
     <h1 className="h" style={{ fontSize: 'clamp(28px,3.6vw,42px)', fontWeight: 800 }}>Монголын инфлүэнсерүүд</h1>
     <p style={{ color: 'var(--mute)', fontSize: 17, marginTop: 8, maxWidth: 720 }}>Facebook, Instagram, TikTok-д 10 000-аас дээш дагагчтай {list.length} бүтээгч. Чиглэл, хүрээгээр шүүгээд шууд хуудас руу нь ороорой.</p>
     <div className="row ifl" style={{ marginTop: 18, gap: 10 }}>
       <input className="field" style={{ marginTop: 0, maxWidth: 340, borderRadius: 999 }} placeholder="Нэрээр хайх…" value={q} onChange={e => setQ(e.target.value)} aria-label="Хайх" />
+      <select className="field" style={{ marginTop: 0, width: 'auto', borderRadius: 999 }} value={so} onChange={e => setSo(e.target.value)} aria-label="Эрэмбэлэх"><option value="top">Эрэмбэ: баталгаажсан эхэнд</option><option value="new">Шинээр нэмэгдсэн</option><option value="reach">Дагагч ихээс</option></select>
       <select className="field" style={{ marginTop: 0, width: 'auto', borderRadius: 999 }} value={rc} onChange={e => setRc(e.target.value)} aria-label="Дагагч">{REACH.map(r => <option key={r[0]} value={r[0]}>{r[0] === 'all' ? 'Дагагч: бүгд' : r[1]}</option>)}</select>
       <select className="field" style={{ marginTop: 0, width: 'auto', borderRadius: 999 }} value={pf} onChange={e => setPf(e.target.value)} aria-label="Платформ"><option value="all">Платформ: бүгд</option><option value="fb">Facebook</option><option value="ig">Instagram</option><option value="tt">TikTok</option></select>
       <Link href="/nemeh?type=influencer" className="btn dark">+ Инфлүэнсер нэмэх</Link>
