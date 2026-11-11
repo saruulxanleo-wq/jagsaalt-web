@@ -29,5 +29,22 @@ export async function GET(req) {
   const ids = [...new Set([...(claims || []), ...ownClaims].map(c => c.user_id))];
   const { data: profs } = ids.length ? await d.from('profiles').select('id,email,full_name').in('id', ids) : { data: [] };
   const pm = Object.fromEntries((profs || []).map(p => [p.id, p]));
-  return json({ orders: orders || [], infPending: infp || [], infTop: (itop || []).map(x => ({ ...x, clicks: ic[x.id] })).sort((a, b) => b.clicks - a.clicks).slice(0, 15), listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), ownClaims: ownClaims.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
+  // Лог: сүүлийн 120 хоногийн бүх хүсэлт (шийдэгдсэнийг ч оруулна). Бөөнөөр импортолсныг (нэг минутад 4+) алгасна.
+  const since = new Date(Date.now() - 120 * 864e5).toISOString();
+  const noBulk = rows => { const c = {}; (rows || []).forEach(r => { const k = String(r.created_at).slice(0, 16); c[k] = (c[k] || 0) + 1; }); return (rows || []).filter(r => c[String(r.created_at).slice(0, 16)] < 4); };
+  const [{ data: lagS }, { data: lclA }, { data: licA }, { data: lrep }, { data: linf }, { data: llst }, { data: lord }] = await Promise.all([
+    d.from('agencies').select('id,slug,name,fb_url,categories,category,added_by,status,created_at,updated_at').in('added_by', ['user', 'owner']).gte('created_at', since).order('created_at', { ascending: false }),
+    d.from('claims').select('id,note,phone,created_at,decided_at,status,user_id,agencies(name,slug,fb_url)').not('user_id', 'is', null).gte('created_at', since).order('created_at', { ascending: false }),
+    d.from('item_claims').select('*').gte('created_at', since).order('created_at', { ascending: false }),
+    d.from('reports').select('id,message,created_at,resolved,agencies(name,slug)').gte('created_at', since).order('created_at', { ascending: false }).limit(200),
+    d.from('influencers').select('id,name,fb_url,ig,tiktok,youtube,niches,bio,contact,fb_followers,ig_followers,tiktok_followers,status,created_at,updated_at').gte('created_at', since).order('created_at', { ascending: false }),
+    d.from('listings').select('id,type,name,maker,description,price,url,topics,status,contact,created_at,updated_at').gte('created_at', since).order('created_at', { ascending: false }),
+    d.from('orders').select('id,code,product,target_name,months,amount,contact,status,created_at,paid_at').gte('created_at', since).order('created_at', { ascending: false }).limit(200),
+  ]);
+  const licItems = await Promise.all((licA || []).map(async c => { const { data: it } = await d.from(c.kind === 'listing' ? 'listings' : 'influencers').select(c.kind === 'listing' ? 'name,type,url' : 'name,fb_url,ig').eq('id', c.item_id).maybeSingle(); return { ...c, item: it }; }));
+  const lids = [...new Set([...(lclA || []), ...licItems].map(c => c.user_id))].filter(x => !ids.includes(x));
+  const { data: lprofs } = lids.length ? await d.from('profiles').select('id,email,full_name').in('id', lids) : { data: [] };
+  (lprofs || []).forEach(p => { pm[p.id] = p; });
+  const log = { agencies: lagS || [], claims: (lclA || []).map(c => ({ ...c, user: pm[c.user_id] || null })), itemClaims: licItems.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: lrep || [], influencers: noBulk(linf), listings: noBulk(llst), orders: lord || [] };
+  return json({ log, orders: orders || [], infPending: infp || [], infTop: (itop || []).map(x => ({ ...x, clicks: ic[x.id] })).sort((a, b) => b.clicks - a.clicks).slice(0, 15), listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), ownClaims: ownClaims.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
 }
