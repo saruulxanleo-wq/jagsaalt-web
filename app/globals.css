@@ -96,3 +96,11 @@ footer{background:var(--ink);color:#CFCAE6;margin-top:80px}
 
 .bellpop{position:absolute;right:0;top:calc(100% + 8px);width:340px;z-index:60;padding:16px;box-shadow:0 20px 50px -20px #0004;display:grid;gap:10px;text-align:left}
 @media(max-width:640px){.bellpop{position:fixed;left:12px;right:12px;top:72px;width:auto;max-height:75vh;overflow:auto}}
+
+/* Инфлүэнсер карт: нэг мөрөнд ижил өндөр, товчнууд доод талдаа тэгшилнэ */
+.pls{grid-template-columns:repeat(3,1fr);margin-top:0}
+.pls .pl{padding:8px 10px;min-width:0}.pls .pl b{font-size:12px}.pls .pl span{font-size:16px}
+.cardfoot{margin-top:auto;display:grid;gap:10px}
+.cardfoot .btn.ghost{width:100%;justify-content:center}
+.nodm{min-height:72px;display:grid;place-items:center;text-align:center;font-size:13px;color:var(--mute);border:1.5px dashed var(--line);border-radius:16px;padding:8px 12px}
+.ownrow{min-height:20px}

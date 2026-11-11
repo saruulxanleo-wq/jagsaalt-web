@@ -38,11 +38,13 @@ function Card({ l }) {
   return <div className="card">
     <div className="top"><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div>{l.verified && <span className="vbadge" style={{ marginTop: 4 }}>✓ {l.dm_url ? 'Шууд хариулдаг' : 'Баталгаажсан'}</span>}</div></div>
     <div className="row" style={{ gap: 6 }}>{(l.niches || []).map(k => <span key={k} className="badge b-off">{NICHES[k] || k}</span>)}</div>
-    <div className="pls">{PL.map(([k, lab, url, n]) => url(l) && <a key={k} href={withUtm(url(l), 'influencer')} target="_blank" rel="noopener" className={'pl pl-' + k} onClick={() => track(l.id, 'social')}><b>{lab}</b><span>{n(l) ? fmtNum(n(l)) : '—'}</span></a>)}</div>
-    {dm && <div style={{ marginTop: 4 }}><a href={dm.href} target="_blank" rel="noopener" className="btn dark" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { track(l.id, 'dm'); ev('Contact', { content_name: 'influencer_dm' }); }}>💬 Шууд бичих</a>
-      <div style={{ fontSize: 12.5, color: 'var(--mute)', marginTop: 5, textAlign: 'center' }}>{dm.own ? `Инфлүэнсерийн ${dm.via} руу очно` : `${dm.via}-т нь шууд очно · хариу удаж магадгүй`}</div></div>}
+    <div className="pls">{PL.map(([k, lab, url, n]) => url(l) && n(l) > 0 && <a key={k} href={withUtm(url(l), 'influencer')} target="_blank" rel="noopener" className={'pl pl-' + k} onClick={() => track(l.id, 'social')}><b>{lab}</b><span>{fmtNum(n(l))}</span></a>)}</div>
+    <div className="cardfoot">
+    {dm ? <div><a href={dm.href} target="_blank" rel="noopener" className="btn dark" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { track(l.id, 'dm'); ev('Contact', { content_name: 'influencer_dm' }); }}>💬 Шууд бичих</a>
+      <div style={{ fontSize: 12.5, color: 'var(--mute)', marginTop: 5, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dm.own ? `Инфлүэнсерийн ${dm.via} руу очно` : `${dm.via}-т нь шууд очно · хариу удаж магадгүй`}</div></div> : <div className="nodm">Шууд бичих суваг алга — багаар зохион байгуулуулж болно</div>}
     {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" onClick={() => { setAsk(true); track(l.id, 'social'); }}>Багаар зохион байгуулуулах</button>}
-    {!l.verified && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=influencer:${l.id}`} className="ownlink" style={{ alignSelf: 'flex-start' }}>Энэ миний профайл</Link>}
+    <div className="ownrow">{!l.verified && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=influencer:${l.id}`} className="ownlink">Энэ миний профайл</Link>}</div>
+    </div>
   </div>;
 }
 export default function Influencers({ list }) {
@@ -69,7 +71,7 @@ export default function Influencers({ list }) {
       <button className={'chip' + (ni === 'all' ? ' on' : '')} onClick={() => setNi('all')}>Бүгд<span>{list.length}</span></button>
       {Object.keys(NICHES).filter(k => counts[k]).map(k => <button key={k} className={'chip' + (ni === k ? ' on' : '')} onClick={() => setNi(k)}>{NICHES[k]}<span>{counts[k]}</span></button>)}
     </div>
-    <div className="grid" style={{ marginTop: 20, alignItems: 'start' }}>{shown.slice(0, n).map(l => <Card key={l.slug} l={l} />)}</div>
+    <div className="grid" style={{ marginTop: 20 }}>{shown.slice(0, n).map(l => <Card key={l.slug} l={l} />)}</div>
     {shown.length > n && <div style={{ textAlign: 'center', marginTop: 24 }}><button className="btn ghost" onClick={() => setN(n + 36)}>Цааш үзэх ({shown.length - n})</button></div>}
     {!shown.length && <div className="panel" style={{ marginTop: 20, textAlign: 'center' }}>Олдсонгүй.</div>}
     <p style={{ color: 'var(--mute)', fontSize: 14, marginTop: 28, maxWidth: 760 }}>Дагагчийн тоог нийтэд нээлттэй эх сурвалжаас авсан, бодит тооноос зөрж болно. Энэ чиний профайл бол картын доорх «Энэ миний профайл»-аар эзэмшиж, өөрөө засаарай. Хасуулах бол <Link href="/aldaa" style={{ textDecoration: 'underline' }}>энд мэдэгдээрэй</Link>.</p>
