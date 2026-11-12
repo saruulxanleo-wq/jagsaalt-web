@@ -5,7 +5,7 @@ const short = n => n >= 1e6 ? (Math.round(n / 1e5) / 10 + ' сая').replace('.'
 export function Logo({ a, size = 60, radius = 16 }) {
   const st = { width: size, height: size, borderRadius: radius };
   return a.logo_url ? <img className="logoimg" style={st} src={a.logo_url} alt={a.name + ' лого'} loading="lazy" />
-    : <span className="logoimg" style={{ ...st, background: 'var(--c)', fontSize: size * 0.38 }}>{a.name.trim()[0]}</span>;
+    : <span className="logoimg" style={{ ...st, background: 'var(--v)', fontSize: size * 0.38 }}>{a.name.trim()[0]}</span>;
 }
 export function Badges({ a }) {
   const act = isActive(a);

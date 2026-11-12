@@ -25,7 +25,7 @@ export default async function Profile({ params }) {
     <Track slug={a.slug} />
     <Link href="/" style={{ color: 'var(--mute)', fontWeight: 600, fontSize: 14.5 }}>← Агентлагууд / {c.label}</Link>
     <div className="panel" style={{ padding: 0, overflow: 'hidden', marginTop: 18 }}>
-      <div style={{ height: 160, background: 'radial-gradient(circle at 15% 30%,var(--l) 0 100px,transparent 101px),radial-gradient(circle at 80% 120%,var(--c) 0 160px,transparent 161px),var(--v)' }} />
+      <div style={{ height: 160, background: 'radial-gradient(circle at 15% 30%,var(--l) 0 100px,transparent 101px),radial-gradient(circle at 80% 120%,var(--b) 0 160px,transparent 161px),var(--v)' }} />
       <div style={{ padding: '0 32px 36px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 32 }}>
         <div>
           <div style={{ marginTop: -56, display: 'inline-block', border: '6px solid #fff', borderRadius: 34, background: '#fff' }}><Logo a={a} size={112} radius={28} /></div>

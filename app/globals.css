@@ -14,7 +14,7 @@
 @font-face{font-family:'Geologica';font-style:normal;font-weight:800;font-display:swap;src:url(/fonts/geologica-cyrillic-800-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
 @font-face{font-family:'Geologica';font-style:normal;font-weight:800;font-display:swap;src:url(/fonts/geologica-cyrillic-ext-800-normal.woff2) format('woff2');unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}
 :root{--font-unbounded:'Geologica';--font-onest:'Geologica'}
-:root{--bg:#F3F8F4;--ink:#14121F;--mute:#5B5770;--line:#DCEAE0;--v:#0B8A3E;--v2:#E1F4E7;--c:#E8452A;--c2:#FFE6DF;--l:#C8F169;--l2:#EEFBD2;--p:#0B7A8A;--p2:#D9F4F6}
+:root{--bg:#F3F8F4;--ink:#14121F;--mute:#5B5770;--line:#DCEAE0;--v:#0B8A3E;--v2:#E1F4E7;--c:#E8452A;--c2:#FFE6DF;--l:#C8F169;--l2:#EEFBD2;--p:#0B7A8A;--p2:#D9F4F6;--b:#3451B2;--b2:#E8EDFC}
 *{box-sizing:border-box;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-onest),system-ui,sans-serif;font-size:16px;line-height:1.5}
 .h{font-family:var(--font-unbounded),sans-serif;letter-spacing:-.025em;line-height:1.1}
@@ -41,7 +41,7 @@ nav.top{display:flex;align-items:center;justify-content:space-between;padding:20
 .chip span{font-size:12px;font-weight:700;color:var(--mute);background:var(--bg);padding:1px 8px;border-radius:99px}
 .chip.on{background:var(--ink);color:#fff;box-shadow:none}.chip.on span{background:#ffffff26;color:#fff}
 .cat{display:inline-block;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:8px}
-.cat.v{background:var(--v2);color:#08662D}.cat.c{background:var(--c2);color:#A3260F}.cat.l{background:var(--l2);color:#3F5A06}.cat.p{background:var(--p2);color:#075864}
+.cat.v{background:var(--v2);color:#08662D}.cat.c{background:var(--b2);color:#2B4499}.cat.l{background:var(--l2);color:#3F5A06}.cat.p{background:var(--p2);color:#075864}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
 .card{background:#fff;border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px -18px #0b3a2040;transition:transform .15s}
 .card:hover{transform:translateY(-3px)}
@@ -70,7 +70,7 @@ footer{background:var(--ink);color:#CFCAE6;margin-top:80px}
 .strip-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .strip .card{box-shadow:none}
 .lcard .licon{background:var(--ink);color:var(--l);font-size:20px}
-.lcard.t-course .licon{background:var(--v);color:#fff}.lcard.t-community .licon{background:var(--c);color:#fff}.lcard.t-media .licon{background:var(--c);color:#fff}.lcard.t-freelancer .licon{background:var(--p);color:#fff;border-radius:50%!important}
+.lcard.t-course .licon{background:var(--v);color:#fff}.lcard.t-community .licon{background:var(--b);color:#fff}.lcard.t-media .licon{background:var(--b);color:#fff}.lcard.t-freelancer .licon{background:var(--p);color:#fff;border-radius:50%!important}
 .lcard .lmain{display:flex;flex-direction:column;gap:14px;color:inherit;text-decoration:none}
 .vbadge{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;color:#1d8a3a;background:#e6f7ea;border-radius:999px;padding:3px 9px}
 .ownlink{font-size:13px;color:var(--mute);text-decoration:underline;font-weight:600}

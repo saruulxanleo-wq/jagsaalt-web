@@ -28,7 +28,7 @@ export default function Directory({ list, tools = [], initialCat = 'all', title 
     <header className="wrap hero" style={{ paddingTop: 20, paddingBottom: 28, position: 'relative' }}>
       <div className="deco" aria-hidden>
         <i style={{ right: 30, top: 0, width: 150, height: 150, borderRadius: '50%', background: 'var(--l)' }} />
-        <i style={{ right: 140, top: 80, width: 96, height: 96, borderRadius: 26, background: 'var(--c)', transform: 'rotate(14deg)' }} />
+        <i style={{ right: 140, top: 80, width: 96, height: 96, borderRadius: 26, background: 'var(--b)', transform: 'rotate(14deg)' }} />
         <i style={{ right: 0, top: 100, width: 86, height: 86, borderRadius: '50%', background: 'var(--v)' }} />
         {list.filter(a => a.logo_url).slice(0, 3).map((a, i) => <img key={a.slug} src={a.logo_url} alt="" style={[{ right: 70, top: 30, width: 58, height: 58, transform: 'rotate(-8deg)', borderRadius: 16 }, { right: 160, top: 100, width: 52, height: 52, transform: 'rotate(6deg)', borderRadius: 14 }, { right: 18, top: 118, width: 48, height: 48, borderRadius: 14 }][i]} />)}
       </div>
