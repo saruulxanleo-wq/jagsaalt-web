@@ -2,7 +2,7 @@
 import { track as ev } from '@/lib/track';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { NICHES, REACH, fbPic, withUtm } from '@/lib/config';
+import { NICHES, REACH, fbPic, withUtm, PARTNER } from '@/lib/config';
 const fmtNum = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n || 0);
 const track = (id, kind) => { if (!/^[0-9a-f-]{36}$/.test(id)) return; const body = JSON.stringify({ iid: id, kind }); navigator.sendBeacon?.('/api/track', new Blob([body], { type: 'application/json' })); };
 // «Шууд бичих»: эзэмшигчийн сонгосон суваг → Facebook Messenger → Instagram DM
@@ -35,14 +35,16 @@ function Ask({ l, onClose }) {
 }
 function Card({ l }) {
   const [ask, setAsk] = useState(false); const dm = dmOf(l);
-  return <div className="card">
-    <div className="top"><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div>{l.verified && <span className="vbadge" style={{ marginTop: 4 }}>✓ {l.dm_url ? 'Шууд хариулдаг' : 'Баталгаажсан'}</span>}</div></div>
+  const pb = l.badge === PARTNER.key;
+  return <div className="card" style={pb ? { position: 'relative' } : undefined}>
+    {pb && <a className="pbadge" href={PARTNER.url} target="_blank" rel="noopener"><img src={PARTNER.logo} alt="" /><span><small>Баталгаажуулсан</small>{PARTNER.name}</span></a>}
+    <div className="top" style={pb ? { paddingTop: 30 } : undefined}><Photo l={l} /><div style={{ minWidth: 0 }}><h3>{l.name}</h3><div style={{ fontSize: 14, color: 'var(--mute)', fontWeight: 600 }}>Нийт {fmtNum(l.reach)} дагагч</div>{l.verified && <span className="vbadge" style={{ marginTop: 4 }}>✓ {l.dm_url ? 'Шууд хариулдаг' : 'Баталгаажсан'}</span>}</div></div>
     <div className="row" style={{ gap: 6 }}>{(l.niches || []).map(k => <span key={k} className="badge b-off">{NICHES[k] || k}</span>)}</div>
     <div className="pls">{PL.map(([k, lab, url, n]) => url(l) && n(l) > 0 && <a key={k} href={withUtm(url(l), 'influencer')} target="_blank" rel="noopener" className={'pl pl-' + k} onClick={() => track(l.id, 'social')}><b>{lab}</b><span>{fmtNum(n(l))}</span></a>)}</div>
     <div className="cardfoot">
     {dm ? <div><a href={dm.href} target="_blank" rel="noopener" className="btn dark" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { track(l.id, 'dm'); ev('Contact', { content_name: 'influencer_dm' }); }}>💬 Шууд бичих</a>
       <div style={{ fontSize: 12.5, color: 'var(--mute)', marginTop: 5, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dm.own ? `Инфлүэнсерийн ${dm.via} руу очно` : `${dm.via}-т нь шууд очно · хариу удаж магадгүй`}</div></div> : <div className="nodm">Шууд бичих суваг алга — багаар зохион байгуулуулж болно</div>}
-    {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" onClick={() => { setAsk(true); track(l.id, 'social'); }}>Багаар зохион байгуулуулах</button>}
+    {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" onClick={() => { setAsk(true); track(l.id, 'social'); }}>{pb ? <><img src={PARTNER.logo} alt="" style={{ width: 20, height: 20, borderRadius: '50%', marginRight: 6, verticalAlign: '-4px' }} />{PARTNER.name}-гоор зохион байгуулуулах</> : 'Багаар зохион байгуулуулах'}</button>}
     <div className="ownrow">{!l.verified && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=influencer:${l.id}`} className="ownlink">Энэ миний профайл</Link>}</div>
     </div>
   </div>;

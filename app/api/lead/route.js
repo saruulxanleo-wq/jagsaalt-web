@@ -1,4 +1,4 @@
-import { db, fail, json, mail, ADMIN_EMAIL, esc, origin, btn } from '@/lib/server';
+import { db, fail, json, mail, ADMIN_EMAIL, esc, origin, btn, partnerEmails } from '@/lib/server';
 import { NEEDS, BUDGETS, SIZES, PRIORITIES, ADS, BRANDS } from '@/lib/match';
 // Клиентийн "үнийн санал авах" хүсэлт
 export async function POST(req) {
@@ -40,6 +40,12 @@ ${others > 0 ? `<p style="color:#667">Энэ харилцагч өөр ${others}
     const { data: inf } = await d.from('influencers').select('name,owner_id').eq('slug', String(q.influencer)).maybeSingle();
     if (inf?.owner_id) { const { data: { user } } = await d.auth.admin.getUserById(inf.owner_id);
       if (user?.email) await mail(user.email, `Хамтран ажиллах санал: ${name}${row.company ? ' · ' + row.company : ''}`, `<p>Сайн уу! ${esc(o.replace(/^https?:\/\//, ''))}-ээр дамжуулан «${esc(inf.name)}» профайлд хамтран ажиллах санал ирлээ.</p><p><b>${esc(name)}</b>${row.company ? ' · ' + esc(row.company) : ''}<br>${esc(phone)} ${esc(email)}</p>${row.note ? `<p>«${esc(row.note)}»</p>` : ''}`); }
+  }
+  // Инфлүэнсерийн хүсэлтийг түнш агентлагт (самбар + имэйл) мэдэгдэнэ
+  if (q.source === 'influencer') {
+    const to = await partnerEmails(d).catch(() => []);
+    const body = `<p>Инфлүэнсерийн цэсээр шинэ хүсэлт ирлээ.</p><p><b>${esc(name)}</b>${row.company ? ' · ' + esc(row.company) : ''}<br>${esc(phone)} ${esc(email)}</p><p>Инфлүэнсер: <a href="${o}/influencer">${esc(q.influencer_name || q.influencer || '')}</a></p>${row.note ? `<p>${esc(row.note)}</p>` : ''}<p>${btn(o + '/partner', 'Самбар нээх', '#16161D')}</p>`;
+    for (const e of to) await mail(e, `Шинэ инфлүэнсерийн хүсэлт: ${name}${row.company ? ' · ' + row.company : ''} | brief.mn`, body);
   }
   return json({ ok: true });
 }

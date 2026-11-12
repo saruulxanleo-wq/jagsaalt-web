@@ -205,6 +205,11 @@ export default function Admin() {
     </>}
     {tab === 'tools' && <>
       <div className="panel" style={{ marginTop: 18 }}>
+        <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>🤝 Инфлүэнсерийн самбар (Contento)</h2>
+        <p style={{ color: 'var(--mute)', marginTop: 6 }}>Инфлүэнсерийн хүсэлт, профайл, үйлдлийн түүх, самбарын эрх (хамгийн ихдээ 3 имэйл).</p>
+        <Link href="/partner" className="btn dark" style={{ marginTop: 10 }}>Самбар нээх</Link>
+      </div>
+      <div className="panel" style={{ marginTop: 18 }}>
         <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>Агентлаг засах / нуух</h2>
         <p style={{ color: 'var(--mute)', marginTop: 6 }}>Аль ч агентлагийн профайл руу ороод «✎ Профайл засах» дар. Эсвэл slug-аар нь шууд:</p>
         <form className="row" style={{ marginTop: 10 }} onSubmit={e => { e.preventDefault(); if (q) location.href = '/minii?edit=' + encodeURIComponent(q.trim()); }}>
