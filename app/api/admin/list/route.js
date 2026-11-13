@@ -50,6 +50,14 @@ export async function GET(req) {
   const lids = [...new Set([...(lclA || []), ...licItems].map(c => c.user_id))].filter(x => !ids.includes(x));
   const { data: lprofs } = lids.length ? await d.from('profiles').select('id,email,full_name').in('id', lids) : { data: [] };
   (lprofs || []).forEach(p => { pm[p.id] = p; });
-  const log = { agencies: lagS || [], claims: (lclA || []).map(c => ({ ...c, user: pm[c.user_id] || null })), itemClaims: licItems.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: lrep || [], influencers: noBulk(linf), listings: noBulk(llst), orders: lord || [] };
+  // Мэдээлэл: шинэ хэрэглэгч, агентлагт удирдагч нэмэгдсэн (хаб/Telegram мэдэгдэлтэй адил харагдана)
+  const since30 = new Date(Date.now() - 14 * 864e5).toISOString();
+  const [{ data: nusers }, { data: nmem }] = await Promise.all([
+    d.from('profiles').select('id,email,full_name,phone,created_at').gte('created_at', since30).order('created_at', { ascending: false }).limit(300),
+    d.from('agency_members').select('agency_id,user_id,created_at,agencies(name,slug)').gte('created_at', since30).order('created_at', { ascending: false }).limit(200),
+  ]);
+  const mids = [...new Set((nmem || []).map(m => m.user_id))].filter(x => !pm[x]);
+  if (mids.length) { const { data: mp } = await d.from('profiles').select('id,email,full_name').in('id', mids); (mp || []).forEach(p => { pm[p.id] = p; }); }
+  const log = { users: nusers || [], members: (nmem || []).map(m => ({ ...m, user: pm[m.user_id] || null })), agencies: lagS || [], claims: (lclA || []).map(c => ({ ...c, user: pm[c.user_id] || null })), itemClaims: licItems.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: lrep || [], influencers: noBulk(linf), listings: noBulk(llst), orders: lord || [] };
   return json({ leadAgencies, log, orders: orders || [], infPending: infp || [], infTop: (itop || []).map(x => ({ ...x, clicks: ic[x.id] })).sort((a, b) => b.clicks - a.clicks).slice(0, 15), listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), ownClaims: ownClaims.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
 }

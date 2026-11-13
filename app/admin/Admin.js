@@ -67,7 +67,7 @@ export default function Admin() {
     setPh(`Дууслаа: инфлүэнсер ${sum.inf[0]} зурагтай боллоо (${sum.inf[1]} олдсонгүй) · мэргэжилтэн ${sum.fl[0]} (${sum.fl[1]} олдсонгүй)`);
   }
   const [s, setS] = useState(undefined); const [data, setData] = useState(null); const [err, setErr] = useState(null); const [q, setQ] = useState('');
-  const [tab, setTab] = useState('leads'); const [lf, setLf] = useState('all'); const [fs, setFs] = useState('pending'); const [ft, setFt] = useState('all'); const [open, setOpen] = useState(null);
+  const [tab, setTab] = useState('leads'); const [lf, setLf] = useState('all'); const [fs, setFs] = useState('all'); const [ft, setFt] = useState('all'); const [open, setOpen] = useState(null);
   const [seen, setSeen] = useState({});
   useEffect(() => { try { setSeen(JSON.parse(localStorage.getItem('brief_admin_read') || '{}')); } catch {} }, []);
   const saveSeen = x => { setSeen(x); try { localStorage.setItem('brief_admin_read', JSON.stringify(x)); } catch {} };
@@ -109,6 +109,10 @@ export default function Admin() {
     ...(L.itemClaims || []).map(c => { const link = c.item?.url || c.item?.fb_url || (c.item?.ig && 'https://www.instagram.com/' + c.item.ig); return { key: 'ic' + c.id, type: 'claim', icon: '🔑', label: (c.kind === 'influencer' ? 'Инфлүэнсер' : TYPES[c.item?.type]?.label || '') + ' эзэмших', at: c.created_at, st: stOf(c.status), decided: c.decided_at, title: <>{c.item?.name} ← {c.user?.full_name || c.user?.email}</>, sub: `${c.user?.email || ''} · ${c.phone || ''}`,
       body: <>«{c.note}»{c.phone && <> · <a href={'tel:' + c.phone} style={{ color: 'var(--v)' }}>залгах</a></>}{link && <> · {lnk(link, 'хуудсаар нь бичих')}</>}{c.proof && <> · нотолгоо: {/^https?:/.test(c.proof) ? lnk(c.proof, 'линк') : c.proof}</>}</>,
       actions: c.status === 'pending' && <><button className="btn v" onClick={() => A('own', c.id, 'approve')}>Батлах</button><button className="btn ghost" onClick={() => A('own', c.id, 'reject', 'Татгалзах уу?')}>Татгалзах</button></> }; }),
+    ...(L.users || []).map(u => ({ key: 'us' + u.id, type: 'user', icon: '👤', label: 'Шинэ хэрэглэгч бүртгүүлсэн', at: u.created_at, st: 'info', title: u.full_name || u.email || 'Нэргүй', sub: [u.email, u.phone].filter(Boolean).join(' · '),
+      body: <span style={{ color: 'var(--mute)' }}>Сайтад бүртгүүлсэн. Агентлаг эзэмших, жагсаалт нэмэх хүсэлт ирвэл тусад нь энд гарна.</span>, actions: null })),
+    ...(L.members || []).map(m => ({ key: 'mb' + m.agency_id + m.user_id, type: 'claim', icon: '🔗', label: 'Агентлагт удирдагч нэмэгдсэн', at: m.created_at, st: 'info', title: <>{m.agencies?.name} ← {m.user?.full_name || m.user?.email || ''}</>, sub: m.user?.email || '',
+      body: m.agencies?.slug ? <Link href={`/a/${m.agencies.slug}`} style={{ color: 'var(--v)' }}>профайл</Link> : null, actions: null })),
     ...(L.reports || []).map(r => ({ key: 'rp' + r.id, type: 'report', icon: '⚠️', label: 'Алдааны мэдээлэл', at: r.created_at, st: r.resolved ? 'done' : 'pending', title: r.agencies?.name || 'Сайтын алдаа', sub: '',
       body: <div style={{ whiteSpace: 'pre-wrap' }}>{r.message}</div>,
       actions: !r.resolved && <>{r.agencies && <Link className="btn ghost" href={`/minii?edit=${r.agencies.slug}`}>✏️ Профайлыг засах</Link>}<button className="btn ghost" onClick={() => A('report', r.id, 'resolve', 'Засаж дууссан уу?')}>✓ Засагдсан, хаах</button></> })),
@@ -116,7 +120,7 @@ export default function Admin() {
       body: <>{o.status === 'pending' ? 'Төлбөр хүлээгдэж байна. QPay-ээр төлбөл автоматаар батлагдана, дансаар шилжүүлсэн бол гүйлгээний утгад энэ код байгаа эсэхийг шалга.' : o.status === 'paid' ? 'Төлөгдсөн, идэвхжсэн.' : 'Цуцлагдсан.'}</>,
       actions: o.status === 'pending' && <><button className="btn v" onClick={() => A('order', o.id, 'approve', `${o.code}: ${fmtMnt(o.amount)} дансанд орсон уу? Идэвхжүүлэх үү?`)}>Төлбөр орсон</button><button className="btn ghost" onClick={() => A('order', o.id, 'reject')}>Цуцлах</button></> })),
   ].sort((a, b) => String(b.at).localeCompare(String(a.at)));
-  const TYPESF = { agency: 'Агентлаг', influencer: 'Инфлүэнсер', listing: 'Мэргэжилтэн, бусад', claim: 'Эзэмших', report: 'Алдаа', order: 'Захиалга' };
+  const TYPESF = { user: 'Хэрэглэгч', agency: 'Агентлаг', influencer: 'Инфлүэнсер', listing: 'Мэргэжилтэн, бусад', claim: 'Эзэмших', report: 'Алдаа', order: 'Захиалга' };
   const pendingN = items.filter(i => i.st === 'pending').length;
   const unreadN = items.filter(i => !seen[i.key]).length;
   const shown = items.filter(i => (fs === 'all' || (fs === 'pending' ? i.st === 'pending' : fs === 'unread' ? !seen[i.key] : i.st !== 'pending' && i.st !== 'info')) && (ft === 'all' || i.type === ft));
