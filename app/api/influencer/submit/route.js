@@ -1,6 +1,6 @@
 import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin, partnerEmails } from '@/lib/server';
 import { NICHES, cap } from '@/lib/config';
-import { normFb } from '@/lib/fb';
+import { fbLinkError, normFb } from '@/lib/fb';
 import { fbPage } from '@/lib/fbpage';
 const handle = (v, re) => { v = String(v || '').trim(); if (!v) return null; const m = v.match(re); return (m ? m[1] : v).replace(/^@/, '').replace(/[/?#].*$/, '').slice(0, 60) || null; };
 const num = v => { const n = parseInt(String(v || '').replace(/[^\d]/g, ''), 10); return Number.isFinite(n) && n > 0 && n < 5e8 ? n : null; };
@@ -10,6 +10,7 @@ export async function POST(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна, түр хүлээгээрэй', 503);
   const b = await req.json().catch(() => ({}));
   const name = cap(b.name).slice(0, 80); if (name.length < 2) return fail('Нэрээ оруул');
+  if (b.fb) { const e = fbLinkError(b.fb); if (e) return fail(e); }
   const fb_url = b.fb ? normFb(b.fb) : null; if (b.fb && !fb_url) return fail('Facebook линк буруу байна');
   const ig = handle(b.ig, /instagram\.com\/([^/?#]+)/i), tiktok = handle(b.tiktok, /tiktok\.com\/@?([^/?#]+)/i);
   let youtube = String(b.youtube || '').trim() || null; if (youtube && !/^https?:\/\//.test(youtube)) youtube = 'https://' + youtube;

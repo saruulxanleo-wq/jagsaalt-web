@@ -1,5 +1,5 @@
 import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin, pickCats } from '@/lib/server';
-import { normFb, slugify } from '@/lib/fb';
+import { fbLinkError, normFb, slugify } from '@/lib/fb';
 import { CATS, SUPABASE_URL } from '@/lib/config';
 import { enrichAgency } from '@/lib/fbpage';
 export async function POST(req) {
@@ -19,6 +19,7 @@ export async function POST(req) {
     ({ data: ag } = await d.from('agencies').select('id,name,slug,fb_url,verified').eq('slug', b.slug).maybeSingle());
     if (!ag) return fail('Агентлаг олдсонгүй', 404);
   } else {
+    { const e = fbLinkError(b.fb_url || ''); if (e) return fail(e); }
     const fb = normFb(b.fb_url || ''); if (!fb) return fail('Facebook хуудасны зөв линк оруул');
     ({ data: ag } = await d.from('agencies').select('id,name,slug,fb_url,verified').eq('fb_url', fb).maybeSingle());
     if (!ag) {

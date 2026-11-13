@@ -1,11 +1,12 @@
 import { db, fail, json, mail, ADMIN_EMAIL, decideLink, esc, btn, origin, pickCats } from '@/lib/server';
-import { normFb, slugify } from '@/lib/fb';
+import { fbLinkError, normFb, slugify } from '@/lib/fb';
 import { CATS, SUPABASE_URL } from '@/lib/config';
 import { enrichAgency } from '@/lib/fbpage';
 // Хэрэглэгч (нэвтрээгүй ч болно) агентлаг санал болгоно → pending, админд и-мэйл.
 export async function POST(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна, түр хүлээгээрэй', 503);
   const b = await req.json().catch(() => ({}));
+  { const e = fbLinkError(b.fb_url || ''); if (e) return fail(e); }
   const fb = normFb(b.fb_url || ''); if (!fb) return fail('Facebook хуудасны зөв линк оруул');
   const name = (b.name || '').trim().slice(0, 80); if (name.length < 2) return fail('Нэрээ оруул');
   const cats = pickCats(b.categories); if (!cats) return fail('1-3 ангилал сонго');
