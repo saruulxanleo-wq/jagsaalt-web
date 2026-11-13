@@ -18,7 +18,7 @@ export async function POST(req) {
 ${row.note ? `<p>Нэмэлт: ${esc(row.note)}</p>` : ''}<p>Сонгосон агентлагууд: ${row.agencies.map(s => `<a href="${o}/a/${s}">${esc(s)}</a>`).join(', ')}</p><p>UTM: ${esc(JSON.stringify(row.utm))}</p><p><a href="${o}/admin">Админ →</a></p>`);
   // Эзэнтэй агентлаг бүрт үнийн саналыг шууд имэйлээр дамжуулна (эзэнгүйг админ гараар дамжуулна)
   if (row.agencies.length) {
-    const { data: ags } = await d.from('agencies').select('id,slug,name').in('slug', row.agencies);
+    const { data: ags } = await d.from('agencies').select('id,slug,name,socials').in('slug', row.agencies);
     const sent = {};
     for (const a of ags || []) {
       const { data: mem } = await d.from('agency_members').select('user_id').eq('agency_id', a.id);
@@ -30,7 +30,10 @@ ${others > 0 ? `<p style="color:#667">Энэ харилцагч өөр ${others}
 <p>${phone ? btn('tel:' + phone.replace(/\s/g, ''), 'Залгах', '#0B8A3E') : ''}${email ? btn('mailto:' + email, 'Имэйл бичих', '#16161D') : ''}</p>
 <p style="color:#667;font-size:13px">Энэ хүсэлтийг brief.mn дээр «${esc(a.name)}»-ийг удирддаг хүнд илгээв. Бүх хүсэлтээ <a href="${o}/minii">Миний самбар</a>-аас харна.</p>`;
       let ok = false;
-      for (const m of mem || []) { const { data: { user } } = await d.auth.admin.getUserById(m.user_id); if (user?.email) ok = (await mail(user.email, `Шинэ үнийн санал: ${name}${row.company ? ' · ' + row.company : ''} | brief.mn`, body)) || ok; }
+      // Агентлагийн профайл дээрх ажлын имэйл + удирдагчдын нэвтрэх имэйл (давхардалгүй)
+      const to = new Set(); const ae = String(a.socials?.email || '').trim().toLowerCase(); if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ae)) to.add(ae);
+      for (const m of mem || []) { const { data: { user } } = await d.auth.admin.getUserById(m.user_id); if (user?.email) to.add(user.email.toLowerCase()); }
+      for (const e of to) ok = (await mail(e, `Шинэ үнийн санал: ${name}${row.company ? ' · ' + row.company : ''} | brief.mn`, body)) || ok;
       if (ok) sent[a.slug] = new Date().toISOString();
     }
     if (ins?.id && Object.keys(sent).length) await d.from('leads').update({ sent }).eq('id', ins.id);

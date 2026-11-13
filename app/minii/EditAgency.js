@@ -109,7 +109,7 @@ export default function EditAgency({ agency, adminSlug }) {
     <Sec id="s-soc" title="Сошиал" hint="линкүүд" done={Object.values(ed.socials || {}).some(Boolean)}>
       <div className="row" style={{ gap: 14 }}>
         {Object.entries(SOCIALS).map(([k, l]) => <F key={k} id={'s' + k} label={l} placeholder={`${k}.com/...`} value={ed.socials[k]} onChange={e => setEd({ ...ed, socials: { ...ed.socials, [k]: e.target.value } })} />)}
-        <F id="sem" label="И-мэйл" type="email" value={ed.socials.email} onChange={e => setEd({ ...ed, socials: { ...ed.socials, email: e.target.value } })} />
+        <F id="sem" label="Ажлын и-мэйл · үнийн саналын хүсэлт энд бас очно" type="email" value={ed.socials.email} onChange={e => setEd({ ...ed, socials: { ...ed.socials, email: e.target.value } })} />
       </div>
     </Sec>
     <Sec id="s-pkg" title="Үйлчилгээ, үнийн санал" hint={`${ed.packages.length}/10`} done={ed.packages.length > 0} why="Үнэтэй багц бүхий агентлагт үнийн санал илүү олон ирдэг — ойролцоо үнэ ч хангалттай.">
