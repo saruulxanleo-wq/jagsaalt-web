@@ -21,7 +21,7 @@ export function Badges({ a }) {
 export default function Card({ a }) {
   return <Link href={`/a/${a.slug}`} className={'card' + (isFeatured(a) ? ' feat' : '')}>
     <div className="top"><Logo a={a} /><div><h3>{a.name}</h3><div className="row" style={{ marginTop: 6, gap: 6 }}>{catsOf(a).map(k => <span key={k} className={`cat ${catTone(k)}`}>{catLabel(k)}</span>)}</div></div></div>
-    {a.description && <p style={{ color: 'var(--mute)', fontSize: 14.5 }}>{a.description}</p>}
+    <p className="cdesc" title={a.description || undefined}>{a.description || ''}</p>
     <Badges a={a} />
     {minPrice(a) && <div className="price"><b>{short(minPrice(a))}₮</b>-өөс эхэлнэ · {a.packages.length} багц</div>}
     <div className="meta"><span>{a.followers != null ? <><b>{fmtNum(a.followers)}</b> дагагч</> : a.founded ? <><b>{a.founded}</b> оноос</> : ''}</span><span style={{ color: 'var(--v)' }}>Профайл →</span></div>

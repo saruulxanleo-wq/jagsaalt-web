@@ -18,7 +18,7 @@ export default function ListingCard({ l, medium = 'hub' }) {
         {l.sponsored && <span className="badge b-off">Онцлох</span>}
         {(l.topics || []).slice(0, 2).map(k => <span key={k} className="badge b-off">{topicLabel(k)}</span>)}
       </div>
-      {l.description && <p style={{ color: 'var(--mute)', fontSize: 14.5 }}>{l.description}</p>}
+      <p className="cdesc" title={l.description || undefined}>{l.description || ''}</p>
     </Link>
     <div className="meta"><span>{l.price ? <b>{l.price}</b> : ''}</span>
       <span className="row" style={{ gap: 12 }}>{!l.verified && medium === 'hub' && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=listing:${l.id}`} className="ownlink">Минийх</Link>}

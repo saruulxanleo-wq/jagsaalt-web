@@ -118,3 +118,5 @@ footer{background:var(--ink);color:#CFCAE6;margin-top:80px}
 .ddm>a:hover{background:#f3f6f4}.ddm small{color:var(--mute);font-weight:500;font-size:13px}
 @media(hover:hover) and (min-width:641px){.dd:hover .ddm,.dd:focus-within .ddm{display:block}}
 @media(max-width:640px){.ddc{display:none}}
+/* Картын тайлбар: 4 мөрөөр тасалж «…», богино/хоосон ч ижил өндөр эзэлнэ → нэг эгнээний картууд тэгш */
+.cdesc{color:var(--mute);font-size:14.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;min-height:calc(1.5em * 4)}
