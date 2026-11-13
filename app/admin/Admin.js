@@ -55,6 +55,17 @@ export default function Admin() {
       ok += r.res.filter(x => x.ok).length; tot = r.total; off = r.next; setRf(`${off}/${tot} шалгасан · ${ok} амжилттай`); if (r.done) break; }
     setRf(`Дууслаа: ${tot}-аас ${ok} агентлагийн мэдээлэл шинэчлэгдлээ`);
   }
+  const [ph, setPh] = useState(null);
+  async function photos() {
+    const sum = { inf: [0, 0], fl: [0, 0] };
+    for (const kind of ['inf', 'fl']) {
+      let skip = 0;
+      while (true) { const r = await api('/api/admin/photos', { kind, skip }); if (!r.ok) { setPh('Алдаа: ' + r.error); return; }
+        r.res.forEach(x => sum[kind][x.ok ? 0 : 1]++); skip = r.next;
+        setPh(`${kind === 'inf' ? 'Инфлүэнсер' : 'Мэргэжилтэн'}: ${sum[kind][0]} зурагтай боллоо · ${sum[kind][1]} олдсонгүй`); if (r.done) break; }
+    }
+    setPh(`Дууслаа: инфлүэнсер ${sum.inf[0]} зурагтай боллоо (${sum.inf[1]} олдсонгүй) · мэргэжилтэн ${sum.fl[0]} (${sum.fl[1]} олдсонгүй)`);
+  }
   const [s, setS] = useState(undefined); const [data, setData] = useState(null); const [err, setErr] = useState(null); const [q, setQ] = useState('');
   const [tab, setTab] = useState('leads'); const [lf, setLf] = useState('all'); const [fs, setFs] = useState('pending'); const [ft, setFt] = useState('all'); const [open, setOpen] = useState(null);
   const [seen, setSeen] = useState({});
@@ -219,6 +230,11 @@ export default function Admin() {
         <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>Facebook мэдээлэл шинэчлэх</h2>
         <p style={{ color: 'var(--mute)', marginTop: 6 }}>Бүх агентлагийн дагагч, сүүлийн пост (идэвхтэй эсэх), логогүй бол логог FB-ээс татна. 3–5 минут болно, хуудсаа бүү хаа.</p>
         <div className="row" style={{ marginTop: 10 }}><button className="btn v" disabled={rf && !rf.startsWith('Дууслаа') && !rf.startsWith('Алдаа')} onClick={refresh}>Шинэчлэх</button>{rf && <span style={{ fontWeight: 600 }}>{rf}</span>}</div>
+      </div>
+      <div className="panel" style={{ marginTop: 18 }}>
+        <h2 className="h" style={{ fontSize: 20, fontWeight: 700 }}>🖼 Профайлын зураг татах</h2>
+        <p style={{ color: 'var(--mute)', marginTop: 6 }}>Зураггүй инфлүэнсер, мэргэжилтний зургийг тэдний нийтэд ил профайлаас (Facebook, Instagram, TikTok, YouTube, Behance) татаж хадгална. Аль хэдийн зурагтайг нь хөндөхгүй. Хэдэн минут болно, хуудсаа бүү хаа.</p>
+        <div className="row" style={{ marginTop: 10 }}><button className="btn v" disabled={ph && !ph.startsWith('Дууслаа') && !ph.startsWith('Алдаа')} onClick={photos}>Зураг татах</button>{ph && <span style={{ fontWeight: 600 }}>{ph}</span>}</div>
       </div>
     </>}
   </section>;

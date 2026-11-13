@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 export default function BugForm() {
-  const [f, setF] = useState({ message: '', contact: '', page: '' }); const [st, setSt] = useState(null);
-  useEffect(() => { try { const r = document.referrer && new URL(document.referrer); if (r && r.origin === location.origin) setF(f => ({ ...f, page: r.pathname })); } catch {} }, []);
+  const sp = useSearchParams(); const pm = (sp.get('m') || '').slice(0, 300);
+  const [f, setF] = useState({ message: pm, contact: '', page: (sp.get('p') || '').slice(0, 200) }); const [st, setSt] = useState(null);
+  useEffect(() => { try { const r = document.referrer && new URL(document.referrer); if (r && r.origin === location.origin) setF(f => f.page ? f : ({ ...f, page: r.pathname })); } catch {} }, []);
   async function send(e) {
     e.preventDefault(); setSt('busy');
     const r = await fetch('/api/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) });

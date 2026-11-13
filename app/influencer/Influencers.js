@@ -45,7 +45,7 @@ function Card({ l }) {
     {dm ? <div><a href={dm.href} target="_blank" rel="noopener" className="btn dark" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { track(l.id, 'dm'); ev('Contact', { content_name: 'influencer_dm' }); }}>💬 Шууд бичих</a>
       <div style={{ fontSize: 12.5, color: 'var(--mute)', marginTop: 5, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dm.own ? `Инфлүэнсерийн ${dm.via} руу очно` : `${dm.via}-т нь шууд очно · хариу удаж магадгүй`}</div></div> : <div className="nodm">Шууд бичих суваг алга — багаар зохион байгуулуулж болно</div>}
     {ask ? <Ask l={l} onClose={() => setAsk(false)} /> : <button className="btn ghost" onClick={() => { setAsk(true); track(l.id, 'social'); }}>{pb ? <><img src={PARTNER.logo} alt="" style={{ width: 20, height: 20, borderRadius: '50%', marginRight: 6, verticalAlign: '-4px' }} />{PARTNER.name}-гоор зохион байгуулуулах</> : 'Багаар зохион байгуулуулах'}</button>}
-    <div className="ownrow">{!l.verified && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=influencer:${l.id}`} className="ownlink">Энэ миний профайл</Link>}</div>
+    <div className="ownrow">{!l.verified && /^[0-9a-f-]{36}$/.test(l.id || '') && <><Link href={`/minii?own=influencer:${l.id}`} className="ownlink">Энэ миний профайл</Link>{l.photo_url && <Link href={`/aldaa?p=/influencer&m=${encodeURIComponent('Зураг хасуулах / солих: ' + l.name)}`} className="ownlink" rel="nofollow" style={{ marginLeft: 12 }}>Зураг хасуулах</Link>}</>}</div>
     </div>
   </div>;
 }

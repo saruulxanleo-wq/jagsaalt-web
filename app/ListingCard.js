@@ -22,6 +22,7 @@ export default function ListingCard({ l, medium = 'hub' }) {
     </Link>
     <div className="meta"><span>{l.price ? <b>{l.price}</b> : ''}</span>
       <span className="row" style={{ gap: 12 }}>{!l.verified && medium === 'hub' && /^[0-9a-f-]{36}$/.test(l.id || '') && <Link href={`/minii?own=listing:${l.id}`} className="ownlink">Минийх</Link>}
+        {!l.verified && l.type === 'freelancer' && l.logo_url && medium === 'hub' && <Link href={`/aldaa?p=/freelancer&m=${encodeURIComponent('Зураг хасуулах / солих: ' + l.name)}`} className="ownlink" rel="nofollow">Зураг хасуулах</Link>}
         <Link href={prof} style={{ color: 'var(--v)' }}>Профайл →</Link></span></div>
   </div>;
 }
