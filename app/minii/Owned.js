@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { api, sb } from '@/lib/sbclient';
 import { resize } from './EditAgency';
-import { TYPES, TOPICS, NICHES, PRODUCTS, priceFor, fmtMnt } from '@/lib/config';
+import { TYPES, topicsFor, NICHES, PRODUCTS, priceFor, fmtMnt } from '@/lib/config';
 import { BankBox } from '../tolbor/Pay';
 const fmtN = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n || 0);
 const ROLES = ['Өөрөө', 'Менежер', 'Эзэмшигч', 'Ажилтан'];
@@ -55,13 +55,13 @@ function EditListing({ l, onSaved }) {
   return <form style={{ display: 'grid', gap: 12, marginTop: 14 }} onSubmit={async e => { e.preventDefault(); setBusy(true); setMsg(null); const r = await api('/api/own/update', { own: 'listing:' + l.id, data: f }); setBusy(false); setMsg(r.ok ? ['ok', 'Хадгалагдлаа'] : ['err', r.error]); if (r.ok) onSaved?.(); }}>
     <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
       <div style={{ flex: 2, minWidth: 220 }}><label className="lab">Нэр</label><input className="field" value={f.name} onChange={set('name')} maxLength={80} /></div>
-      <div style={{ flex: 1, minWidth: 180 }}><label className="lab">{fl ? 'Мэргэжил' : l.type === 'media' ? 'Төрөл' : 'Бүтээгч'}</label><input className="field" value={f.maker} onChange={set('maker')} maxLength={60} /></div></div>
+      <div style={{ flex: 1, minWidth: 180 }}><label className="lab">{fl ? 'Мэргэжил' : l.type === 'media' ? 'Компани' : 'Бүтээгч'}</label><input className="field" value={f.maker} onChange={set('maker')} maxLength={60} /></div></div>
     <div><label className="lab">Тайлбар · {f.description.length}/200</label><textarea className="field" rows={3} maxLength={200} value={f.description} onChange={set('description')} /></div>
     <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
       <div style={{ flex: 2, minWidth: 220 }}><label className="lab">Линк</label><input className="field" value={f.url} onChange={set('url')} /></div>
       <div style={{ flex: 1, minWidth: 160 }}><label className="lab">Үнэ</label><input className="field" value={f.price} onChange={set('price')} maxLength={40} /></div></div>
     <ImgPick own={'listing:' + l.id} label={fl ? 'Зураг' : 'Лого'} round={fl} value={f.logo_url} onChange={v => setF(x => ({ ...x, logo_url: v }))} />
-    <div className="row">{Object.entries(TOPICS).map(([k, v]) => chip(f.topics.includes(k), k, v, tog))}</div>
+    <div className="row">{Object.entries(topicsFor(l.type)).map(([k, v]) => chip(f.topics.includes(k), k, v, tog))}</div>
     {msg && <div className={msg[0]}>{msg[1]}</div>}
     <button className="btn dark" disabled={busy}>{busy ? '…' : 'Хадгалах'}</button>
   </form>;

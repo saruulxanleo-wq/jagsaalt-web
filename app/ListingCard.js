@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { track } from '@/lib/track';
-import { TYPES, TOPICS, host, withUtm } from '@/lib/config';
+import { TYPES, topicLabel, host, withUtm } from '@/lib/config';
 export const trackClick = lid => { if (!/^[0-9a-f-]{36}$/.test(lid)) return; track('Contact', { content_name: 'listing_click' }); const body = JSON.stringify({ lid, kind: 'click' }); if (!(navigator.sendBeacon && navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' })))) fetch('/api/track', { method: 'POST', body, headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(() => {}); };
 export default function ListingCard({ l, medium = 'hub' }) {
   const t = TYPES[l.type] || TYPES.tool; const href = withUtm(l.url, medium); const prof = /^[0-9a-f-]{36}$/.test(l.id || '') ? `/l/${l.id}` : href;
@@ -16,7 +16,7 @@ export default function ListingCard({ l, medium = 'hub' }) {
         <span className={'cat ' + t.tone}>{t.icon} {t.label}</span>
         {l.verified && <span className="vbadge">✓ Баталгаажсан</span>}
         {l.sponsored && <span className="badge b-off">Онцлох</span>}
-        {(l.topics || []).slice(0, 2).map(k => <span key={k} className="badge b-off">{TOPICS[k]}</span>)}
+        {(l.topics || []).slice(0, 2).map(k => <span key={k} className="badge b-off">{topicLabel(k)}</span>)}
       </div>
       {l.description && <p style={{ color: 'var(--mute)', fontSize: 14.5 }}>{l.description}</p>}
     </Link>

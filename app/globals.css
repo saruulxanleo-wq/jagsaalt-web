@@ -108,3 +108,13 @@ footer{background:var(--ink);color:#CFCAE6;margin-top:80px}
 .pbadge{position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:6px;background:#F1F5FF;border:1px solid #DCE5FB;border-radius:999px;padding:3px 10px 3px 3px;font-size:11.5px;font-weight:700;color:#2B4499;text-decoration:none;line-height:1.1}
 .pbadge img{width:22px;height:22px;border-radius:50%}
 .pbadge small{display:block;font-size:9px;font-weight:500;color:#5b6a8f}
+/* Цэсний «Өөрөө хийх» доош унждаг жагсаалт (компьютер); утсан дээр шууд хуудас руу */
+.dd{position:relative;display:inline-flex}
+.ddc{font-size:11px;opacity:.6}
+.ddm{display:none;position:absolute;top:100%;left:-14px;padding-top:12px;z-index:60}
+.ddm>a{display:flex;flex-direction:column;gap:2px;background:#fff;padding:10px 16px;min-width:230px;color:var(--ink);white-space:nowrap}
+.ddm>a:first-child{border-radius:14px 14px 0 0;padding-top:14px}.ddm>a:last-child{border-radius:0 0 14px 14px;padding-bottom:14px}
+.ddm{filter:drop-shadow(0 10px 24px rgba(0,0,0,.12))}
+.ddm>a:hover{background:#f3f6f4}.ddm small{color:var(--mute);font-weight:500;font-size:13px}
+@media(hover:hover) and (min-width:641px){.dd:hover .ddm,.dd:focus-within .ddm{display:block}}
+@media(max-width:640px){.ddc{display:none}}

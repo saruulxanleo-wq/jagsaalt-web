@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getListing, listListings } from '@/lib/db';
-import { TYPES, TOPICS, host, siteUrl } from '@/lib/config';
+import { TYPES, topicLabel, host, siteUrl } from '@/lib/config';
 import ListingCard from '../../ListingCard';
 import GoButton from './GoButton';
 export const dynamic = 'force-dynamic';
@@ -32,7 +32,7 @@ export default async function Page({ params }) {
         <span className={'cat ' + t.tone}>{t.icon} {t.label}</span>
         {l.verified && <span className="vbadge">✓ Баталгаажсан</span>}
         {l.sponsored && <span className="badge b-off">Онцлох</span>}
-        {(l.topics || []).map(k => <span key={k} className="badge b-off">{TOPICS[k]}</span>)}
+        {(l.topics || []).map(k => <span key={k} className="badge b-off">{topicLabel(k)}</span>)}
       </div>
       {l.description && <p style={{ fontSize: 17, lineHeight: 1.6 }}>{l.description}</p>}
       {l.price && <div><div className="lab">Үнэ</div><b style={{ fontSize: 20 }}>{l.price}</b></div>}

@@ -2,9 +2,9 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import ListingCard from './ListingCard';
-import { TYPES, TOPICS } from '@/lib/config';
+import { TYPES, topicsFor } from '@/lib/config';
 export default function Hub({ type, list }) {
-  const t = TYPES[type]; const [q, setQ] = useState(''); const [tp, setTp] = useState('all');
+  const t = TYPES[type]; const TOPICS = topicsFor(type); const [q, setQ] = useState(''); const [tp, setTp] = useState('all');
   const counts = useMemo(() => list.reduce((m, l) => ((l.topics || []).forEach(k => m[k] = (m[k] || 0) + 1), m), {}), [list]);
   const shown = list.filter(l => (tp === 'all' || (l.topics || []).includes(tp)) && (!q.trim() || (l.name + ' ' + (l.maker || '') + ' ' + (l.description || '')).toLowerCase().includes(q.trim().toLowerCase())));
   return <section className="wrap" style={{ marginTop: 10 }}>

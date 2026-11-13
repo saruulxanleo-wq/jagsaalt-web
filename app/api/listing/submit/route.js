@@ -1,5 +1,5 @@
 import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin } from '@/lib/server';
-import { TYPES, TOPICS, cap } from '@/lib/config';
+import { TYPES, topicsFor, cap } from '@/lib/config';
 // Хэрэгсэл / сургалт / коммюнити санал → pending, админд и-мэйл
 export async function POST(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна, түр хүлээгээрэй', 503);
@@ -7,7 +7,7 @@ export async function POST(req) {
   if (!TYPES[b.type]) return fail('Төрлөө сонго');
   const name = cap(b.name).slice(0, 80); if (name.length < 2) return fail('Нэрээ оруул');
   let url; try { url = new URL(/^https?:\/\//.test(b.url || '') ? b.url : 'https://' + (b.url || '')); if (!url.hostname.includes('.')) throw 0; url = url.toString(); } catch { return fail('Линкээ зөв оруул'); }
-  const topics = (Array.isArray(b.topics) ? b.topics : []).filter(t => TOPICS[t]).slice(0, 3); if (!topics.length) return fail('1–3 сэдэв сонго');
+  const topics = (Array.isArray(b.topics) ? b.topics : []).filter(t => topicsFor(b.type)[t]).slice(0, 3); if (!topics.length) return fail('1–3 сэдэв сонго');
   const description = String(b.description || '').trim().slice(0, 200); if (description.length < 10) return fail('Товч тайлбар бич (10+ тэмдэгт)');
   const u = b.mine ? await authUser(req, d) : null;
   const row = { owner_id: null, type: b.type, name, url, topics, description, maker: String(b.maker || '').trim().slice(0, 60) || null, price: String(b.price || '').trim().slice(0, 40) || null, contact: String(b.contact || '').trim().slice(0, 80) || null };
