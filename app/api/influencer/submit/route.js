@@ -1,4 +1,5 @@
 import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin, partnerEmails } from '@/lib/server';
+import { imgToken } from '@/lib/imgtoken';
 import { NICHES, cap } from '@/lib/config';
 import { fbLinkError, normFb } from '@/lib/fb';
 import { fbPage } from '@/lib/fbpage';
@@ -30,7 +31,7 @@ export async function POST(req) {
   if (u) { // өөрийнхөө профайл: утас баталгаажсан бол эзэмших хүсэлтийг шууд үүсгэнэ
     const p = await getProfile(d, u);
     if (p?.phone_verified_at) { await d.from('item_claims').insert({ kind: 'influencer', item_id: data.id, user_id: u.id, phone: p.phone, note: 'Өөрөө (нэмэхдээ)', proof: '' }); return json({ ok: true, claimed: true }); }
-    return json({ ok: true, own: 'influencer:' + data.id });
+    return json({ ok: true, own: 'influencer:' + data.id, img: await imgToken('influencer', data.id) });
   }
-  return json({ ok: true });
+  return json({ ok: true, img: data?.id ? await imgToken('influencer', data.id) : null });
 }

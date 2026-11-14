@@ -1,4 +1,5 @@
 import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin } from '@/lib/server';
+import { imgToken } from '@/lib/imgtoken';
 import { TYPES, topicsFor, cap } from '@/lib/config';
 // Хэрэгсэл / сургалт / коммюнити санал → pending, админд и-мэйл
 export async function POST(req) {
@@ -20,7 +21,7 @@ export async function POST(req) {
   if (u) { // өөрийнхөө профайл: утас баталгаажсан бол эзэмших хүсэлтийг шууд үүсгэнэ
     const p = await getProfile(d, u);
     if (p?.phone_verified_at) { await d.from('item_claims').insert({ kind: 'listing', item_id: data.id, user_id: u.id, phone: p.phone, note: 'Өөрөө (нэмэхдээ)', proof: '' }); return json({ ok: true, claimed: true }); }
-    return json({ ok: true, own: 'listing:' + data.id });
+    return json({ ok: true, own: 'listing:' + data.id, img: await imgToken('listing', data.id) });
   }
-  return json({ ok: true });
+  return json({ ok: true, img: data?.id ? await imgToken('listing', data.id) : null });
 }

@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { api } from '@/lib/sbclient';
 import Link from 'next/link';
 import { TYPES, topicsFor } from '@/lib/config';
+import { PickImg, uploadImg } from './PickImg';
 const PH = { media: ['Хэвлэл, сайт, суваг, самбарын нэр', 'Баннер 300 000₮-с, 30 сек 500 000₮'], freelancer: ['Овог нэр', 'Сард 800 000₮-с, пост бүр 50 000₮'], tool: ['SARUUL Score, Canva…', 'Үнэгүй, 9 000₮, сард 29 000₮'], course: ['Курсын нэр', 'Үнэгүй, 350 000₮'], community: ['Группын нэр', 'Үнэгүй, гишүүнчлэл сард 20 000₮'] };
 export default function ListingForm({ type, self }) {
   const t = TYPES[type]; const TOPICS = topicsFor(type);
   const [f, setF] = useState({ name: '', url: '', maker: '', description: '', price: '', topics: [], contact: '' });
-  const mine = !!self; const [msg, setMsg] = useState(null); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
+  const [img, setImg] = useState(null); const mine = !!self; const [msg, setMsg] = useState(null); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
   const set = k => e => setF({ ...f, [k]: e.target.value });
   const tog = k => setF({ ...f, topics: f.topics.includes(k) ? f.topics.filter(x => x !== k) : f.topics.length >= 3 ? f.topics : [...f.topics, k] });
   async function submit(e) {
     e.preventDefault(); setBusy(true); setMsg(null);
-    const r = await api('/api/listing/submit', { ...f, type, mine }); setBusy(false); if (r.ok && r.own) { location.href = '/minii?own=' + r.own; return; } if (r.claimed) setMsg(null);
+    const r = await api('/api/listing/submit', { ...f, type, mine }); if (r.ok) await uploadImg(r.img, img); setBusy(false); if (r.ok && r.own) { location.href = '/minii?own=' + r.own; return; } if (r.claimed) setMsg(null);
     r.ok ? (setDone(true), track('SubmitApplication', { content_name: 'listing_' + type })) : setMsg(r.error || 'Алдаа гарлаа');
   }
   if (done) return <div className="panel ok" style={{ marginTop: 22, fontSize: 17 }}>{self ? 'Баярлалаа! Бид шалгаад нийтэлж, «✓ Баталгаажсан» болгоно. Батлагдмагц и-мэйлээр мэдэгдэнэ.' : 'Баярлалаа! Админ шалгаад нийтэлнэ.'} <Link href={t.path} style={{ textDecoration: 'underline' }}>{t.plural} →</Link></div>;
@@ -29,6 +30,7 @@ export default function ListingForm({ type, self }) {
       <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="lp" className="lab">Үнэ <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input id="lp" className="field" maxLength={40} placeholder={PH[type][1]} value={f.price} onChange={set('price')} /></div>
     </div>
     <div><label htmlFor="lc" className="lab">Холбоо барих утас эсвэл и-мэйл <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· зөвхөн админ харна</span></label><input id="lc" className="field" maxLength={80} value={f.contact} onChange={set('contact')} /></div>
+    <PickImg file={img} onChange={setImg} label={type === 'freelancer' ? 'Профайл зураг' : 'Лого / зураг'} round={type === 'freelancer'} hint="Дөрвөлжин тайрч автоматаар шахна. Зурагтай профайл илүү олон хандалт авдаг." />
     {msg && <div className="err">{msg}</div>}
     <button className="btn dark" disabled={busy || !f.topics.length} style={{ padding: 16 }}>{busy ? 'Түр хүлээ…' : self ? 'Үргэлжлүүлэх: баталгаажуулах →' : 'Санал болгох →'}</button>
   </form>;

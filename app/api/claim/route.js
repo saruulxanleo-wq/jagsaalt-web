@@ -1,4 +1,5 @@
 import { db, fail, json, authUser, getProfile, mail, ADMIN_EMAIL, decideLink, esc, btn, origin, pickCats } from '@/lib/server';
+import { imgToken } from '@/lib/imgtoken';
 import { fbLinkError, normFb, slugify } from '@/lib/fb';
 import { CATS, SUPABASE_URL } from '@/lib/config';
 import { enrichAgency } from '@/lib/fbpage';
@@ -36,5 +37,5 @@ export async function POST(req) {
   const { data: c, error } = await d.from('claims').insert({ agency_id: ag.id, user_id: u.id, phone: p.phone, note, status: 'pending' }).select('id').single();
   if (error) return fail('Хадгалж чадсангүй', 500);
   await mail(ADMIN_EMAIL(), `Эзэмших хүсэлт: ${ag.name}`, `<p><b>${esc(p.full_name || '')}</b> (${esc(u.email)}, утас ${esc(p.phone)})<br>«<b>${esc(ag.name)}</b>» агентлагийг эзэмших хүсэлт илгээлээ.</p><p>Албан тушаал / тайлбар: ${esc(note)}</p><p><a href="${ag.fb_url || ''}">${esc(ag.fb_url || '')}</a></p><p>${btn(await decideLink(origin(req), 'claim', c.id, 'approve'), 'Батлах', '#2FB344')}${btn(await decideLink(origin(req), 'claim', c.id, 'reject'), 'Татгалзах', '#E8452A')}</p>`);
-  return json({ ok: true });
+  return json({ ok: true, img: ag.logo_url ? null : await imgToken('agency', ag.id) });
 }
