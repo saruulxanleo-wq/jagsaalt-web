@@ -67,7 +67,7 @@ export default function Admin() {
     }
     setPh(`Дууслаа: инфлүэнсер ${sum.inf[0]} зурагтай боллоо (${sum.inf[1]} олдсонгүй) · мэргэжилтэн ${sum.fl[0]} (${sum.fl[1]} олдсонгүй)`);
   }
-  const [s, setS] = useState(undefined); const [data, setData] = useState(null); const [err, setErr] = useState(null); const [q, setQ] = useState('');
+  const [s, setS] = useState(undefined); let [data, setData] = useState(null); const [err, setErr] = useState(null); const [q, setQ] = useState('');
   const [tab, setTab] = useState('leads'); const [lf, setLf] = useState('all'); const [fs, setFs] = useState('all'); const [ft, setFt] = useState('all'); const [open, setOpen] = useState(null);
   const [seen, setSeen] = useState({});
   useEffect(() => { try { setSeen(JSON.parse(localStorage.getItem('brief_admin_read') || '{}')); } catch {} }, []);
@@ -76,8 +76,10 @@ export default function Admin() {
   const markAll = list => saveSeen(Object.fromEntries(list.map(i => [i.key, 1])));
   const typeSel = l => <select className="field" aria-label="Төрөл солих" style={{ marginTop: 0, width: 'auto', padding: '9px 12px' }} value={l.type} onChange={e => act('listing', l.id, 'type:' + e.target.value, `«${l.name}»-ийг «${TYPES[e.target.value]?.label}» руу зөөх үү?`)}>{Object.entries(TYPES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>;
   useEffect(() => { sb().auth.getSession().then(({ data }) => setS(data.session)); }, []);
+  // Эхлээд шийдвэр хүлээж буй зүйлс (хурдан), дараа нь 30 хоногийн статистик
+  const [st, setSt] = useState(null);
   const load = async () => { const r = await api('/api/admin/list'); r.ok ? setData(r) : setErr(r.error); };
-  useEffect(() => { if (s) load(); }, [s]);
+  useEffect(() => { if (s) { load(); api('/api/admin/list?stats=1').then(r => r.ok && setSt(r)); } }, [s]);
   const act = async (kind, id, action, confirmText) => {
     if (confirmText && !window.confirm(confirmText)) return;
     const r = await api('/api/admin/action', { kind, id, action }); r.ok ? load() : setErr(r.error);
@@ -88,6 +90,7 @@ export default function Admin() {
     <button className="btn ghost" style={{ justifySelf: 'start' }} onClick={async () => { await sb().auth.signOut(); location.href = '/minii'; }}>Гараад өөр бүртгэлээр нэвтрэх</button></section>;
   if (!data) return <section className="wrap" style={{ padding: 40 }}>Ачаалж байна…</section>;
 
+  if (st) data = { ...data, top: st.top, totalViews: st.totalViews, totalClicks: st.totalClicks, infTop: st.infTop, listings: data.listings.map(l => ({ ...l, clicks: st.lc[l.id] || 0 })) };
   const L = data.log || {};
   const A = (kind, id, action, c) => act(kind, id, action, c);
   const lnk = (href, t) => href ? <a href={href} target="_blank" rel="noopener" style={{ color: 'var(--v)' }}>{t}</a> : null;
@@ -219,7 +222,7 @@ export default function Admin() {
     {tab === 'contacts' && <Contacts />}
     {tab === 'stats' && <>
       <SubStats />
-      <Box title={`Агентлаг — хамгийн их үзэлттэй (30 хоног · нийт ${data.totalViews} үзэлт, ${data.totalClicks} дарсан)`} n={data.top.length}>
+      <Box title={`Агентлаг — хамгийн их үзэлттэй (30 хоног · нийт ${data.totalViews ?? "…"} үзэлт, ${data.totalClicks ?? "…"} дарсан)`} n={data.top.length}>
         {data.top.map((a, i) => <Row key={a.slug} actions={<Link className="btn ghost" href={`/minii?edit=${a.slug}`}>Статистик</Link>}><b>{i + 1}. {a.name}</b> <span style={{ color: 'var(--mute)' }}>· {a.views} үзэлт · {a.clicks} дарсан</span></Row>)}
       </Box>
       <Box title={`Төлөгдсөн захиалга · нийт ${fmtMnt(data.orders.filter(o => o.status === 'paid').reduce((s, o) => s + o.amount, 0))}`} n={data.orders.filter(o => o.status === 'paid').length}>{data.orders.filter(o => o.status === 'paid').map(o => <Row key={o.id}>
