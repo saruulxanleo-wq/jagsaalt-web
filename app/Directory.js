@@ -14,7 +14,7 @@ export default function Directory({ list, tools = [], initialCat = 'all', title 
     let r = list.filter(a => (cat === 'all' || catsOf(a).includes(cat)) && (!s || (a.name + ' ' + (a.description || '') + ' ' + (a.clients || []).join(' ') + ' ' + (a.services || []).join(' ')).toLowerCase().includes(s)));
     if (sort === 'name') r = [...r].sort((x, y) => x.name.localeCompare(y.name));
     else if (sort === 'followers') r = [...r].sort((x, y) => (y.followers || 0) - (x.followers || 0));
-    else r = [...r].sort((x, y) => rankScore(y) - rankScore(x)); // баталгаажсан + профайлын бүрдэл + дагагч
+    else r = [...r].sort((x, y) => (y._r ?? rankScore(y)) - (x._r ?? rankScore(x))); // баталгаажсан + профайлын бүрдэл + дагагч
     // Онцлох агентлагууд эхэнд (хуудас ачаалах бүрт дараалал нь солигдоно)
     const f = (seed ? shuffle(r.filter(isFeatured)) : r.filter(isFeatured));
     return f.length ? [...f, ...r.filter(a => !isFeatured(a))] : r;

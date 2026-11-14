@@ -15,19 +15,25 @@ export const generateMetadata = async () => ({
 });
 const [n1, n2] = SITE_NAME.split('.');
 export const dynamic = 'force-dynamic';
-const pixel = id => `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${id}');fbq('track','PageView');`;
-const gtag = id => `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${id}');`;
+// Pixel, GA-г хуудас бүрэн ачаалсны дараа (load + 1.5с) татна. fbq/gtag дараалал нь шууд үүсэх тул эрт дуудсан event алдагдахгүй.
+const later = src => `addEventListener('load',function(){setTimeout(function(){var t=document.createElement('script');t.async=1;t.src='${src}';document.head.appendChild(t)},1500)});`;
+const pixel = id => `!function(f){if(f.fbq)return;var n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}(window);fbq('init','${id}');fbq('track','PageView');` + later('https://connect.facebook.net/en_US/fbevents.js');
+const gtag = id => `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${id}');` + later('https://www.googletagmanager.com/gtag/js?id=' + id);
 export default function Root({ children }) {
   const pid = (process.env.META_PIXEL_ID || '').replace(/\D/g, '');
   const gid = (process.env.GA_ID || '').replace(/[^A-Z0-9-]/gi, '');
   return (
     <html lang="mn">
+      <head>
+        <link rel="preload" href="/fonts/geologica-cyrillic-800-normal.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href="/fonts/geologica-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preconnect" href="https://feclitszuweodpnyejnj.supabase.co" />
+      </head>
       <body>
         {pid && <script dangerouslySetInnerHTML={{ __html: pixel(pid) }} />}
-        {gid && <script async src={'https://www.googletagmanager.com/gtag/js?id=' + gid} />}
         {gid && <script dangerouslySetInnerHTML={{ __html: gtag(gid) }} />}
         <div className="wrap"><nav className="top">
-          <Link href="/" className="logo" aria-label={SITE_NAME}><img src="/logo.png" alt={SITE_NAME} width={199} height={34} /></Link>
+          <Link href="/" className="logo" aria-label={SITE_NAME}><img src="/logo.webp" alt={SITE_NAME} width={199} height={34} fetchPriority="high" /></Link>
           <Nav />
           <div className="row topbtns"><AdminBell /><Link href="/minii" className="btn ghost"><span className="hide-sm">Миний </span>самбар</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
         </nav></div>
