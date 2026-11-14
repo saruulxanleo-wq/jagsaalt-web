@@ -3,16 +3,18 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import ToolStrip from './ToolStrip';
 import Link from 'next/link';
 import Card from './Card';
-import { CATS, CAT_TOPIC, isActive, catsOf, catLabel, isFeatured } from '@/lib/config';
+import { CATS, CAT_TOPIC, isActive, catsOf, catLabel, isFeatured, rankScore } from '@/lib/config';
 const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 export default function Directory({ list, tools = [], initialCat = 'all', title }) {
   const [seed, setSeed] = useState(null); useEffect(() => setSeed(shuffle(tools)), [tools]);
-  const [q, setQ] = useState(''); const [cat, setCat] = useState(initialCat); const [sort, setSort] = useState('followers'); const [n, setN] = useState(24);
+  const [q, setQ] = useState(''); const [cat, setCat] = useState(initialCat); const [sort, setSort] = useState('rank'); const [n, setN] = useState(24);
   const counts = useMemo(() => list.reduce((m, a) => (catsOf(a).forEach(k => m[k] = (m[k] || 0) + 1), m), {}), [list]);
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
     let r = list.filter(a => (cat === 'all' || catsOf(a).includes(cat)) && (!s || a.name.toLowerCase().includes(s) || (a.description || '').toLowerCase().includes(s)));
     if (sort === 'name') r = [...r].sort((x, y) => x.name.localeCompare(y.name));
+    else if (sort === 'followers') r = [...r].sort((x, y) => (y.followers || 0) - (x.followers || 0));
+    else r = [...r].sort((x, y) => rankScore(y) - rankScore(x)); // баталгаажсан + профайлын бүрдэл + дагагч
     // Онцлох агентлагууд эхэнд (хуудас ачаалах бүрт дараалал нь солигдоно)
     const f = (seed ? shuffle(r.filter(isFeatured)) : r.filter(isFeatured));
     return f.length ? [...f, ...r.filter(a => !isFeatured(a))] : r;
@@ -52,7 +54,7 @@ export default function Directory({ list, tools = [], initialCat = 'all', title 
       <div className="row" style={{ justifyContent: 'space-between', margin: '22px 0 16px' }}>
         <h2 className="h" style={{ fontSize: 24, fontWeight: 700 }}>{cat === 'all' ? 'Бүх агентлаг' : catLabel(cat)} <span style={{ color: 'var(--mute)', fontSize: 18 }}>{shown.length}</span></h2>
         <label className="row" style={{ background: '#fff', padding: '9px 14px', borderRadius: 12, boxShadow: 'inset 0 0 0 1.5px var(--line)', fontWeight: 600, fontSize: 14.5 }}>Эрэмбэ:
-          <select value={sort} onChange={e => setSort(e.target.value)} style={{ border: 0, background: 'transparent', fontWeight: 600 }}><option value="followers">Дагагчаар</option><option value="name">Нэрээр</option></select></label>
+          <select value={sort} onChange={e => setSort(e.target.value)} style={{ border: 0, background: 'transparent', fontWeight: 600 }}><option value="rank">Санал болгох</option><option value="followers">Дагагчаар</option><option value="name">Нэрээр</option></select></label>
       </div>
       <div className="grid">{shown.slice(0, n).map((a, i) => <Fragment key={a.slug}><Card a={a} />{stripAt(i) && i < shown.slice(0, n).length - 1 && <ToolStrip items={stripItems(i)} />}</Fragment>)}</div>
       {shown.length === 0 && <p style={{ textAlign: 'center', color: 'var(--mute)', padding: 40 }}>Олдсонгүй. <Link href="/nemeh" style={{ color: 'var(--v)', fontWeight: 700 }}>Нэмэх үү?</Link></p>}
