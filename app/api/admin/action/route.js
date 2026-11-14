@@ -1,13 +1,15 @@
 import { activateOrder } from '@/lib/orders';
 import { TYPES } from '@/lib/config';
 import { decideOwn } from '@/lib/ownDecide';
+import { decideRJ } from '@/lib/decideRJ';
 import { db, fail, json, authUser, isAdmin, mail, esc, origin } from '@/lib/server';
 export async function POST(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна', 503);
   const u = await authUser(req, d); if (!isAdmin(u)) return fail('Зөвхөн админ', 403);
   const { kind, id, action } = await req.json().catch(() => ({}));
   const now = new Date().toISOString();
-  if (kind === 'agency') {
+  if (kind === 'review' || kind === 'job') { if (!['approve', 'reject', 'hide', 'close'].includes(action)) return fail('Буруу үйлдэл'); await decideRJ(d, kind, id, action === 'hide' ? 'reject' : action); }
+  else if (kind === 'agency') {
     if (action === 'approve') await d.from('agencies').update({ status: 'approved', updated_at: now }).eq('id', id);
     else if (action === 'reject' || action === 'hide') await d.from('agencies').update({ status: 'rejected', updated_at: now }).eq('id', id);
     else if (action === 'delete') await d.from('agencies').delete().eq('id', id);

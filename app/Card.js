@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { isActive, fmtNum, catsOf, catLabel, catTone, isFeatured, fmtMnt } from '@/lib/config';
+import { SPEED } from '@/lib/reviews';
+import ShortBtn from './ShortBtn';
 const minPrice = a => { const v = (a.packages || []).filter(p => p.type !== 'negotiable' && p.min).map(p => p.min); return v.length ? Math.min(...v) : null; };
 const short = n => n >= 1e6 ? (Math.round(n / 1e5) / 10 + ' сая').replace('.', ',') : Math.round(n / 1e3) + ' мянга';
 export function Logo({ a, size = 60, radius = 16 }) {
@@ -12,6 +14,8 @@ export function Badges({ a }) {
   return <div className="row">
     {isFeatured(a) && <span className="badge b-feat">⭐ Онцлох</span>}
     {a.verified && <span className="badge b-ver">✓ Баталгаажсан</span>}
+    {a.rv?.avg && a.rv.rated >= 1 && <span className="badge b-feat" title={`${a.rv.rated} баталгаат харилцагчийн үнэлгээ`}>★ {String(a.rv.avg).replace('.', ',')} ({a.rv.rated})</span>}
+    {a.rv?.speed && a.rv.speed !== 'slow' && <span className="badge b-act" title={`${a.rv.asked} харилцагчаас ${a.rv.fast} нь 24 цагт холбогдсон гэж хариулсан`}>{SPEED[a.rv.speed]}</span>}
     {act === true && <span className="badge b-act"><span className="dot" />Идэвхтэй</span>}
     {act === false && <span className="badge b-off">Сүүлд идэвхгүй</span>}
     {a.team_size && <span className="badge b-off">👥 {a.team_size} хүн</span>}
@@ -19,7 +23,8 @@ export function Badges({ a }) {
   </div>;
 }
 export default function Card({ a }) {
-  return <Link href={`/a/${a.slug}`} className={'card' + (isFeatured(a) ? ' feat' : '')}>
+  return <Link href={`/a/${a.slug}`} className={'card' + (isFeatured(a) ? ' feat' : '')} style={{ position: 'relative' }}>
+    <ShortBtn slug={a.slug} />
     <div className="top"><Logo a={a} /><div><h3>{a.name}</h3><div className="row" style={{ marginTop: 6, gap: 6, flexWrap: 'nowrap' }}>{catsOf(a).slice(0, 1).map(k => <span key={k} className={`cat ${catTone(k)}`}>{catLabel(k)}</span>)}{catsOf(a).length > 1 && <span className="cat more" title={catsOf(a).slice(1).map(catLabel).join(', ')}>+{catsOf(a).length - 1}</span>}</div></div></div>
     <p className="cdesc" title={a.description || undefined}>{a.description || ''}</p>
     <Badges a={a} />

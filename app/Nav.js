@@ -5,8 +5,8 @@ import { TYPES, DIY } from '@/lib/config';
 const LEARN = Object.values(TYPES).filter(t => t.group === 'learn');
 export default function Nav() {
   const p = usePathname() || '/';
-  const items = [['/', 'Агентлаг'], [TYPES.freelancer.path, TYPES.freelancer.label], ['/influencer', 'Инфлүэнсер'], [TYPES.media.path, TYPES.media.label]];
-  const on = h => h === '/' ? (p === '/' || p.startsWith('/a/') || p === '/songoh' || p === '/studi' || p === '/produkshn') : p.startsWith(h);
+  const items = [['/', 'Агентлаг'], [TYPES.freelancer.path, TYPES.freelancer.label], ['/influencer', 'Инфлүэнсер'], [TYPES.media.path, TYPES.media.label], ['/ajil', 'Ажил, төсөл']];
+  const on = h => h === '/' ? (p === '/' || p.startsWith('/a/') || p === '/songoh' || p.startsWith('/haritsuulah') || p === '/studi' || p === '/produkshn') : p.startsWith(h);
   const diyOn = p.startsWith(DIY.path) || LEARN.some(t => p.startsWith(t.path));
   return <div className="links">
     {items.map(([h, l]) => <Link key={h} href={h} className={on(h) ? 'on' : undefined}>{l}</Link>)}

@@ -11,7 +11,8 @@ export async function POST(req) {
   const topics = (Array.isArray(b.topics) ? b.topics : []).filter(t => topicsFor(b.type)[t]).slice(0, 3); if (!topics.length) return fail('1–3 сэдэв сонго');
   const description = String(b.description || '').trim().slice(0, 200); if (description.length < 10) return fail('Товч тайлбар бич (10+ тэмдэгт)');
   const u = b.mine ? await authUser(req, d) : null;
-  const row = { owner_id: null, type: b.type, name, url, topics, description, maker: String(b.maker || '').trim().slice(0, 60) || null, price: String(b.price || '').trim().slice(0, 40) || null, contact: String(b.contact || '').trim().slice(0, 80) || null };
+  const row = { owner_id: null, type: b.type, name, url, topics, description, maker: String(b.maker || '').trim().slice(0, 60) || null, price: String(b.price || '').trim().slice(0, 40) || null, contact: String(b.contact || '').trim().slice(0, 80) || null,
+    ...(b.type === 'course' ? { starts_at: /^\d{4}-\d{2}-\d{2}$/.test(b.starts_at || '') ? b.starts_at : null, schedule: String(b.schedule || '').trim().slice(0, 80) || null } : {}) };
   const { data: ex } = await d.from('listings').select('id').eq('url', url).maybeSingle();
   if (ex) return fail('Энэ линк аль хэдийн нэмэгдсэн байна');
   const { data, error } = await d.from('listings').insert(row).select('id').single();

@@ -8,6 +8,9 @@ import ReportButton from './ReportButton';
 import Track from './Track';
 import { MemberPhoto } from '../../Avatar';
 import Card, { Logo, Badges } from '../../Card';
+import ShortBtn from '../../ShortBtn';
+import { SPEED, HIRED } from '@/lib/reviews';
+import { rankScore, isActive } from '@/lib/config';
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }) {
   const a = await getAgency((await params).slug);
@@ -20,7 +23,11 @@ export default async function Profile({ params }) {
   const a = await getAgency(slug);
   if (!a) notFound();
   const c = { label: catLabel(catsOf(a)[0]) };
-  const similar = (await listAgencies()).filter(x => x.slug !== a.slug && catsOf(x).some(k => catsOf(a).includes(k))).slice(0, 3);
+  const sim = (await listAgencies()).filter(x => x.slug !== a.slug && catsOf(x).some(k => catsOf(a).includes(k)));
+  const similar = sim.slice(0, 3);
+  // Хамт үнийн санал авахад санал болгох 2: хариу өгдөг, идэвхтэй, профайл бүрэн нь түрүүнд
+  const suggest = [...sim].filter(x => x.rv?.speed !== 'slow' && isActive(x) !== false).sort((x, y) => rankScore(y) - rankScore(x)).slice(0, 2)
+    .map(x => ({ slug: x.slug, name: x.name, badge: x.rv?.speed === '24h' ? SPEED['24h'] : null }));
   return <section className="wrap" style={{ marginTop: 10 }}>
     <Track slug={a.slug} />
     <Link href="/" style={{ color: 'var(--mute)', fontWeight: 600, fontSize: 14.5 }}>← Агентлагууд / {c.label}</Link>
@@ -37,7 +44,9 @@ export default async function Profile({ params }) {
           {a.team?.length > 0 && <><h2 className="h" style={{ fontSize: 19, fontWeight: 700, marginTop: 30 }}>Баг</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(210px,1fr))', gap: 10, marginTop: 12 }}>{a.team.map((m, i) => <div key={i} className="row" style={{ background: 'var(--bg)', borderRadius: 16, padding: '10px 12px', gap: 12, flexWrap: 'nowrap' }}><MemberPhoto m={m} size={48} /><div><b>{m.name}</b><div style={{ color: 'var(--mute)', fontSize: 14 }}>{m.role}</div></div></div>)}</div></>}
         </div>
         <aside style={{ marginTop: 24, display: 'grid', gap: 14, alignContent: 'start' }}>
-          <QuoteBox slug={a.slug} name={a.name} />
+          {a.rv?.speed && <div className="ok" style={{ background: a.rv.speed === 'slow' ? 'var(--c2)' : undefined, color: a.rv.speed === 'slow' ? '#A3260F' : undefined }}>{SPEED[a.rv.speed]} · үнийн санал авсан {a.rv.asked} харилцагчаас {a.rv.fast} нь 24 цагт, {a.rv.contacted} нь холбогдсон гэж хариулсан</div>}
+          <QuoteBox slug={a.slug} name={a.name} suggest={suggest} />
+          <ShortBtn slug={a.slug} big />
           <div style={{ background: 'var(--bg)', borderRadius: 24, padding: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             {[[a.founded, 'Байгуулагдсан'], [a.team_size && a.team_size + ' хүн', 'Баг'], [a.followers != null && fmtNum(a.followers), 'FB дагагч'], [a.min_budget, 'Доод төсөв']].filter(([v]) => v).slice(0, 4).map(([v, l]) =>
               <div key={l}><div className="h" style={{ fontSize: String(v).length > 8 ? 18 : 26, fontWeight: 800 }}>{v}</div><div style={{ color: 'var(--mute)', fontSize: 14, fontWeight: 600 }}>{l}</div></div>)}
@@ -63,6 +72,12 @@ export default async function Profile({ params }) {
     {a.cases?.length > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 18px' }}>Кейсүүд</h2>
       <div className="grid">{a.cases.map((c, i) => { const In = <>{c.image && <img src={c.image} alt={c.title} loading="lazy" style={{ width: 'calc(100% + 44px)', margin: '-22px -22px 4px', aspectRatio: '16/10', objectFit: 'cover', borderRadius: '24px 24px 0 0' }} />}<span className="cat v" style={{ alignSelf: 'flex-start' }}>{c.client || 'Кейс'}</span><h3>{c.title}</h3>{c.result && <p style={{ fontSize: 16, fontWeight: 600 }}>{c.result}</p>}{c.link && <span style={{ color: 'var(--v)', fontWeight: 600, fontSize: 14, marginTop: 'auto' }}>Дэлгэрэнгүй →</span>}</>;
         return c.link ? <a key={i} href={c.link} target="_blank" rel="noopener" className="card">{In}</a> : <div key={i} className="card">{In}</div>; })}</div></>}
+    {a.rv?.n > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 8px' }}>Баталгаат харилцагчдын үнэлгээ</h2>
+      <p style={{ color: 'var(--mute)', marginBottom: 18 }}>brief.mn-ээр үнийн санал авсан харилцагчдаас 3 хоногийн дараа асууж цуглуулсан. {a.rv.avg && <><b style={{ color: 'var(--ink)' }}>★ {String(a.rv.avg).replace('.', ',')}</b> ({a.rv.rated} үнэлгээ) · </>}{a.rv.hired > 0 && <>{a.rv.hired} нь ажил болсон · </>}{a.rv.contacted}/{a.rv.asked} холбогдсон</p>
+      {a.reviews?.length > 0 && <div className="grid">{a.reviews.slice(0, 9).map(r => <div key={r.id} className="card" style={{ gap: 10 }}>
+        <div style={{ color: '#F5B301', fontSize: 18 }}>{'★'.repeat(r.rating || 0)}<span style={{ color: '#D9D6E3' }}>{'★'.repeat(5 - (r.rating || 0))}</span></div>
+        <p style={{ fontSize: 15.5 }}>«{r.comment}»</p>
+        <div className="meta"><span>{r.author}</span><span>{HIRED[r.hired] || ''}</span></div></div>)}</div>}</>}
     {similar.length > 0 && <><h2 className="h" style={{ fontSize: 24, fontWeight: 700, margin: '44px 0 18px' }}>Төстэй агентлагууд</h2><div className="grid">{similar.map(x => <Card key={x.slug} a={x} />)}</div></>}
   </section>;
 }

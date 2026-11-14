@@ -1,14 +1,16 @@
 import { db, sign, mail, esc, origin } from '@/lib/server';
 import { activateOrder } from '@/lib/orders';
 import { decideOwn } from '@/lib/ownDecide';
+import { decideRJ } from '@/lib/decideRJ';
 const page = (SITE_URL, t, ok = true) => new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><body style="font-family:system-ui;background:#F3F8F4;display:grid;place-items:center;min-height:100vh;margin:0"><div style="background:#fff;padding:40px;border-radius:24px;max-width:420px;text-align:center"><div style="font-size:40px">${ok ? '✓' : '✕'}</div><p style="font-size:18px">${t}</p><a href="${SITE_URL}" style="color:#0B8A3E">brief.mn руу буцах</a></div>`, { headers: { 'content-type': 'text/html; charset=utf-8' } });
 export async function GET(req) {
   const SITE_URL = origin(req); const P = (t, ok) => page(SITE_URL, t, ok);
   const q = new URL(req.url).searchParams; const k = q.get('k'), id = q.get('id'), a = q.get('a');
-  if (!['claim', 'agency', 'listing', 'influencer', 'order', 'own'].includes(k) || !['approve', 'reject'].includes(a) || q.get('t') !== await sign(`${k}:${id}:${a}`)) return P('Линк буруу байна', false);
+  if (!['claim', 'agency', 'listing', 'influencer', 'order', 'own', 'review', 'job'].includes(k) || !['approve', 'reject'].includes(a) || q.get('t') !== await sign(`${k}:${id}:${a}`)) return P('Линк буруу байна', false);
   const d = db(); if (!d) return P('Систем тохируулагдаагүй', false);
   const now = new Date().toISOString();
   if (k === 'own') { const r = await decideOwn(d, id, a === 'approve', SITE_URL); return r.error ? P(esc(r.error), false) : P(`«${esc(r.name)}» — ${a === 'approve' ? 'баталгаажлаа, хэрэглэгчид мэдэгдлээ' : 'татгалзлаа'}`); }
+  if (k === 'review' || k === 'job') { const r = await decideRJ(d, k, id, a); return P(r); }
   if (k === 'order') {
     if (a === 'reject') { await d.from('orders').update({ status: 'cancelled' }).eq('id', id).eq('status', 'pending'); return P('Захиалга цуцлагдлаа'); }
     const r = await activateOrder(d, id); if (r.error) return P(r.error, false);

@@ -1,10 +1,12 @@
-import { db, json } from '@/lib/server';
+import { db, json, origin } from '@/lib/server';
+import { sendDueSurveys } from '@/lib/survey';
 const KINDS = ['view', 'phone', 'fb', 'website', 'social', 'email'];
 const BOT = /bot|crawl|spider|slurp|facebookexternalhit|preview|headless|lighthouse/i;
 // Профайл үзэлт, товч дарсныг бүртгэнэ (нэвтрэлт шаардахгүй, bot-ыг алгасна)
 export async function POST(req) {
   if (BOT.test(req.headers.get('user-agent') || '')) return json({ ok: true });
   const d = db(); if (!d) return json({ ok: false });
+  await sendDueSurveys(d, process.env.SITE_URL || origin(req)).catch(() => 0);
   const b = await req.json().catch(() => null) || await req.text().then(t => { try { return JSON.parse(t); } catch { return {}; } }).catch(() => ({}));
   if (b.kind === 'click' && typeof b.lid === 'string' && /^[0-9a-f-]{36}$/.test(b.lid)) { await d.from('events').insert({ listing_id: b.lid, kind: 'click' }); return json({ ok: true }); }
   if (typeof b.iid === 'string' && /^[0-9a-f-]{36}$/.test(b.iid)) { await d.from('events').insert({ influencer_id: b.iid, kind: b.kind === 'dm' ? 'dm' : 'social' }); return json({ ok: true }); }

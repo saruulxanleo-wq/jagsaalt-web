@@ -3,7 +3,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import ToolStrip from './ToolStrip';
 import Link from 'next/link';
 import Card from './Card';
-import { CATS, CAT_TOPIC, isActive, catsOf, catLabel, isFeatured, rankScore } from '@/lib/config';
+import { CATS, CAT_TOPIC, isActive, catsOf, catLabel, isFeatured, rankScore, TYPES, DIY } from '@/lib/config';
 const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 export default function Directory({ list, tools = [], initialCat = 'all', title }) {
   const [seed, setSeed] = useState(null); useEffect(() => setSeed(shuffle(tools)), [tools]);
@@ -11,7 +11,7 @@ export default function Directory({ list, tools = [], initialCat = 'all', title 
   const counts = useMemo(() => list.reduce((m, a) => (catsOf(a).forEach(k => m[k] = (m[k] || 0) + 1), m), {}), [list]);
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
-    let r = list.filter(a => (cat === 'all' || catsOf(a).includes(cat)) && (!s || a.name.toLowerCase().includes(s) || (a.description || '').toLowerCase().includes(s)));
+    let r = list.filter(a => (cat === 'all' || catsOf(a).includes(cat)) && (!s || (a.name + ' ' + (a.description || '') + ' ' + (a.clients || []).join(' ') + ' ' + (a.services || []).join(' ')).toLowerCase().includes(s)));
     if (sort === 'name') r = [...r].sort((x, y) => x.name.localeCompare(y.name));
     else if (sort === 'followers') r = [...r].sort((x, y) => (y.followers || 0) - (x.followers || 0));
     else r = [...r].sort((x, y) => rankScore(y) - rankScore(x)); // баталгаажсан + профайлын бүрдэл + дагагч
@@ -37,14 +37,19 @@ export default function Directory({ list, tools = [], initialCat = 'all', title 
       <h1 className="h" style={{ fontSize: 'clamp(28px,3.6vw,46px)', fontWeight: 800, maxWidth: 760 }}>{title || <>Монголын маркетингийн агентлагууд <span style={{ color: 'var(--v)' }}>нэг дор</span></>}</h1>
       <div style={{ marginTop: 18, display: 'flex', gap: 10, background: '#fff', borderRadius: 999, padding: '6px 6px 6px 22px', maxWidth: 640, boxShadow: '0 16px 40px -24px #0b8a3e66, inset 0 0 0 2px var(--ink)' }}>
         <label htmlFor="q" style={{ position: 'absolute', left: -9999 }}>Хайх</label>
-        <input id="q" value={q} onChange={e => { setQ(e.target.value); setN(24); }} placeholder="Агентлагийн нэрээр хайх…" style={{ flex: 1, border: 0, outline: 0, fontSize: 17, background: 'transparent', minWidth: 0 }} />
+        <input id="q" value={q} onChange={e => { setQ(e.target.value); setN(24); }} placeholder="Агентлаг, үйлчилгээ эсвэл харилцагч брэндээр хайх…" style={{ flex: 1, border: 0, outline: 0, fontSize: 17, background: 'transparent', minWidth: 0 }} />
         <span className="btn v" style={{ padding: '11px 22px' }}>Хайх</span>
       </div>
       <div className="row" style={{ marginTop: 12, gap: 18, color: 'var(--mute)', fontWeight: 600, fontSize: 14.5 }}>
         <span><b style={{ color: 'var(--ink)' }}>{list.length}</b> агентлаг</span>
         {active > 0 && <span><span className="dot" />&nbsp;<b style={{ color: 'var(--ink)' }}>{active}</b> идэвхтэй</span>}{verified > 0 && <span><b style={{ color: 'var(--ink)' }}>{verified}</b> баталгаажсан</span>}
-        <Link href="/songoh" className="btn lime" style={{ padding: '8px 16px', fontSize: 14 }}>Аль агентлаг тохирохыг 1 минутад ол →</Link>
       </div>
+      {!title && <div className="paths">
+        <Link href="/songoh" className="path hot"><span aria-hidden>🎯</span><b>Агентлаг хөлслөх</b><small>1 минутын асуулгаар тохирох 3–5 агентлаг, үнийн санал нэг дор</small><i>Эхлэх →</i></Link>
+        <Link href={TYPES.freelancer.path} className="path"><span aria-hidden>🧑‍💻</span><b>Мэргэжилтэн, эксперт</b><small>Фрилансер дизайнер, SMM, зар тохируулагч, маркетингийн зөвлөх</small><i>Үзэх →</i></Link>
+        <Link href="/influencer" className="path"><span aria-hidden>⭐</span><b>Инфлүэнсер</b><small>Дагагч, чиглэлээр нь шүүж, хамтран ажиллах санал илгээ</small><i>Үзэх →</i></Link>
+        <Link href={DIY.path} className="path"><span aria-hidden>🛠</span><b>Өөрөө хийх</b><small>Хэрэгсэл, сургалт, коммюнити — төсөв багатай үед</small><i>Үзэх →</i></Link>
+      </div>}
     </header>
     <section className="wrap">
       <div className="row chips" style={{ gap: 10 }}>

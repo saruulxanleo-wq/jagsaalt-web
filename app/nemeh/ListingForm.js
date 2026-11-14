@@ -8,7 +8,7 @@ import { PickImg, uploadImg } from './PickImg';
 const PH = { media: ['Хэвлэл, сайт, суваг, самбарын нэр', 'Баннер 300 000₮-с, 30 сек 500 000₮'], freelancer: ['Овог нэр', 'Сард 800 000₮-с, пост бүр 50 000₮'], tool: ['SARUUL Score, Canva…', 'Үнэгүй, 9 000₮, сард 29 000₮'], course: ['Курсын нэр', 'Үнэгүй, 350 000₮'], community: ['Группын нэр', 'Үнэгүй, гишүүнчлэл сард 20 000₮'] };
 export default function ListingForm({ type, self }) {
   const t = TYPES[type]; const TOPICS = topicsFor(type);
-  const [f, setF] = useState({ name: '', url: '', maker: '', description: '', price: '', topics: [], contact: '' });
+  const [f, setF] = useState({ name: '', url: '', maker: '', description: '', price: '', topics: [], contact: '', starts_at: '', schedule: '' });
   const [img, setImg] = useState(null); const mine = !!self; const [msg, setMsg] = useState(null); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
   const set = k => e => setF({ ...f, [k]: e.target.value });
   const tog = k => setF({ ...f, topics: f.topics.includes(k) ? f.topics.filter(x => x !== k) : f.topics.length >= 3 ? f.topics : [...f.topics, k] });
@@ -29,6 +29,10 @@ export default function ListingForm({ type, self }) {
       <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="lm" className="lab">{type === 'freelancer' ? 'Мэргэжил' : type === 'media' ? 'Компани' : 'Бүтээгч'} <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input id="lm" className="field" maxLength={60} placeholder={type === 'freelancer' ? 'SMM мэргэжилтэн, график дизайнер…' : type === 'media' ? 'Эзэмшигч компани, сувгийн нэр…' : 'Компани, хүн'} value={f.maker} onChange={set('maker')} /></div>
       <div style={{ flex: 1, minWidth: 220 }}><label htmlFor="lp" className="lab">Үнэ <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input id="lp" className="field" maxLength={40} placeholder={PH[type][1]} value={f.price} onChange={set('price')} /></div>
     </div>
+    {type === 'course' && <div className="row" style={{ gap: 14, alignItems: 'flex-start' }}>
+      <div style={{ flex: '1 1 180px' }}><label htmlFor="ls" className="lab">Дараагийн анги эхлэх өдөр <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· хуваарьт гарна</span></label><input id="ls" type="date" className="field" value={f.starts_at} onChange={set('starts_at')} /></div>
+      <div style={{ flex: '2 1 260px' }}><label htmlFor="lsc" className="lab">Хуваарь <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· заавал биш</span></label><input id="lsc" className="field" maxLength={80} placeholder="Мягмар, Пүрэв 19:00 · 4 долоо хоног · онлайн" value={f.schedule} onChange={set('schedule')} /></div>
+    </div>}
     <div><label htmlFor="lc" className="lab">Холбоо барих утас эсвэл и-мэйл <span style={{ color: 'var(--mute)', fontWeight: 500 }}>· зөвхөн админ харна</span></label><input id="lc" className="field" maxLength={80} value={f.contact} onChange={set('contact')} /></div>
     <PickImg file={img} onChange={setImg} label={type === 'freelancer' ? 'Профайл зураг' : 'Лого / зураг'} round={type === 'freelancer'} hint="Дөрвөлжин тайрч автоматаар шахна. Зурагтай профайл илүү олон хандалт авдаг." />
     {msg && <div className="err">{msg}</div>}

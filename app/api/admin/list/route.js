@@ -1,8 +1,10 @@
 import { db, fail, json, authUser, isAdmin } from '@/lib/server';
 import { ownCode } from '@/lib/owners';
+import { sendDueSurveys } from '@/lib/survey';
 export async function GET(req) {
   const d = db(); if (!d) return fail('Систем тохируулагдаж байна', 503);
   const u = await authUser(req, d); if (!isAdmin(u)) return fail('Зөвхөн админ', 403);
+  await sendDueSurveys(d, process.env.SITE_URL || new URL(req.url).origin).catch(() => 0);
   const [{ data: pending }, { data: claims }, { data: reports }, { count: total }] = await Promise.all([
     d.from('agencies').select('id,slug,name,fb_url,categories,category,added_by,created_at').eq('status', 'pending').order('created_at', { ascending: false }),
     d.from('claims').select('id,note,phone,created_at,status,user_id,agencies(name,slug,fb_url)').eq('status', 'pending').not('user_id', 'is', null).order('created_at', { ascending: false }),
@@ -58,6 +60,10 @@ export async function GET(req) {
   ]);
   const mids = [...new Set((nmem || []).map(m => m.user_id))].filter(x => !pm[x]);
   if (mids.length) { const { data: mp } = await d.from('profiles').select('id,email,full_name').in('id', mids); (mp || []).forEach(p => { pm[p.id] = p; }); }
-  const log = { users: nusers || [], members: (nmem || []).map(m => ({ ...m, user: pm[m.user_id] || null })), agencies: lagS || [], claims: (lclA || []).map(c => ({ ...c, user: pm[c.user_id] || null })), itemClaims: licItems.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: lrep || [], influencers: noBulk(linf), listings: noBulk(llst), orders: lord || [] };
+  const [{ data: lrev }, { data: ljob }] = await Promise.all([
+    d.from('reviews').select('id,contacted,hired,rating,draft,comment,author,status,created_at,updated_at,agencies(name,slug)').gte('created_at', since).order('created_at', { ascending: false }).limit(300),
+    d.from('jobs').select('*').gte('created_at', since).order('created_at', { ascending: false }).limit(300),
+  ]);
+  const log = { reviews: lrev || [], jobs: ljob || [], users: nusers || [], members: (nmem || []).map(m => ({ ...m, user: pm[m.user_id] || null })), agencies: lagS || [], claims: (lclA || []).map(c => ({ ...c, user: pm[c.user_id] || null })), itemClaims: licItems.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: lrep || [], influencers: noBulk(linf), listings: noBulk(llst), orders: lord || [] };
   return json({ leadAgencies, log, orders: orders || [], infPending: infp || [], infTop: (itop || []).map(x => ({ ...x, clicks: ic[x.id] })).sort((a, b) => b.clicks - a.clicks).slice(0, 15), listings: (listings || []).map(l => ({ ...l, clicks: lc[l.id] || 0 })), leads: leads || [], top, totalViews, totalClicks, total, pending: pending || [], claims: (claims || []).map(c => ({ ...c, user: pm[c.user_id] || null })), ownClaims: ownClaims.map(c => ({ ...c, user: pm[c.user_id] || null })), reports: reports || [] });
 }

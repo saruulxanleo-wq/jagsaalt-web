@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Nav from './Nav';
 import Subscribe from './Subscribe';
 import AdminBell from './AdminBell';
+import MobileTabs from './MobileTabs';
+import CompareBar from './CompareBar';
 import { siteUrl, SITE_NAME } from '@/lib/config';
 export const generateMetadata = async () => ({
   metadataBase: new URL(siteUrl()),
@@ -30,6 +32,7 @@ export default function Root({ children }) {
           <div className="row topbtns"><AdminBell /><Link href="/minii" className="btn ghost"><span className="hide-sm">Миний </span>самбар</Link><Link href="/nemeh" className="btn dark">+ Нэмэх</Link></div>
         </nav></div>
         {children}
+        <CompareBar /><MobileTabs />
         <footer><div className="wrap" style={{ paddingTop: 34 }}><Subscribe source="footer" variant="footer" /></div><div className="wrap row" style={{ justifyContent: 'space-between', paddingTop: 32, paddingBottom: 32 }}>
           <div className="logo" style={{ color: '#fff' }}><i /><span>{n1}<b style={{ color: '#2BD46E' }}>.{n2}</b></span></div>
           <p style={{ fontSize: 14 }}>Идэвхтэй эсэхийг Saruul RADAR шалгана · Үнэгүй жагсаалт · <Link href="/une" style={{ textDecoration: 'underline' }}>Үнийн санал</Link> · <Link href="/nuuts" style={{ textDecoration: 'underline' }}>Нууцлал ба нөхцөл</Link> · <Link href="/aldaa" style={{ textDecoration: 'underline' }}>Алдаа мэдээлэх</Link></p>
