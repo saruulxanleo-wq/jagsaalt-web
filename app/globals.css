@@ -155,3 +155,8 @@ footer{background:var(--ink);color:#CFCAE6;margin-top:80px}
 .cmp th{vertical-align:bottom}.cmp td:first-child{color:var(--mute);font-weight:700;white-space:nowrap;position:sticky;left:0;background:#fff}
 .cmp tr:last-child td{border-bottom:0}
 .job summary{list-style:none;cursor:pointer}.job summary::-webkit-details-marker{display:none}.job:hover{transform:none}
+@media(max-width:640px){
+  .mtabs a,.mtabs button{font-size:10.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .paths{gap:8px;margin-top:16px}.path{padding:12px 12px;flex-direction:row;align-items:center;gap:8px;border-radius:16px}
+  .path>span{font-size:20px}.path b{font-size:13px;line-height:1.2}.path small,.path i{display:none}
+}

@@ -9,8 +9,8 @@ export default function MobileTabs() {
   const p = usePathname() || '/'; const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [p]);
   if (p.startsWith('/admin')) return null;
-  const tabs = [['/', '🏢', 'Агентлаг', p === '/' || p.startsWith('/a/') || p === '/songoh' || p.startsWith('/haritsuulah')], [TYPES.freelancer.path, '🧑‍💻', 'Мэргэжилтэн', p.startsWith(TYPES.freelancer.path)],
-    ['/influencer', '⭐', 'Инфлүэнсер', p.startsWith('/influencer')], [DIY.path, '🛠', 'Өөрөө хийх', p.startsWith(DIY.path) || LEARN.some(t => p.startsWith(t.path))]];
+  const tabs = [['/', '🏢', 'Агентлаг', p === '/' || p.startsWith('/a/') || p === '/songoh' || p.startsWith('/haritsuulah')], [TYPES.freelancer.path, '🧑‍💻', 'Эксперт', p.startsWith(TYPES.freelancer.path)],
+    ['/influencer', '⭐', 'Инфлүэнсер', p.startsWith('/influencer')], [DIY.path, '🛠', 'Өөрөө', p.startsWith(DIY.path) || LEARN.some(t => p.startsWith(t.path))]];
   const more = [[TYPES.media.path, TYPES.media.icon || '📺', TYPES.media.label], ['/ajil', '💼', 'Ажил, төсөл'], ['/surgalt#huvaari', '📅', 'Сургалтын хуваарь'], ['/songoh', '🎯', 'Надад тохирох агентлагийг ол'], ['/minii', '👤', 'Миний самбар'], ['/nemeh', '➕', 'Жагсаалтад нэмэх']];
   return <>
     {open && <div className="msheet" onClick={() => setOpen(false)}><div onClick={e => e.stopPropagation()}>{more.map(([h, i, l]) => <Link key={h} href={h}><span aria-hidden>{i}</span>{l}</Link>)}</div></div>}
